@@ -4,14 +4,14 @@
 
 .Login-container {
     text-align: center;
-    background-color: #17171E;
+    /* background-color: #17171E;
     color: #FFFFFF;
     flex-direction: column;
     justify-content: center;
     align-content: center;
     min-height: 100vh;
-    display: flex;
-    place-items: center; /* Center content both horizontally and vertically */
+    display: flex; */
+    /* place-items: center; Center content both horizontally and vertically */
 }
 
 

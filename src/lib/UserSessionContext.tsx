@@ -1,13 +1,21 @@
 import { createContext, useEffect, useRef, useState } from 'react';
-import { Consumer } from './user'
+import { Consumer, Users } from './user'
 import { SongRequestType, SongType } from './song';
-import { fetchWithToken } from '../index'
+import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, resetTokenValues, rootGetRefreshToken } from '../index'
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
+import Cookies from 'universal-cookie';
+import { TokenReturnType, getUser } from './serverinfo';
+import { useLocation } from 'react-router-dom';
 
 export type UserSessionContextType = {
     user: Consumer,
     setUser: (user: Consumer) => void; //do we even need this? or can i just load for asyncstorage
+}
+
+export const DefaultUserSessionContext = {
+    user: new Consumer("", 0, ""),
+    setUser: () => {}
 }
 
 function useInterval(callback: () => any, delay: number) {
@@ -30,7 +38,24 @@ function useInterval(callback: () => any, delay: number) {
       }, [delay]);
 }
 
-export const UserSessionContext = createContext<UserSessionContextType | null>({user: new Consumer("", 0, ""), setUser: () => {}});
+export const getStartingUser = async (): Promise<Consumer> => {
+    const cookies = new Cookies(null, {path: '/'});
+    const rt = cookies.get("refresh_token");
+    // const ea = cookies.get("expires_at");
+    if(rt === null) return  new Consumer("", 0, "");
+    return checkIfAccountExists(new Consumer("", 0, ""), rt).then(r => {
+        if(r.result){
+            return consumerFromJSON(undefined, r.data);
+        }
+        cookies.remove("refresh_token"); //bad refresh
+        return new Consumer("", 0, "")
+    })
+
+    // getUser("tipper", "", 0, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(new Consumer("", 0, ""), tokens, cookies)).then((json) => {
+    //     json.data
+    // })
+}
+export const UserSessionContext = createContext<UserSessionContextType>({user: new Consumer("",0,""), setUser: () => {}});
 
 export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise<[SongRequestType[], number]> => {
     const p: SongRequestType[] = [];
@@ -63,7 +88,7 @@ const fetchTokenPendingData = async (user: Consumer) : Promise<[SongRequestType[
       tokens += json.token_amount;
     }).catch((e: Error) => {console.log("problem getting tipzy tokens.", e);});
 
-    console.log("fetch acc tokens");
+    // console.log("fetch acc tokens");
   
     //get the pending tokens
     await getPending(user).then(r => {
@@ -72,7 +97,7 @@ const fetchTokenPendingData = async (user: Consumer) : Promise<[SongRequestType[
     })
     .catch((e: Error) => console.log("problem getting pending tokens.", e));
 
-    console.log("fetch pending tokens");
+    // console.log("fetch pending tokens");
 
     return [pr, tokens, ptokens];
 }
@@ -107,8 +132,9 @@ export const setTokenPendingData = async (context: UserSessionContextType) => {
   }
 
 
-export function UserSessionContextProvider(props: { defaultValue: UserSessionContextType | null, children: JSX.Element }) {
-    const [user, setUser] = useState(props.defaultValue ? props.defaultValue.user : new Consumer("", 0, ""));
+export function UserSessionContextProvider(props: { children: JSX.Element }) {
+    const cookies = new Cookies(null, { path: '/' });
+    const [user, setUser] = useState<Consumer>(new Consumer("", 0, ""));
     const [ready, setReady] = useState(false);
 
     const editUser = (user: Consumer) => {
@@ -117,12 +143,10 @@ export function UserSessionContextProvider(props: { defaultValue: UserSessionCon
 
     //10s refresh token data
     const refreshRate = 10000;
-    
-    useEffect(() => 
-        {
-            console.log("start refresh");
-            fetchTokenPendingData(user).then(r => {
-            setUser(new Consumer(
+
+    const refreshUserData = (user: Consumer) => {
+        return fetchTokenPendingData(user).then(r => {
+            const u = new Consumer(
                 user.access_token,
                 user.expires_at,
                 user.name,
@@ -131,11 +155,37 @@ export function UserSessionContextProvider(props: { defaultValue: UserSessionCon
                 r[1],
                 r[0],
                 r[2],
-            ));
+            );
+            setUser(u);
+            console.log("fetched data success", u);
+        })
+        .then(() => {
+            console.log('setready')
             setReady(true);
-        }).catch((e) => {
-            alert("Error. Couldn't fetch data about your tokens." + e);
-        } );
+        })
+        .catch((e) => {
+            console.log("Error. Couldn't fetch data about your tokens." + e);
+            console.log('setconsumer')
+            setUser(new Consumer("", 0, ""))
+        });
+    }
+    
+    useEffect(() => 
+        {
+            // if(location.pathname === "/login" || location.pathname === "/register") return;
+            console.log("useeffect")
+            if(!cookies.get("refresh_token") || JSON.stringify(user) === JSON.stringify(new Consumer("", 0, ""))){
+                let newUser = new Consumer("", 0, "");
+                checkIfAccountExists(user, cookies.get("refresh_token")).then((r) => {
+                    refreshUserData(r.data).then(() => setReady(true));
+                })
+                .catch((e) => {
+                    console.log("no session detected." + e)
+                    setReady(true)
+                })
+            } else {
+                refreshUserData(user).then(() => setReady(true));
+            }
     }, []);
 
     useInterval(() => setTokenPendingData({user, setUser}), refreshRate);

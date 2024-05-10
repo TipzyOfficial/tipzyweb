@@ -27,10 +27,6 @@ export const expiresInToAt = (expires_in: number) : number => {
 }  
 
 const convertToTokenReturnType = (at: string, rt: string, expires_in: number): TokenReturnType => {
-    console.log('EIN', expires_in);
-    console.log('EAT', expiresInToAt(expires_in));
-    console.log('NOW', Date.now())
-
     return {access_token: at, refresh_token: rt, expires_at: expiresInToAt(expires_in)}
 }
 
@@ -49,21 +45,9 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     let myAccessToken = accessToken;
     
     const newTokens = async () => {
-        console.log("generating new tokens!");
         const refreshToken = await getRefreshToken();
-        if(refreshToken === null) { console.log("no refresh token stored!"); logout(); return 0; }
-
+        if(refreshToken === null) { console.log("no refresh token stored!"); return 0; }
         const tokens: TokenReturnType | null = await getAccessToken(refreshToken)
-            .then(t => {
-                console.log("whats our t", t);
-
-                if(t === null) {
-                    alert("You've been signed out. Please sign in again.")
-                    logout();
-                    return null; 
-                }
-                return t;
-            })
             .catch((e) => {console.log("error access: ", e.message); return null});
         if(tokens === null) {  
             console.log("problem getting access tokens!");
@@ -74,12 +58,12 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
         return 1;
     }
 
-    // console.log("ea, dn ", expiresAt, Date.now())
-    // console.log("ea < dn", expiresAt <= Date.now());
-
     if(isNaN(expiresAt) || expiresAt <= Date.now()) {
         const res = await newTokens();
-        if(res === 0) return null;
+        if(res === 0) {
+            logout();
+            return null;
+        }
     }
         
     const theFetch = async () => {
@@ -127,6 +111,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
  * @returns the json data of the user
  */
 export async function getUser(userType: "tipper" | "business", accessToken: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>)): Promise<any>{
+    console.log("getuser called")
     return fetchWithToken(accessToken, userType+"/", expiresAt, getRefreshToken, logout, resetTokenValues, 'GET').then(response => {
         if(response === null || !response.ok){
             throw new Error(`Bad response. Response: ${response ? response.status + ".." : "null response"}`)
@@ -134,7 +119,7 @@ export async function getUser(userType: "tipper" | "business", accessToken: stri
         return response.json();
     }).then(json => {
         return json;
-    });
+    }).catch((e) => console.log(e));
 }
 
 /**
@@ -143,6 +128,8 @@ export async function getUser(userType: "tipper" | "business", accessToken: stri
  * @returns access_token, refresh_token, and expires_at.
  */
 export async function getAccessToken(refresh_token: string): Promise<TokenReturnType | null> {
+    // console.log("id", process.env.REACT_APP_CLIENT_ID, "Secret", process.env.REACT_APP_CLIENT_SECRET);
+
     return fetch(`${ServerInfo.baseurl}auth/token`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -163,8 +150,6 @@ export async function getAccessToken(refresh_token: string): Promise<TokenReturn
         return response.json();
     }).then(json => {
         if(json === null) return null;
-        console.log("got a new access token!");
-        console.log("json ein", json.expires_in);
         return convertToTokenReturnType(json.access_token, json.refresh_token, json.expires_in);
     }).catch((error: Error) => {throw error})
 }

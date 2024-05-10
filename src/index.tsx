@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App, { goToLogin } from './App';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import App, { goToLogin, router } from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import { ServerInfo, TokenReturnType, getUser } from './lib/serverinfo';
@@ -9,19 +10,18 @@ import { Consumer, Users } from './lib/user';
 import { redirect, useNavigate } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import { fetchWithToken as sharedFetchWithToken } from './lib/serverinfo';
-import { UserSessionContextProvider } from './lib/UserSessionContext';
+import { DefaultUserSessionContext, UserSessionContextProvider, getStartingUser } from './lib/UserSessionContext';
 
 const cookies = new Cookies(null, { path: '/' });
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GAUTH_CLIENT_ID ?? ""}>
-      <UserSessionContextProvider defaultValue={null}>
-        <App />
-      </UserSessionContextProvider>
+      <App />
     </GoogleOAuthProvider>
   </React.StrictMode>
 );
@@ -41,14 +41,16 @@ export async function Logout(cookies: Cookies) {
 
 export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
   const rt = cookies.get("refresh_token");
-  if (typeof rt !== "string") cookies.set("refresh_token", null, { path: '/' })
+  console.log("refresh token = ", rt);
+  if (typeof rt !== "string") cookies.remove("refresh_token")
   return rt;
 }
 
 export async function resetTokenValues(user: Users, tokens: TokenReturnType, cookies: Cookies, setUser?: (user: Users) => void) {
-  await cookies.set("access_token", tokens.access_token, { path: '/' });
+  console.log("resetting token values");
+  console.log("resettting rt token = ", tokens.refresh_token);
   await cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
-  await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
+  // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
   user.access_token = tokens.access_token;
   user.expires_at = tokens.expires_at;
   if(setUser) setUser(user);
@@ -58,8 +60,8 @@ export async function getTipper(user: Consumer, cookies: Cookies){
   return getUser("tipper", user.access_token, user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(user, tokens, cookies));
 }
 
-export const consumerFromJSON = (user: Consumer, d: any) => {
-  const c = new Consumer(user.access_token, user.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user.image, d.user_info.email, d.token_count, user.pending_requests, user.pending_tokens)
+export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
+  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user ? user.image : undefined, d.user_info.email, d.token_count, user ? user.pending_requests : undefined, user ? user.pending_tokens : undefined)
   c.setBirthday(d.birthday);
   return(c);
 }
@@ -84,17 +86,12 @@ export async function fetchWithToken(user: Consumer, urlEnding: string, fetchMet
 }
 
 async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
-  cookies.set("access_token", accessToken);
   cookies.set("refresh_token", refreshToken);
-  cookies.set("expires_at", expiresAt.toString());
+  cookies.set("expires_at", expiresAt);
 }
 
 export async function storeAll(user: Consumer, refreshToken: string) {
-  console.log("ueat", user);
-
   await storeTokens(user.access_token, refreshToken, user.expires_at);
-  // SecureStore.setItemAsync("name", user.name);
-  // SecureStore.setItemAsync("email", user.email ?? "");
   const json = await getTipper(user, cookies);
 
   return consumerFromJSON(user, json.data);

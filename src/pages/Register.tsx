@@ -65,35 +65,33 @@ function Register() {
     }
 
     return(
-        <div className='Login-container'>
-            <div style={styles.jumbo}>
-                <div style={styles.header}>
-                    <span style={styles.title}>Sign Up</span>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='' placeholder='Last name' value={lastName} onChange={(e) => setLastName(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' placeholder='Username' value={username} autoCorrect='off' autoCapitalize='off' onChange={(e) => setUsername(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='email' placeholder='email@address.com' value={email} onChange={(e) => setEmail(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10, justifyContent: 'flex-start'}}>
-                    <input className='input' type='Password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
-                    <PasswordRule/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='Password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
-                    <ConfirmPasswordRule/>
-                </div>
-                <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
-                <div style={{paddingTop:10}}>
-                    Have an account? <a href={"./login"}>Sign In</a>
-                </div>
+        <div style={styles.jumbo}>
+            <div style={styles.header}>
+                <span style={styles.title}>Sign Up</span>
+            </div>
+            <div style={{paddingBottom: 10}}>
+                <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+            </div>
+            <div style={{paddingBottom: 10}}>
+                <input className='input' type='' placeholder='Last name' value={lastName} onChange={(e) => setLastName(e.target.value)}/>
+            </div>
+            <div style={{paddingBottom: 10}}>
+                <input className='input' placeholder='Username' value={username} autoCorrect='off' autoCapitalize='off' onChange={(e) => setUsername(e.target.value)}/>
+            </div>
+            <div style={{paddingBottom: 10}}>
+                <input className='input' type='email' placeholder='email@address.com' value={email} onChange={(e) => setEmail(e.target.value)}/>
+            </div>
+            <div style={{paddingBottom: 10, justifyContent: 'flex-start'}}>
+                <input className='input' type='Password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                <PasswordRule/>
+            </div>
+            <div style={{paddingBottom: 10}}>
+                <input className='input' type='Password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+                <ConfirmPasswordRule/>
+            </div>
+            <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
+            <div style={{paddingTop:10}}>
+                Have an account? <a href={"./login"}>Sign In</a>
             </div>
         </div>
     )
