@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Colors, radius, padding } from '../lib/Constants';
-import FullLogo from '../assets/Tipzy_Full_Orange.png'
+import { Colors, radius } from '../lib/Constants';
 
 function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean}) {
     const [opacity, setOpacity] = useState(1);

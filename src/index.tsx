@@ -2,15 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-import App, { goToLogin, router } from './App';
+import App, { goToLogin } from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
-import { ServerInfo, TokenReturnType, getUser } from './lib/serverinfo';
+import { TokenReturnType, getUser } from './lib/serverinfo';
 import { Consumer, Users } from './lib/user';
-import { redirect, useNavigate } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import { fetchWithToken as sharedFetchWithToken } from './lib/serverinfo';
-import { DefaultUserSessionContext, UserSessionContextProvider, getStartingUser } from './lib/UserSessionContext';
 
 const cookies = new Cookies(null, { path: '/' });
 
