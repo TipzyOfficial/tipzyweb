@@ -42,7 +42,7 @@ export default function Bar(){
         return <LoadingScreen></LoadingScreen>
 
     return(
-        <div  style={{height: "100vh", width: '100%'}}>
+        <div  style={{height: "100vh", width: '100%', display: 'flex', flexDirection: 'column'}}>
             <div style={{width: '100%', height: "30%", objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "cover",
@@ -55,9 +55,17 @@ export default function Bar(){
             >
                 <span className='App-title'>{bar.name}</span>
             </div>
-            <Container fluid>
-                
-            </Container>
+            <div style={{justifyContent: 'center', alignItems: 'center', flex: 1, display: 'flex'}}>
+                <Container data-bs-theme="dark">
+                    <Card>
+                        <Card.Header style={{textAlign: 'center'}}>
+                            <span>This page is still under development.</span>
+                            <br></br>
+                            <span>Thank you for your patience!</span>
+                        </Card.Header>
+                    </Card>
+                </Container>
+            </div>
         </div>
     );
 }
