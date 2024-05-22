@@ -192,7 +192,9 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
     return (
         <UserSessionContext.Provider value={{ user: user, setUser: editUser }}>
-            <DisplayOrLoading content={props.children} condition={ready}></DisplayOrLoading>
+            <DisplayOrLoading condition={ready}>
+                {props.children}
+            </DisplayOrLoading>
         </UserSessionContext.Provider>
     )
 }

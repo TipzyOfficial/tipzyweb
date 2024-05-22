@@ -30,6 +30,17 @@
   font-weight: bold;
 }
 
+.App-subtitle {
+  font-size: calc(20px + 2vmin);
+  font-size: calc(20px + 2vmin);
+  font-weight: bold;
+}
+.App-tertiarytitle {
+  font-size: calc(15x + 1vmin);
+  font-size: calc(15px + 1vmin);
+  font-weight: bold;
+}
+
 /* unvisited link */
 a:link {
   color: #FA9D17;

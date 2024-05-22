@@ -3,7 +3,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import '../App.css'
 import { Colors } from '../lib/Constants';
 
-export function DisplayOrLoading(props: {content: JSX.Element, condition: boolean, loadingScreen?: JSX.Element}) {
+export function DisplayOrLoading(props: {children: JSX.Element, condition: boolean, loadingScreen?: JSX.Element}) {
     const LoadingScreen = () => {
 
         // useEffect(() => {
@@ -28,7 +28,7 @@ export function DisplayOrLoading(props: {content: JSX.Element, condition: boolea
     }
 
     return( props.condition ?
-        props.content
+        props.children
         : <LoadingScreen/>
     )
 }

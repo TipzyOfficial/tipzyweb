@@ -7,10 +7,10 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
     return(
         <button 
         onClick={props.onClick}
-        onMouseDown={() => {
+        onPointerDown={() => {
             setOpacity(0.7);
         }}
-        onMouseUp={() => {
+        onPointerUp={() => {
             setOpacity(1);
         }}
         style={{
