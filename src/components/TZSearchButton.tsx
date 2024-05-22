@@ -6,10 +6,7 @@ import { padding, radius } from '../lib/Constants';
 export default function TZSearchButton(props: {onClick: () => void, dims?: number}){
     const [opacity, setOpacity] = React.useState(1);
     const dims = props.dims ?? 20;
-    console.log(dims)
     const fontSize = Math.max(Math.min(dims, 30), 15);
-    console.log('fontsize', fontSize)
-
     return(
         <button style={{
             padding: padding, width: '100%', opacity: opacity,

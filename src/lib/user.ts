@@ -7,7 +7,6 @@ export class Users {
     image?: string;
     email: string;
 
-
     constructor(token: string, expires_at: number, name: string, image?: string, email ?: string) {
         this.access_token = token;
         this.expires_at = expires_at;
@@ -55,29 +54,5 @@ export class Consumer extends Users {
     }
     setStripeID(stripe_id?: string) {
         this.stripe_id = stripe_id;
-    }
-}
-
-export class Business extends Users {
-    business_name?: string;
-    business_image?: string;
-    type?: string;
-    address?: string;
-    vibe?: string;
-
-    setBusinessName(name?: string){
-        this.business_name = name;
-    }
-    setBusinessImage(imageurl?: string){
-        this.business_image = imageurl;
-    }
-    setType(type?: string){
-        this.type = type;
-    }
-    setAddress(address?: string){
-        this.address = address;
-    }
-    setVibe(vibe?: string){
-        this.vibe = vibe;
     }
 }

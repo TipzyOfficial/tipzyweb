@@ -10,8 +10,8 @@ function artistsStringListToString(artists: string[]){
     return out.substring(2);
 }
 
-export default function Song(props: {song: SongType, big?: boolean, dims?: number}){
-    const big = props.big ?? false;
+export default function Song(props: {song: SongType, dims?: number}){
+    // const big = props.big ?? false;
 
     const bigDims = 128;
     const dims = props.dims ?? 50;

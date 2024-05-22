@@ -1,13 +1,13 @@
 import { BarType } from "./bar";
 
 export type SongType = {
-    title: string,
-    artists: string[],
-    albumart: string,
-    albumartbig?: string,
-    id: string;
-    duration?: number;
-    explicit: boolean;
+    id: string; //ID of song
+    title: string, //song's title
+    artists: string[], //song's artist
+    albumart: string, //image url of the song's album art. small
+    albumartbig?: string, //image url of the song's album art. large
+    duration?: number; //duration of song in ms. ignore
+    explicit: boolean; //if the song is marked as explicit
 }
 
 export type AlbumType = {

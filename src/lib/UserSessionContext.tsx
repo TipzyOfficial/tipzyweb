@@ -166,7 +166,6 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     useEffect(() => 
         {
             // if(location.pathname === "/login" || location.pathname === "/register") return;
-            console.log("useeffect")
             if(!cookies.get("refresh_token") || JSON.stringify(user) === JSON.stringify(new Consumer("", 0, ""))){
                 let newUser = new Consumer("", 0, "");
                 checkIfAccountExists(user, cookies.get("refresh_token")).then((r) => {

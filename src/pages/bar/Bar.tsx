@@ -14,7 +14,7 @@ import Song from "../../components/Song";
 import Artist from "../../components/Artist";
 import { ScrollMenu, VisibilityContext, publicApiType } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
-import useWindowDimensions from "../../components/useWindowDimensions";
+import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
 import Cookies from "universal-cookie";
 
@@ -76,7 +76,6 @@ export default function Bar(){
 
         bar.topArtists = await fetchWithToken(userContext.user, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
-            console.log(json);
             const artists = new Array<ArtistType>();
             json.data.forEach((s: any) => {
                 const artist: ArtistType = {id: s.id, name: s.name, image: s.images[0].url}

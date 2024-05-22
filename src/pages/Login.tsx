@@ -70,7 +70,6 @@ function Login() {
             if(result.result){
                 storeAll(user, refreshToken).then((user) => {
                     userContext?.setUser(user);
-                    console.log("our user");
                     // console.log(user)
                     router.navigate("/code");
                     // props.navigation.replace('Tabs', {
