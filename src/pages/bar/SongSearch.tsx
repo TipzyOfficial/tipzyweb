@@ -3,8 +3,8 @@ import TZButton from "../../components/TZButton";
 
 export default function SongSearch() {
     return(
-        <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-            <TZButton onClick={() => router.navigate("/bar")}></TZButton>
+        <div className="App-body">
+            <TZButton title={"Back to bar page"} onClick={() => router.navigate("/bar")}></TZButton>
         </div>
     )
 }

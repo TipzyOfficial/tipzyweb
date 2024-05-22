@@ -37,7 +37,7 @@ export default function Bar(){
     const topArtists = bar?.topArtists ?? [];
     // const [topSongs, setTopSongs] = useState<SongType[]>([]);
     // const [topArtists, setTopArtists] = useState<ArtistType[]>([]);
-    const id = searchParams.get("id") ?? cookies.get("bar_session");
+    const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
     const window = useWindowDimensions();
 
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
