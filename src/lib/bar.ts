@@ -1,3 +1,5 @@
+import { ArtistType, SongType } from "./song";
+
 export type BarType = {
     name: string;
     type: string;
@@ -6,4 +8,6 @@ export type BarType = {
     id: number;
     description: string;
     active: boolean
+    topArtists?: ArtistType[]
+    topSongs?: SongType[]
   }

@@ -10,6 +10,10 @@ function EnterCode() {
     const userContext = useContext(UserSessionContext)
     const [barID, setBarID] = useState("");
 
+    const onClick = () => {
+        router.navigate(`/bar?id=${barID}`)
+    }
+
     // console.log(userContext)
     return(
             <div style={{maxWidth: 350}}>
@@ -32,7 +36,7 @@ function EnterCode() {
                         }}
                         ></input>
                         <div style={{paddingTop: padding}}>
-                            <TZButton title="Continue" onClick={() =>  router.navigate(`/bar?id=${barID}`)}/>
+                            <TZButton title="Continue" onClick={onClick}/>
                         </div>
                     </Card.Body>
                 </Card>

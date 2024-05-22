@@ -1,6 +1,6 @@
-import { Card, Container, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
-import { Colors, padding as basePadding, radius } from "../../lib/Constants";
+import { Colors, padding as basePadding } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { useContext, useEffect, useState } from "react";
 import { BarType } from "../../lib/bar";
@@ -15,6 +15,8 @@ import Artist from "../../components/Artist";
 import { ScrollMenu, VisibilityContext, publicApiType } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import useWindowDimensions from "../../components/useWindowDimensions";
+import { router } from "../../App";
+import Cookies from "universal-cookie";
 
 const LoadingScreen = () => 
     <div className="App-header">
@@ -27,10 +29,15 @@ export default function Bar(){
     const [searchParams, setSearchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
     const [ready, setReady] = useState(false);
-    const [bar, setBar] = useState<BarType | undefined>(undefined);
-    const [topSongs, setTopSongs] = useState<SongType[]>([]);
-    const [topArtists, setTopArtists] = useState<ArtistType[]>([]);
-    const id = searchParams.get("id");
+    const cookies = new Cookies(null, { path: '/' });
+    // const [bar, setBar] = useState<BarType | undefined>(undefined);
+    const [badLoad, setBadLoad] = useState(false);
+    const bar = userContext.barState.bar;
+    const topSongs = bar?.topSongs ?? [];
+    const topArtists = bar?.topArtists ?? [];
+    // const [topSongs, setTopSongs] = useState<SongType[]>([]);
+    // const [topArtists, setTopArtists] = useState<ArtistType[]>([]);
+    const id = searchParams.get("id") ?? cookies.get("bar_session");
     const window = useWindowDimensions();
 
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
@@ -43,9 +50,9 @@ export default function Bar(){
 
 
     const fetchEverything = async () => {
-        await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
+        const bar: BarType = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
-            const bar: BarType = {
+            return {
                 id: json.id,
                 name: json.business_name,
                 type: json.business_type,
@@ -53,20 +60,21 @@ export default function Bar(){
                 description: json.description,
                 active: json.active,
             }
-            setBar(bar);
+            // setBar(bar);
         })
 
-        await fetchWithToken(userContext.user, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topSongs = await fetchWithToken(userContext.user, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
             const songs = new Array<SongType>();
             json.data.forEach((s: any) => {
                 const song: SongType = {id: s.id, title: s.name, artists: s.artists, albumart: s.images[2].url, albumartbig: s.images[0].url, explicit: s.explicit}
                 songs.push(song);
             })
-            setTopSongs(songs)
-        })
+            //setTopSongs(songs)
+            return songs;
+        }).catch(() => undefined)
 
-        await fetchWithToken(userContext.user, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topArtists = await fetchWithToken(userContext.user, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
             console.log(json);
             const artists = new Array<ArtistType>();
@@ -74,21 +82,40 @@ export default function Bar(){
                 const artist: ArtistType = {id: s.id, name: s.name, image: s.images[0].url}
                 artists.push(artist);
             })
-            setTopArtists(artists)
-        })
+            //setTopArtists(artists)
+            return artists;
+        }).catch(() => undefined)
+
+        userContext.barState.setBar(bar)
 
         setReady(true);
     }
 
     useEffect(() => {
-        fetchEverything().catch(e => {
-            console.log(e)
+        console.log(userContext.barState.bar)
+        // if() {
+        //     router.navigate("code")
+        // }
+        //if id is the same as bar or if new id hasn't been set yet
+        if(!id || (userContext.barState.bar && id === userContext.barState.bar.id.toString())) {
             setReady(true);
-        });;
+            return;
+        }
+        fetchEverything().catch(e => {
+            userContext.barState.setBar(undefined)
+            console.log(e)
+            // setBadLoad(true);
+            setReady(true);
+        })
     }, [])
 
-    if(bar === undefined)
+    if(bar === undefined && ready === false)
         return <LoadingScreen></LoadingScreen>
+    else if(bar === undefined)
+        return <div className="App-body" style={{display: 'flex', flexDirection: 'column', textAlign: 'center', padding: padding}}>
+                    <span className="App-title" style={{color: Colors.primaryRegular}}>404</span>
+                    <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
+                </div>
 
     // const TopArtistsList = (props: {artists: ArtistType[]}) => {
     
@@ -153,7 +180,7 @@ export default function Bar(){
                     </div>
                     <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
                     <div style={{paddingTop: padding, width: '100%'}}>
-                        <TZSearchButton dims={searchDims} onClick={() => {}}/>
+                        <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
                 </div>
                 <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>

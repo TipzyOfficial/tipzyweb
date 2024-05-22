@@ -13,6 +13,7 @@ import { Navigate } from 'react-router'
 // import { Cookies, useCookies } from 'react-cookie';
 import Cookies from 'universal-cookie';
 import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessionContext';
+import SongSearch from './pages/bar/SongSearch';
 
 
 function Redirect() {
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
   {
     path: "/bar",
     Component: Bar
+  },
+  {
+    path: "/bar/search",
+    Component: SongSearch
   },
 ], {});
 
