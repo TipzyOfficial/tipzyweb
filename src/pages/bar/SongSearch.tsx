@@ -10,7 +10,7 @@
  * As always, if you have any questions message me. Good luck!
  */
 
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
@@ -43,6 +43,7 @@ import FlatList from "flatlist-react/lib";
  * put anything. you can check out the code in components/Song.tsx
  */
 import Song from "../../components/Song";
+import { Colors, padding } from "../../lib/Constants";
 
 export default function SongSearch() {
     /**
@@ -81,7 +82,14 @@ export default function SongSearch() {
      * searchResults is the current results of your search. initialized to nothing.
      * setSearchResults sets the results of your search and rerenders the page.
      */
-    const [searchResults, setSearchResults] = useState<SongType[]>([])
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<SongType[]>([]);
+    const window = useWindowDimensions();
+    const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
+    const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
+    const limit = 50;
+    let timer: NodeJS.Timeout;
+    const timeoutInterval = 1000;
 
     /**
      * searches for songs related to a certain query.
@@ -99,34 +107,86 @@ export default function SongSearch() {
         return songs;
     }
 
-    async function exampleSearch(){
-        //here's one way to use the search function.
-        searchForSongs("Radiohead", 10)
-        .then((songs) => {
-            console.log("Radiohead search results: ", songs);
-        })
-        .catch(() => []);
-    
-        //here's another way (it only works when inside an async function, but it's cleaner)
-        const songs = await searchForSongs("DJ Khaled", 10).catch(() => []);
-        console.log("DJ Khaled search results: ", songs);
-
-        /**
-         * note: i add the .catch(() => []) at the end so that instead of giving
-         * an error if the search went wrong it just returns an empty result.
-         * feel free to put something else in the catch statement.
-         */
+    async function getSearchResults(query: string, limit: number){
+        const response = await searchForSongs(query, limit).catch((e) => {
+            console.log("can't get response,", e);
+            return [];
+        });
+        setSearchResults(response);
     }
 
     /* useEffect calls code every time a component is rerendered. by putting
         the [] as the second argument it only gets called once per page open */
     useEffect(() => {
-        exampleSearch();
-    }, [])
+        if(!bar) {
+            router.navigate("/code");
+            return;
+        }
+        getSearchResults("hi", 20);
+    }, []);
+
+    const SongResultList = (props: {songs: SongType[]}) => {
+        return (
+            <FlatList
+                list={props.songs}
+                renderWhenEmpty={() => <></>}
+                renderItem={(item) => 
+                <button style={{display: 'flex', width: '100%', 
+                            paddingRight: 0,
+                            paddingLeft: 0,
+                            paddingTop: 0,
+                            paddingBottom: padding, 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            boxSizing: "border-box",
+                            WebkitBoxSizing: "border-box",
+                            MozBoxSizing: "border-box",
+                            // opacity: opacity,
+                            border: 'none',
+                            backgroundColor: '#0000'
+                        }}
+                    onClick={() => {alert("hi")}}
+                >
+                    <Song key={"id" + item.id} 
+                            dims={songDims}
+                            song={item}/>
+                    <div style={{display: 'flex', padding: 10, 
+                                border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
+                                backgroundColor: '#8881',
+                                justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
+                        $1.50
+                    </div>
+                </button>}
+            />
+        )
+    }
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            getSearchResults(searchQuery, limit)
+        }, timeoutInterval)
+
+        return () => clearTimeout(delayDebounceFn)
+        }, [searchQuery])
 
     return(
-        <div className="App-body">
-            <TZButton title={"Back to bar page"} onClick={() => router.navigate("/bar")}></TZButton>
+        <div className="App-body-top">
+            <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
+                <input 
+                    className='input' 
+                    autoFocus 
+                    placeholder="Request a song!" 
+                    value={searchQuery} 
+                    onChange={(e) => setSearchQuery(e.target.value)} 
+                    onSubmit={() => searchForSongs(searchQuery, limit)}
+                    />
+                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center'}} onClick={() => router.navigate("/bar")}>
+                    <span className="text">Cancel</span>
+                </div>
+            </div>
+            <div style={{display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%'}}>
+                <SongResultList songs={searchResults}></SongResultList>
+            </div>
         </div>
     )
 }

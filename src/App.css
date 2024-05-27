@@ -13,6 +13,54 @@
   color: white;
 }
 
+.App-body-top {
+  background-color: #17171E;
+  min-height: 100vh;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /* font-size: calc(10px + 2vmin); */
+  color: white;
+}
+
+.input {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12;
+  border-radius: 10;
+  border-width: 1;
+  border-color: #888;
+  background-color: white;
+  color: black;
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+}
+
+.text {
+  font-size: calc(12x + 1vmin);
+  font-size: calc(12px + 1vmin);
+  font-weight: bold;
+}
+
+.onelinetext {
+  font-size: calc(15x + 1vmin);
+  font-size: calc(15px + 1vmin);
+  font-weight: bold;
+  width: 300px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  justify-content: flex-start;
+}
+
 .App-header {
   background-color: #17171E;
   min-height: 100vh;

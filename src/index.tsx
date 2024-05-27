@@ -16,6 +16,8 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+console.log(!process.env.REACT_APP_GAUTH_CLIENT_ID ? "No Gauth client id detected." : "Gauth client id detected.")
+
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GAUTH_CLIENT_ID ?? ""}>
