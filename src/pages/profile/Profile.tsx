@@ -18,11 +18,13 @@ import TZHeader from "../../components/TZHeader";
  * Setup payment stuff
  * Logout
  * A back button
+ * 
+ * init
  */
 
-function ProfileItem(props: {title: string, value: string, onClick?: () => void}) {
-    return(
-        <div style={{padding: padding, width: "100%", backgroundColor: 'red'}}>
+function ProfileItem(props: { title: string, value: string, onClick?: () => void }) {
+    return (
+        <div style={{ padding: padding, width: "100%", backgroundColor: 'red' }}>
             <span>
                 {props.title}:
             </span>
@@ -41,9 +43,9 @@ export default function Profile() {
     // user.name
     // user.email
 
-    return(
+    return (
         <div className={"App-body-top"}>
-            <TZHeader title="Your Profile"/>
+            <TZHeader title="Your Profile" />
             <div style={styles}>
                 <ProfileItem title="Name" value={usc.user.name}></ProfileItem>
                 <TZButton title={"logout"} onClick={() => Logout(cookies)}></TZButton>
@@ -52,7 +54,7 @@ export default function Profile() {
     )
 }
 
-const styles : React.CSSProperties = {
+const styles: React.CSSProperties = {
     paddingRight: padding,
     paddingLeft: padding,
     width: "100%"
