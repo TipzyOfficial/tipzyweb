@@ -2,15 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-import App, { goToLogin } from './App';
+import App, { getCookies, goToLogin } from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import { TokenReturnType, getUser } from './lib/serverinfo';
 import { Consumer, Users } from './lib/user';
 import Cookies from 'universal-cookie';
 import { fetchWithToken as sharedFetchWithToken } from './lib/serverinfo';
+import { useCookies } from 'react-cookie';
 
-const cookies = new Cookies(null, { path: '/' });
+const cookies = getCookies();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

@@ -1,3 +1,5 @@
+import useWindowDimensions from "./useWindowDimensions";
+
 export const Colors =  {
     background: '#17171E',
     text: '#FFF',
@@ -14,3 +16,9 @@ export const Colors =  {
 
 export const radius = 10;
 export const padding = 12;
+
+export const useFdim = () => {
+    const window = useWindowDimensions();
+    const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;  
+    return fdim;  
+}

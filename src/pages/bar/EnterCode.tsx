@@ -5,6 +5,7 @@ import { Button, Card, Container } from "react-bootstrap";
 import { padding } from "../../lib/Constants";
 import TZButton from "../../components/TZButton";
 import { router } from "../../App";
+import ProfileButton from "../../components/ProfileButton";
 
 function EnterCode() {
     const userContext = useContext(UserSessionContext)
@@ -41,7 +42,8 @@ function EnterCode() {
                     </Card.Body>
                 </Card>
             </Container>
-            </div>
+            <ProfileButton/>
+        </div>
     )
 }
 

@@ -25,7 +25,7 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
             opacity: opacity,
             border: 'none'
         }}>
-            <span style={{fontSize: 20, color: props.disabled ? "#888" : "white", fontWeight: "bold"}}>{props.title ?? ""}</span>
+            <span className="App-tertiarytitle" style={{color: props.disabled ? "#888" : "white", fontWeight: "bold"}}>{props.title ?? ""}</span>
         </button>
     )
 }

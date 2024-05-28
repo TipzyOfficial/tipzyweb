@@ -83,6 +83,21 @@
   font-size: calc(20px + 2vmin);
   font-weight: bold;
 }
+
+.App-headertop {
+  background-color: #17171E;
+  display: flex;
+  flex-direction: column;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-headertitle {
+  font-size: calc(17px + 2vmin);
+  font-size: calc(17px + 2vmin);
+  font-weight: bold;
+}
+
 .App-tertiarytitle {
   font-size: calc(15x + 1vmin);
   font-size: calc(15px + 1vmin);

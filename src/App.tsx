@@ -4,21 +4,34 @@ import Login from './pages/Login';
 import Register from './pages/Register'
 import {
   createBrowserRouter,
+  Outlet,
   RouterProvider,
 } from 'react-router-dom';
 import Bar from './pages/bar/Bar';
 import EnterCode from './pages/bar/EnterCode';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router'
 // import { Cookies, useCookies } from 'react-cookie';
 import Cookies from 'universal-cookie';
 import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessionContext';
 import SongSearch from './pages/bar/SongSearch';
+import {Elements, PaymentElement,} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
+import PaymentSetup from './pages/profile/PaymentSetup';
+import { fetchWithToken } from '.';
+import { fetchPaymentSheetParams } from './lib/stripe';
+import { DisplayOrLoading } from './components/DisplayOrLoading';
+import Profile from './pages/profile/Profile';
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
+
+export const getCookies = () => {
+  return new Cookies(null, { path: '/', sameSite: "strict" })
+}
 
 function Redirect() {
   const userContext = useContext(UserSessionContext)
-  const cookies = new Cookies(null, { path: '/' });
+  const cookies = getCookies();
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
   return(
@@ -26,8 +39,40 @@ function Redirect() {
   )
 }
 
-export const router = createBrowserRouter([
-  {
+const Layout = () => {
+  const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
+  const usc = useContext(UserSessionContext);
+
+  useEffect(() => {
+    // Create SetupIntent as soon as the page loads
+    fetchPaymentSheetParams(usc.user).then(
+      (r) => {
+        setClientSecret(r);
+        console.log("ClientSecret", r)
+      }
+    )
+  }, []);
+
+  if(clientSecret === null) return <Outlet></Outlet>
+  
+  return(
+    clientSecret ? 
+      <Elements 
+      stripe={stripePromise} 
+      options={{
+        clientSecret: clientSecret,
+      }}
+      >
+        <Outlet/>
+      </Elements> : 
+      <DisplayOrLoading condition={false}></DisplayOrLoading>
+  );
+}
+
+export const router = createBrowserRouter([{
+  element: <Layout/>,
+  children: 
+  [{
     path: "/",
     Component: Redirect
   },
@@ -51,13 +96,30 @@ export const router = createBrowserRouter([
     path: "/bar/search",
     Component: SongSearch
   },
+  {
+    path: "/profile",
+    Component: Profile
+  },
+  {
+    path: "/paymentsetup",
+    Component: PaymentSetup
+  },
+  ]}
 ], {});
+
+const options = {
+  // passing the client secret obtained from the server
+  clientSecret: `${"dgad"}_secret_${"adgad"}`,
+};
 
 function App() {
   return(
     <div className="App-body">
       <UserSessionContextProvider>
-        <RouterProvider router={router}></RouterProvider>
+        <div className="App-body" style={{width: '100%'}}>
+            <RouterProvider 
+            router={router}/>  
+        </div>      
       </UserSessionContextProvider>
     </div>
   )

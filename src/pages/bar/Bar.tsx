@@ -1,6 +1,6 @@
 import { Spinner } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
-import { Colors, padding as basePadding } from "../../lib/Constants";
+import { Colors, padding as basePadding, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { useContext, useEffect, useState } from "react";
 import { BarType } from "../../lib/bar";
@@ -15,8 +15,9 @@ import Artist from "../../components/Artist";
 import { ScrollMenu, VisibilityContext, publicApiType } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import useWindowDimensions from "../../lib/useWindowDimensions";
-import { router } from "../../App";
+import { getCookies, router } from "../../App";
 import Cookies from "universal-cookie";
+import ProfileButton from "../../components/ProfileButton";
 
 const LoadingScreen = () => 
     <div className="App-header">
@@ -29,7 +30,7 @@ export default function Bar(){
     const [searchParams, setSearchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
     const [ready, setReady] = useState(false);
-    const cookies = new Cookies(null, { path: '/' });
+    const cookies = getCookies();
     // const [bar, setBar] = useState<BarType | undefined>(undefined);
     const [badLoad, setBadLoad] = useState(false);
     const bar = userContext.barState.bar;
@@ -39,9 +40,7 @@ export default function Bar(){
     // const [topArtists, setTopArtists] = useState<ArtistType[]>([]);
     const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
     const window = useWindowDimensions();
-
-    const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
-
+    const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim/50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const artistDims = fdim ?  Math.max(Math.min(fdim/4.8, 200), 50) : 120;
@@ -90,6 +89,10 @@ export default function Bar(){
         setReady(true);
     }
 
+    function payment() {
+
+    }
+    
     useEffect(() => {
         console.log(userContext.barState.bar)
         // if() {
@@ -142,7 +145,7 @@ export default function Bar(){
                             border: 'none',
                             backgroundColor: '#0000'
                         }}
-                    onClick={() => {alert("hi")}}
+                    onClick={() => {payment()}}
                 >
                     <Song key={"id" + item.id} 
                             dims={songDims}
@@ -203,6 +206,7 @@ export default function Bar(){
                         <TopSongsList queue={topSongs}></TopSongsList>
                     </div>
                 </div>
+                <ProfileButton/>
             </div>
         </DisplayOrLoading>
     );

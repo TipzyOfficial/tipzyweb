@@ -37,7 +37,6 @@ function Login() {
 
     const googleLogin = useGoogleLogin({
         onSuccess: tokenResponse => loginWithGoogleToken(tokenResponse.access_token),
-        // onError: (e) => {console.log(e);}
     });
 
     const onLogin = () => {

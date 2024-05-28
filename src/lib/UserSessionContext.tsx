@@ -5,6 +5,7 @@ import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipp
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
+import { getCookies } from '../App';
 
 export type BarStateType = {
     bar?: BarType, 
@@ -44,7 +45,7 @@ function useInterval(callback: () => any, delay: number) {
 }
 
 export const getStartingUser = async (): Promise<Consumer> => {
-    const cookies = new Cookies(null, {path: '/'});
+    const cookies = getCookies();
     const rt = cookies.get("refresh_token");
     // const ea = cookies.get("expires_at");
     if(rt === null) return  new Consumer("", 0, "");
@@ -135,7 +136,7 @@ export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise
 
 
 export function UserSessionContextProvider(props: { children: JSX.Element }) {
-    const cookies = new Cookies(null, { path: '/' });
+    const cookies = getCookies();
     const [user, setUser] = useState<Consumer>(new Consumer("", 0, ""));
     const [bar, setBar] = useState<BarType | undefined>();
     const [ready, setReady] = useState(false);
