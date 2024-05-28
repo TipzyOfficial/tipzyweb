@@ -3,10 +3,6 @@
  * and explanations for what they do. You obviously don't need to use all of them
  * if you don't need to but you will need to use some of them.
  * 
- * YOUR ASSIGNMENT: create a page that lets a user search for whatever song they want
- * and displays the top results as a list. If the query is empty, display the
- * bar's top songs (see the bar const description)
- * 
  * As always, if you have any questions message me. Good luck!
  */
 

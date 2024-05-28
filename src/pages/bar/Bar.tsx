@@ -141,7 +141,6 @@ export default function Bar(){
                             boxSizing: "border-box",
                             WebkitBoxSizing: "border-box",
                             MozBoxSizing: "border-box",
-                            // opacity: opacity,
                             border: 'none',
                             backgroundColor: '#0000'
                         }}
