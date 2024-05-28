@@ -19,16 +19,20 @@ import TZHeader from "../../components/TZHeader";
  * Logout
  * A back button
  * 
- * init
  */
 
 function ProfileItem(props: { title: string, value: string, onClick?: () => void }) {
     return (
-        <div style={{ padding: padding, width: "100%", backgroundColor: 'red' }}>
-            <span>
+        <div style={{ padding: padding, width: "100%", backgroundColor: "red", display: "flex" }}>
+            <span style={{ backgroundColor: "purple", padding: padding }}>
+                <div style={{ backgroundColor: "pink", borderRadius: "50%" }}>
+                    <img></img>
+                </div>
+            </span>
+            <span style={{ backgroundColor: "blue", padding: padding }}>
                 {props.title}:
             </span>
-            <span>
+            <span style={{ backgroundColor: "orange", padding: padding }}>
                 {props.value}
             </span>
         </div>
