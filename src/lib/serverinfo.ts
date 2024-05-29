@@ -88,6 +88,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
 
     return theFetch().then(response => 
         {
+            // alert(response.status);
             if(response.status === 401){
                 console.log("401 error. old Access token: ", myAccessToken)
                 return newTokens().then((res) => {

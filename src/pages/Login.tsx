@@ -193,7 +193,7 @@ function Login() {
                 <div style={{paddingBottom: 10}}>
                     <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
                 </div>
-                <TZButton onClick={onLogin} title="Sign in"></TZButton>
+                <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
                 <div style={{padding:10, textAlign: 'center'}}>
                     or
                 </div>

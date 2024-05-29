@@ -155,13 +155,15 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     const refreshRate = 10000;
 
     const refreshUserData = (user: Consumer) => {
-        return new Consumer(
+        const c = new Consumer(
             user.access_token,
             user.expires_at,
             user.name,
             user.image,
             user.email,
         );
+
+        editUser(c);
     }
     
     useEffect(() => 

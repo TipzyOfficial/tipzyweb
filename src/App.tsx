@@ -18,12 +18,12 @@ import SongSearch from './pages/bar/SongSearch';
 import {Elements, PaymentElement,} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import PaymentSetup from './pages/profile/PaymentSetup';
-import { fetchWithToken } from '.';
+import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
+export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
 export const getCookies = () => {
   return new Cookies(null, { path: '/', sameSite: "strict" })
@@ -53,7 +53,10 @@ const Layout = () => {
     )
   }, []);
 
-  if(clientSecret === null) return <Outlet></Outlet>
+  if(clientSecret === null) {
+    Logout(getCookies());
+    return(<Outlet></Outlet>)
+  }
   
   return(
     clientSecret ? 
@@ -61,6 +64,7 @@ const Layout = () => {
       stripe={stripePromise} 
       options={{
         clientSecret: clientSecret,
+        appearance: {theme: "night"}
       }}
       >
         <Outlet/>
@@ -70,7 +74,7 @@ const Layout = () => {
 }
 
 export const router = createBrowserRouter([{
-  element: <Layout/>,
+  // element: <Layout/>,
   children: 
   [{
     path: "/",
@@ -106,11 +110,6 @@ export const router = createBrowserRouter([{
   },
   ]}
 ], {});
-
-const options = {
-  // passing the client secret obtained from the server
-  clientSecret: `${"dgad"}_secret_${"adgad"}`,
-};
 
 function App() {
   return(

@@ -78,12 +78,20 @@ export async function checkIfAccountExists(user: Consumer, refreshToken: string)
   .catch(e => {throw e})
 }
 
-export async function fetchWithToken(user: Consumer, urlEnding: string, fetchMethod: string, body?: string) {
-  return sharedFetchWithToken(user.access_token, urlEnding, user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(user, tokens, cookies), fetchMethod, body).then(response => {
-      if(response === null) throw new Error("Null response.");
-      if(!response.ok) throw new Error(`Bad response!! Code: ${response.status}. ${response.body}`);
-      return response;
-  });
+async function handleResponse (response: Response | null) {
+  if(response === null) throw new Error("Null response.");
+  if(!response.ok) {
+    const t = await response.text()
+    throw new Error(`Bad response. Code: ${response.status}. ${t}`);
+  }
+  return response;
+}
+
+export async function fetchWithToken(user: Consumer, urlEnding: string, fetchMethod: string, body?: string) {  
+  const response = await sharedFetchWithToken(user.access_token, urlEnding, user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(user, tokens, cookies), fetchMethod, body).then(response => {
+    return handleResponse(response);
+  }).catch(e => {throw new Error(e);});
+  return response;
 }
 
 async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
