@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, memo } from "react";
 import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
@@ -24,7 +24,7 @@ function ProfileButton(props: { text: string, onClick: () => void }) {
     const profileButton: React.CSSProperties = {
         fontSize: "30px",
         fontWeight: 'bold',
-        margin: '10px',
+        margin: '5px',
         width: '100%',
         borderRadius: radius,
         display: 'flex',
@@ -80,8 +80,10 @@ function ProfileLanding(props: {}) {
 
     );
 }
-function ProfileItem(props: { title: string, value: string, profilePic?: string, email: string, onClick?: () => void }) {
-    console.log("Profile Name is: " + props.value);
+
+//react was re-rendering profileItem every hover state for the back button, so we memoize it.
+const ProfileItem = memo(function ProfileItem(props: { title: string, value: string, profilePic?: string, email: string, onClick?: () => void }) {
+    console.log("User is: " + props.value);
     //overriding default CSS properties by initializing within the function
     const defaultProfile: React.CSSProperties = {
         width: "100px",
@@ -122,17 +124,43 @@ function ProfileItem(props: { title: string, value: string, profilePic?: string,
         </div >
     );
 }
+);
 
 export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
+    const [isBackButtonHovered, setIsBackButtonHovered] = useState(false);
     // user.name
     // user.email
+    const backButtonStyle: React.CSSProperties = {
+        border: 'none',
+        backgroundColor: 'transparent',
+        color: isBackButtonHovered ? '#EDA13E' : 'white',
+        fontSize: '16px',
+        cursor: 'pointer',
+        transition: 'color 0.3s ease',
+        marginLeft: '15px'
+    };
 
+    const handleBackClick = () => {
+        console.log("Back button clicked");
+        // Add your navigation logic here
+    };
     return (
         <div className={"App-body-top"}>
-            <TZHeader title="Your Profile" />
+            <div style={headerStyle}>
+                <button style={backButtonStyle}
+                    onMouseEnter={() => setIsBackButtonHovered(true)}
+                    onMouseLeave={() => setIsBackButtonHovered(false)}
+                    onClick={handleBackClick}>
+                    Back
+                </button>
+                <div style={headerTitleStyle}>
+                    <TZHeader title="Your Profile" />
+                </div>
+            </div>
+
             <div style={styles}>
                 <ProfileItem title="Name" value={usc.user.name} profilePic={user.image} email={user.email}></ProfileItem>
                 <ProfileLanding></ProfileLanding>
@@ -140,7 +168,7 @@ export default function Profile() {
             </div>
         </div>
     )
-}
+};
 
 // Function to extract initials from a name
 const getInitials = (name: string) => {
@@ -153,5 +181,30 @@ const styles: React.CSSProperties = {
     paddingRight: padding,
     paddingLeft: padding,
     width: "100%",
-    maxWidth: "600px"
-}
+    maxWidth: "600px",
+    margin: '0 auto'
+};
+
+const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    position: 'relative',
+};
+// const buttonStyle: React.CSSProperties = {
+//     border: 'none',
+//     backgroundColor: 'transparent',
+//     color: 'white',
+//     fontSize: '16px',
+//     cursor: 'pointer',
+//     marginLeft: '15px'
+// };
+
+const headerTitleStyle: React.CSSProperties = {
+    flexGrow: 1,
+    textAlign: 'center',
+    fontSize: '24px',
+    color: 'white',
+    fontWeight: 'bold',
+};
