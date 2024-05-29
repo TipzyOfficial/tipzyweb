@@ -192,14 +192,6 @@ const headerStyle: React.CSSProperties = {
     width: '100%',
     position: 'relative',
 };
-// const buttonStyle: React.CSSProperties = {
-//     border: 'none',
-//     backgroundColor: 'transparent',
-//     color: 'white',
-//     fontSize: '16px',
-//     cursor: 'pointer',
-//     marginLeft: '15px'
-// };
 
 const headerTitleStyle: React.CSSProperties = {
     flexGrow: 1,
