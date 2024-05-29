@@ -42,7 +42,6 @@ export async function Logout(cookies: Cookies) {
 
 export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
   const rt = cookies.get("refresh_token");
-  console.log("rgrt refresh token = ", rt);
   if (typeof rt !== "string") cookies.remove("refresh_token")
   return rt;
 }
@@ -57,7 +56,6 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
  */
 export async function resetTokenValues(user: Users, tokens: TokenReturnType, cookies: Cookies, setUser?: (user: Users) => void) {
   console.log("resetting token values");
-  console.log("updating rt token = ", tokens.refresh_token);
   cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
   cookies.set("access_token", tokens.access_token, { path: '/' });
   // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
@@ -77,7 +75,6 @@ export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
 }
 
 export async function checkIfAccountExists(user: Consumer): Promise<{result: boolean, data: Consumer}>{
-  console.log("ciae")
   return getTipper(user, cookies).then(json => {
       const d = json.data;
       return {
