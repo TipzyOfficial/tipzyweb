@@ -6,7 +6,7 @@
  * As always, if you have any questions message me. Good luck!
  */
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
@@ -38,7 +38,7 @@ import FlatList from "flatlist-react/lib";
  * dims is completely optional, it will default to a certain size if you don't
  * put anything. you can check out the code in components/Song.tsx
  */
-import Song from "../../components/Song";
+import Song, { SongList, SongRenderItem } from "../../components/Song";
 import { Colors, padding } from "../../lib/Constants";
 
 export default function SongSearch() {
@@ -84,8 +84,7 @@ export default function SongSearch() {
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
-    let timer: NodeJS.Timeout;
-    const timeoutInterval = 1000;
+    const timeoutInterval = 500;
 
     /**
      * searches for songs related to a certain query.
@@ -94,7 +93,18 @@ export default function SongSearch() {
      * @returns the array of songs matching the query. since it's an async function, it returns a promise.
      */
     async function searchForSongs(query: string, limit: number): Promise<SongType[]>{
-        //this function calls the backend to get the search results for a query.
+        //this function calls the backend to get the search results for a query.        
+
+        console.log("query", query);
+
+        if(query.length === 0) {
+            if(!userContext.barState.bar) {
+                router.navigate("/code");
+                throw new Error("no bar")
+            }
+            console.log("ts", userContext.barState.bar.topSongs);
+            return(userContext.barState.bar.topSongs ?? []);
+        }
         const json = await fetchWithToken(user, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
@@ -105,59 +115,18 @@ export default function SongSearch() {
 
     async function getSearchResults(query: string, limit: number){
         const response = await searchForSongs(query, limit).catch((e) => {
+            if(e.message === "no bar") return [];
             console.log("can't get response,", e);
             return [];
         });
         setSearchResults(response);
     }
 
-    /* useEffect calls code every time a component is rerendered. by putting
-        the [] as the second argument it only gets called once per page open */
-    useEffect(() => {
-        if(!bar) {
-            router.navigate("/code");
-            return;
-        }
-        getSearchResults("hi", 20);
-    }, []);
-
-    const SongResultList = (props: {songs: SongType[]}) => {
-        return (
-            <FlatList
-                list={props.songs}
-                renderWhenEmpty={() => <></>}
-                renderItem={(item) => 
-                <button style={{display: 'flex', width: '100%', 
-                            paddingRight: 0,
-                            paddingLeft: 0,
-                            paddingTop: 0,
-                            paddingBottom: padding, 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between',
-                            boxSizing: "border-box",
-                            WebkitBoxSizing: "border-box",
-                            MozBoxSizing: "border-box",
-                            // opacity: opacity,
-                            border: 'none',
-                            backgroundColor: '#0000'
-                        }}
-                    onClick={() => {alert("hi")}}
-                >
-                    <Song key={"id" + item.id} 
-                            dims={songDims}
-                            song={item}/>
-                    <div style={{display: 'flex', padding: 10, 
-                                border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
-                                backgroundColor: '#8881',
-                                justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
-                        $1.50
-                    </div>
-                </button>}
-            />
-        )
-    }
+    const SongResultListMemo = memo(SongList);
 
     useEffect(() => {
+        getSearchResults(searchQuery, limit)
+
         const delayDebounceFn = setTimeout(() => {
             getSearchResults(searchQuery, limit)
         }, timeoutInterval)
@@ -181,7 +150,7 @@ export default function SongSearch() {
                 </div>
             </div>
             <div style={{display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%'}}>
-                <SongResultList songs={searchResults}></SongResultList>
+                <SongResultListMemo songs={searchResults} dims={songDims}></SongResultListMemo>
             </div>
         </div>
     )

@@ -10,7 +10,7 @@ import TZSearchButton from "../../components/TZSearchButton";
 import FlatList from 'flatlist-react';
 import '../../App.css'
 import { ArtistType, SongType } from "../../lib/song";
-import Song from "../../components/Song";
+import Song, { SongList, SongRenderItem } from "../../components/Song";
 import Artist from "../../components/Artist";
 import { ScrollMenu, VisibilityContext, publicApiType } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
@@ -27,17 +27,13 @@ const LoadingScreen = () =>
     </div>;
 
 export default function Bar(){
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
     const [ready, setReady] = useState(false);
     const cookies = getCookies();
-    // const [bar, setBar] = useState<BarType | undefined>(undefined);
-    const [badLoad, setBadLoad] = useState(false);
     const bar = userContext.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    // const [topSongs, setTopSongs] = useState<SongType[]>([]);
-    // const [topArtists, setTopArtists] = useState<ArtistType[]>([]);
     const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
     const window = useWindowDimensions();
     const fdim = useFdim();
@@ -49,7 +45,7 @@ export default function Bar(){
 
 
     const fetchEverything = async () => {
-        const bar: BarType = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
+        const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
             return {
                 id: json.id,
@@ -60,7 +56,14 @@ export default function Bar(){
                 active: json.active,
             }
             // setBar(bar);
+        }).catch((e: Error) => {
+            alert("error: " + e.message);
+            return undefined;
         })
+
+        if(!bar) {
+            return bar;
+        }
 
         bar.topSongs = await fetchWithToken(userContext.user, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
@@ -115,7 +118,7 @@ export default function Bar(){
         return <LoadingScreen></LoadingScreen>
     else if(bar === undefined)
         return <div className="App-body" style={{display: 'flex', flexDirection: 'column', textAlign: 'center', padding: padding}}>
-                    <span className="App-title" style={{color: Colors.primaryRegular}}>404</span>
+                    <span className="App-title" style={{color: Colors.primaryRegular}}>Oops!</span>
                     <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
                 </div>
 
@@ -124,41 +127,6 @@ export default function Bar(){
     //     return (
     //     );
     // }
-
-    const TopSongsList = (props: {queue: SongType[]}) => {
-        return (
-            <FlatList
-                list={props.queue}
-                renderWhenEmpty={() => <></>}
-                renderItem={(item) => 
-                <button style={{display: 'flex', width: '100%', 
-                            paddingRight: 0,
-                            paddingLeft: 0,
-                            paddingTop: 0,
-                            paddingBottom: padding, 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between',
-                            boxSizing: "border-box",
-                            WebkitBoxSizing: "border-box",
-                            MozBoxSizing: "border-box",
-                            border: 'none',
-                            backgroundColor: '#0000'
-                        }}
-                    onClick={() => {payment()}}
-                >
-                    <Song key={"id" + item.id} 
-                            dims={songDims}
-                            song={item}/>
-                    <div style={{display: 'flex', padding: 10, 
-                                border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
-                                backgroundColor: '#8881',
-                                justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
-                        $1.50
-                    </div>
-                </button>}
-            />
-        )
-    }
 
     return(
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen></LoadingScreen>}>
@@ -202,7 +170,7 @@ export default function Bar(){
                     <div style={{padding: padding, width: '100%'}}>
                         <span className='App-subtitle'>Top Songs</span>
                         <div style={{paddingBottom: padding/3}}></div>
-                        <TopSongsList queue={topSongs}></TopSongsList>
+                        <SongList songs={topSongs} dims={songDims}/>
                     </div>
                 </div>
                 <ProfileButton/>

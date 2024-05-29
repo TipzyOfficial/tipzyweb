@@ -61,6 +61,7 @@ const Layout = () => {
       stripe={stripePromise} 
       options={{
         clientSecret: clientSecret,
+        appearance: {theme: "night"}
       }}
       >
         <Outlet/>

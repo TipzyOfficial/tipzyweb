@@ -15,17 +15,17 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
         }}
         style={{
             padding: 12,
-            backgroundColor: props.disabled ? "#8888": props.backgroundColor ?? Colors.secondaryDark,
+            backgroundColor: props.backgroundColor ?? Colors.secondaryDark,
             justifyContent: 'center', alignItems: 'center',
             borderRadius: radius,
             width: props.width ?? "100%",
             boxSizing: "border-box",
             WebkitBoxSizing: "border-box",
             MozBoxSizing: "border-box",
-            opacity: opacity,
+            opacity: props.disabled ? 0.7 : opacity,
             border: 'none'
         }}>
-            <span className="App-tertiarytitle" style={{color: props.disabled ? "#888" : "white", fontWeight: "bold"}}>{props.title ?? ""}</span>
+            <span className="App-tertiarytitle" style={{color: "white", fontWeight: "bold"}}>{props.title ?? ""}</span>
         </button>
     )
 }

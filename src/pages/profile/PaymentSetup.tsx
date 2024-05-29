@@ -1,5 +1,8 @@
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { FormEvent } from "react";
+import { Button } from "react-bootstrap";
+import TZButton from "../../components/TZButton";
+import { padding } from "../../lib/Constants";
 
 export default function PaymentSetup() {
     const stripe = useStripe();
@@ -16,7 +19,7 @@ export default function PaymentSetup() {
         return;
         }
 
-        const result = await stripe.confirmPayment({
+        const result = await stripe.confirmSetup({
         //`Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
@@ -37,8 +40,10 @@ export default function PaymentSetup() {
 
     return(
         <form onSubmit={handleSubmit}>
-            <PaymentElement />
-            <button>Submit</button>
+            <PaymentElement/>
+            <div style={{paddingTop: padding}}>
+                <TZButton title={"Submit"}/>
+            </div>
         </form>
     );
 }
