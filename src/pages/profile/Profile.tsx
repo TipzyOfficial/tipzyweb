@@ -99,7 +99,7 @@ function ProfileItem(props: { title: string, value: string, profilePic?: string,
         textAlign: 'center',
     };
     return (
-        <div style={{ padding: padding, width: "100%", display: "flex", }}>
+        <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ padding: padding }}>
                 <div style={{ borderRadius: "50%" }}>
                     {props.profilePic ? (
