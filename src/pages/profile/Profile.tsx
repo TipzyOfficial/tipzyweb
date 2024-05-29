@@ -19,14 +19,8 @@ import TZHeader from "../../components/TZHeader";
  * A back button
  * 
  */
-
-
-function ProfileLanding(props: {}) {
-    const [isHovered1, setIsHovered1] = useState(false);
-    const [isHovered2, setIsHovered2] = useState(false);
-    const [isHovered3, setIsHovered3] = useState(false);
-    const [isHovered4, setIsHovered4] = useState(false);
-
+function ProfileButton(props: { text: string, onClick: () => void }) {
+    const [isHovered, setIsHovered] = useState(false);
     const profileButton: React.CSSProperties = {
         fontSize: "30px",
         fontWeight: 'bold',
@@ -36,17 +30,38 @@ function ProfileLanding(props: {}) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        // backgroundColor: 'grey',
+        backgroundColor: isHovered ? '#EDA13E' : 'transparent',
+        color: isHovered ? '#1B242E' : 'white',
         cursor: 'pointer',
         transition: 'background-color 0.3s ease, color 0.3s ease'
     };
+    return (
+        <div style={profileButton}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={props.onClick}>
+            {props.text}
+        </div>
+    );
+}
 
-    const hoveredButton: React.CSSProperties = {
-        ...profileButton,
-        color: '#1B242E',
-        backgroundColor: '#EDA13E', // Change background color on hover
+function ProfileLanding(props: {}) {
+    //handling clicks
+    const handleAccountClick = () => {
+        console.log("Your Account clicked");
     };
 
+    const handleRequestsClick = () => {
+        console.log("Your Requests clicked");
+    };
+
+    const handleHistoryClick = () => {
+        console.log("Transaction History clicked");
+    };
+
+    const handleAboutClick = () => {
+        console.log("About clicked");
+    };
     return (
         <div style={{
             // backgroundColor: "red",
@@ -56,28 +71,11 @@ function ProfileLanding(props: {}) {
             justifyContent: 'center',
             width: '100%',
             marginBottom: "10px"
-        }
-        }>
-            <div style={isHovered1 ? hoveredButton : profileButton}
-                onMouseEnter={() => setIsHovered1(true)}
-                onMouseLeave={() => setIsHovered1(false)}>
-                Your Account
-            </div>
-            <div style={isHovered2 ? hoveredButton : profileButton}
-                onMouseEnter={() => setIsHovered2(true)}
-                onMouseLeave={() => setIsHovered2(false)}>
-                Your Requests
-            </div>
-            <div style={isHovered3 ? hoveredButton : profileButton}
-                onMouseEnter={() => setIsHovered3(true)}
-                onMouseLeave={() => setIsHovered3(false)}>
-                Transaction History
-            </div>
-            <div style={isHovered4 ? hoveredButton : profileButton}
-                onMouseEnter={() => setIsHovered4(true)}
-                onMouseLeave={() => setIsHovered4(false)}>
-                About
-            </div>
+        }}>
+            <ProfileButton text="Your Account" onClick={handleAccountClick}></ProfileButton>
+            <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton>
+            <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton>
+            <ProfileButton text="About" onClick={handleAboutClick}></ProfileButton>
         </div>
 
     );
