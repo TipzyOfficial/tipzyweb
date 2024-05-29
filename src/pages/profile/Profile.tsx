@@ -82,7 +82,7 @@ function ProfileLanding(props: {}) {
 
     );
 }
-function ProfileItem(props: { title: string, value: string, profilePic?: string, onClick?: () => void }) {
+function ProfileItem(props: { title: string, value: string, profilePic?: string, email: string, onClick?: () => void }) {
     console.log("Profile Name is: " + props.value);
     //overriding default CSS properties by initializing within the function
     const defaultProfile: React.CSSProperties = {
@@ -100,19 +100,27 @@ function ProfileItem(props: { title: string, value: string, profilePic?: string,
     };
     return (
         <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ padding: padding }}>
-                <div style={{ borderRadius: "50%" }}>
-                    {props.profilePic ? (
-                        <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
-                        :
-                        (<div style={defaultProfile}>{getInitials(props.value)}</div>)
-                    }
+            <div style={{ padding: padding, width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center' }}>
+                <span style={{ padding: padding }}>
+                    <div style={{ borderRadius: "50%" }}>
+                        {props.profilePic ? (
+                            <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
+                            :
+                            (<div style={defaultProfile}>{getInitials(props.value)}</div>)
+                        }
 
+                    </div>
+                </span >
+                <div style={{ padding: padding, display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center', }}>
+                    <span style={{ padding: padding, paddingBottom: '0', display: 'flex', fontSize: "36px", fontWeight: "bold" }}>
+                        {props.value}
+                    </span>
+                    <span style={{ padding: padding, paddingTop: '0' }}>{ //starting all emails with upper case
+                        props.email.substring(0, 1).toUpperCase() + props.email.substring(1)}</span>
                 </div>
-            </span >
-            <span style={{ padding: padding, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: "36px", fontWeight: "bold" }}>
-                {props.value}
-            </span>
+
+            </div>
+
         </div >
     );
 }
@@ -128,7 +136,7 @@ export default function Profile() {
         <div className={"App-body-top"}>
             <TZHeader title="Your Profile" />
             <div style={styles}>
-                <ProfileItem title="Name" value={usc.user.name} profilePic={user.image}></ProfileItem>
+                <ProfileItem title="Name" value={usc.user.name} profilePic={user.image} email={user.email}></ProfileItem>
                 <ProfileLanding></ProfileLanding>
                 <TZButton title={"Logout"} onClick={() => Logout(cookies)}></TZButton>
             </div>
