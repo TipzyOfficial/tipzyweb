@@ -152,19 +152,6 @@ const getInitials = (name: string) => {
 const styles: React.CSSProperties = {
     paddingRight: padding,
     paddingLeft: padding,
-    width: "100%"
+    width: "100%",
+    maxWidth: "600px"
 }
-
-// const defaultProfile: React.CSSProperties = {
-//     width: "50px",
-//     height: "50px",
-//     background: 'linear-gradient(0deg, #c76b89, #d38932)',
-//     borderRadius: '50%',
-//     display: 'flex',
-//     fontSize: "30px",
-//     alignItems: 'center',
-//     alignContent: 'center',
-//     color: 'white',
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-// }
