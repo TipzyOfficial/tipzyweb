@@ -23,7 +23,6 @@ export function DisplayOrLoading(props: {children?: JSX.Element, condition: bool
         <div className="App-header">
         <Spinner animation="grow" style={{color: Colors.primaryRegular, width: 75, height: 75}}/>
         <br></br>
-        <span>Getting user session...please don't reload!</span>
         </div>);
     }
 
