@@ -134,13 +134,14 @@ export default function Profile() {
     // user.name
     // user.email
     const backButtonStyle: React.CSSProperties = {
+        position: 'absolute',
+        left: '15px',
         border: 'none',
         backgroundColor: 'transparent',
         color: isBackButtonHovered ? '#EDA13E' : 'white',
         fontSize: '16px',
         cursor: 'pointer',
         transition: 'color 0.3s ease',
-        marginLeft: '15px'
     };
 
     const handleBackClick = () => {
@@ -150,15 +151,15 @@ export default function Profile() {
     return (
         <div className={"App-body-top"}>
             <div style={headerStyle}>
+                <div style={headerTitleStyle}>
+                    <TZHeader title="Your Profile" />
+                </div>
                 <button style={backButtonStyle}
                     onMouseEnter={() => setIsBackButtonHovered(true)}
                     onMouseLeave={() => setIsBackButtonHovered(false)}
                     onClick={handleBackClick}>
                     Back
                 </button>
-                <div style={headerTitleStyle}>
-                    <TZHeader title="Your Profile" />
-                </div>
             </div>
 
             <div style={styles}>
