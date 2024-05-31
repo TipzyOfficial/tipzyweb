@@ -15,13 +15,14 @@ import { Navigate } from 'react-router'
 import Cookies from 'universal-cookie';
 import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessionContext';
 import SongSearch from './pages/bar/SongSearch';
-import {Elements, PaymentElement,} from '@stripe/react-stripe-js';
-import {loadStripe} from '@stripe/stripe-js';
+import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import PaymentSetup from './pages/profile/PaymentSetup';
 import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
+import ArtistInfo from './pages/bar/ArtistInfo';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -34,7 +35,7 @@ function Redirect() {
   const cookies = getCookies();
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
-  return(
+  return (
     loggedin ? <Navigate to='/code'></Navigate> : <Login></Login>
   )
 }
@@ -53,79 +54,84 @@ const Layout = () => {
     )
   }, []);
 
-  if(clientSecret === null) {
+  if (clientSecret === null) {
     Logout(getCookies());
-    return(<Outlet></Outlet>)
+    return (<Outlet></Outlet>)
   }
-  
-  return(
-    clientSecret ? 
-      <Elements 
-      stripe={stripePromise} 
-      options={{
-        clientSecret: clientSecret,
-        appearance: {theme: "night"}
-      }}
+
+  return (
+    clientSecret ?
+      <Elements
+        stripe={stripePromise}
+        options={{
+          clientSecret: clientSecret,
+          appearance: { theme: "night" }
+        }}
       >
-        <Outlet/>
-      </Elements> : 
+        <Outlet />
+      </Elements> :
       <DisplayOrLoading condition={false}></DisplayOrLoading>
   );
 }
 
 export const router = createBrowserRouter([{
   // element: <Layout/>,
-  children: 
-  [{
-    path: "/",
-    Component: Redirect
-  },
-  {
-    path: "/login",
-    Component: Login
-  },
-  {
-    path: "/register",
-    Component: Register
-  },
-  {
-    path: "/code",
-    Component: EnterCode
-  },
-  {
-    path: "/bar",
-    Component: Bar
-  },
-  {
-    path: "/bar/search",
-    Component: SongSearch
-  },
-  {
-    path: "/profile",
-    Component: Profile
-  },
-  {
-    path: "/paymentsetup",
-    Component: PaymentSetup
-  },
-  ]}
+  children:
+    [{
+      path: "/",
+      Component: Redirect
+    },
+    {
+      path: "/login",
+      Component: Login
+    },
+    {
+      path: "/register",
+      Component: Register
+    },
+    {
+      path: "/code",
+      Component: EnterCode
+    },
+    {
+      path: "/bar",
+      Component: Bar
+    },
+    {
+      path: "/bar/search",
+      Component: SongSearch
+    },
+    {
+      path: "/profile",
+      Component: Profile
+    },
+    {
+      path: "/paymentsetup",
+      Component: PaymentSetup
+    },
+    {
+      path: "/artistInfo",
+      Component: ArtistInfo
+    }
+    ]
+}
 ], {});
 
 function App() {
-  return(
+  return (
     <div className="App-body">
       <UserSessionContextProvider>
-        <div className="App-body" style={{width: '100%'}}>
-            <RouterProvider 
-            router={router}/>  
-        </div>      
+        <div className="App-body" style={{ width: '100%' }}>
+          <RouterProvider
+            router={router} />
+        </div>
       </UserSessionContextProvider>
     </div>
   )
 }
 
 export function goToLogin() {
-    router.navigate('/')
+  router.navigate('/')
 }
 
 export default App;
