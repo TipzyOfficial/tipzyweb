@@ -16,6 +16,7 @@ export default function ProfileButton(){
             position: "fixed",
             top:padding,
             right:padding,
+            zIndex: 20,
         }}>
             <button 
             onClick={() => router.navigate("/profile")}
@@ -27,7 +28,7 @@ export default function ProfileButton(){
                 height: dims,
                 borderRadius: dims,
                 padding: padding,
-                borderColor: 'black'
+                borderColor: 'black',
             }}>        
                 <FontAwesomeIcon icon={faProfile} color={'black'} fontSize={dims/2}></FontAwesomeIcon>
             </button>

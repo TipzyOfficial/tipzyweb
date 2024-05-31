@@ -46,9 +46,7 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
  */
 export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string): Promise<Response | null>{
     let myAccessToken = accessToken;
-
-    console.log("myAccessToken", myAccessToken)
-    
+        
     const newTokens = async () => {
         const refreshToken = await getRefreshToken();
         if(refreshToken === null) { console.log("no refresh token stored!"); return 0; }

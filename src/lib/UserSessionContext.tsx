@@ -84,7 +84,7 @@ export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise
             const s: SongType = {id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: false};
             const b: BarType = {id: bi.id, name: bi.business_name, type: bi.business_type, image_url: bi.image_url, description: bi.description, active: bi.active}
             ptc += e.token_count ?? 0;
-            p.push({id: e.id, song: s, tokenCount: e.token_count, status: e.status, bar: b, date: new Date(e.request_time)})
+            p.push({id: e.id, song: s, status: e.status, bar: b, date: new Date(e.request_time)})
         })
     })
     .catch((e: Error) => {console.log("problem getting pending: ", e)});

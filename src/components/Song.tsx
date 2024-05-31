@@ -28,7 +28,7 @@ export default function Song(props: {song: SongType, dims?: number}){
                 <span className="onelinetext"  style={{fontSize: dims/3, color: "white", width: '100%'}}>
                     {props.song.title}
                 </span>
-                <span className="onelinetext" style={{fontSize: dims/4, color: "#888", width: '100%'}}>
+                <span className="onelinetext" style={{fontSize: dims/4, color: "#aaa", width: '100%', fontWeight: 'normal'}}>
                     {props.song.explicit ?"🅴": ""} {artistsStringListToString(props.song.artists)}
                 </span>
             </div>

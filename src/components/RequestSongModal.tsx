@@ -34,6 +34,17 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
     }
     
     function RequestScreen() {
+        function onRequestClick(): void {
+            // setPaymentScreenVisible(true);
+            fetch(`https://de07-201-235-133-111.ngrok-free.app/get_saved_payment3/`, {
+                method: 'GET',
+                headers: {
+                    // Authorization: `Bearer ${myAccessToken}`,
+                    'Content-Type': 'application/json'
+                },
+            }).then(r => console.log(r.status)).catch((e) => console.log(e));
+        }
+
         return(<>
                 <Modal.Header closeButton>
                     <Modal.Title style={{color: 'white'}}>Request a song</Modal.Title>
@@ -60,9 +71,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
                                 <div>
                                     <TZButton 
                                         title={"$1.50"}
-                                        onClick={() => {
-                                        setPaymentScreenVisible(true)
-                                        }}/>
+                                        onClick={() => onRequestClick()}/>
                                 </div>
                             </Col>
                         </Row>

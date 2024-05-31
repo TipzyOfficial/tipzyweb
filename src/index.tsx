@@ -69,7 +69,7 @@ export async function getTipper(user: Consumer, cookies: Cookies){
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
-  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user ? user.image : undefined, d.user_info.email, d.token_count, user ? user.pending_requests : undefined, user ? user.pending_tokens : undefined)
+  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user ? user.image : undefined, d.user_info.email, user ? user.requests : undefined)
   c.setBirthday(d.birthday);
   return(c);
 }

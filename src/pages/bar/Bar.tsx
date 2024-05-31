@@ -1,23 +1,42 @@
-import { Spinner } from "react-bootstrap";
+import { Spinner, ToggleButton } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
-import { Colors, padding as basePadding, useFdim } from "../../lib/Constants";
+import { Colors, padding as basePadding, radius, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
-import { useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZSearchButton from "../../components/TZSearchButton";
-import FlatList from 'flatlist-react';
 import '../../App.css'
-import { ArtistType, SongType } from "../../lib/song";
-import Song, { SongList, SongRenderItem } from "../../components/Song";
+import { ArtistType, SongRequestType, SongType } from "../../lib/song";
+import { SongList } from "../../components/Song";
 import Artist from "../../components/Artist";
-import { ScrollMenu, VisibilityContext, publicApiType } from 'react-horizontal-scrolling-menu';
+import { ScrollMenu, } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { getCookies, router } from "../../App";
-import Cookies from "universal-cookie";
 import ProfileButton from "../../components/ProfileButton";
+import ToggleTab from "../../components/ToggleTab";
+import RequestsContent from "./Requests";
+
+function parseSongIHateMeku(s: any): SongType{
+    return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
+}
+
+function parseSong(s: any): SongType{
+    return {id: s.id, title: s.name, artists: s.artists, albumart: s.images[2].url, albumartbig: s.images[0].url, explicit: s.explicit}
+}
+
+function parseBusiness(b: any): BarType {
+    return {
+        id: b.id,
+        name: b.business_name,
+        type: b.business_type,
+        description: b.description,
+        active: b.active,
+        image_url: b.image_url
+    }
+}
 
 const LoadingScreen = () => 
     <div className="App-header">
@@ -30,6 +49,8 @@ export default function Bar(){
     const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
     const [ready, setReady] = useState(false);
+    const [view, setView] = useState(0);
+    // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
     const bar = userContext.barState.bar;
     const topSongs = bar?.topSongs ?? [];
@@ -41,10 +62,18 @@ export default function Bar(){
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const artistDims = fdim ?  Math.max(Math.min(fdim/4.8, 200), 50) : 120;
     const searchDims = fdim ?  Math.max(Math.min(fdim/20, 30), 15) : 15;
-    const minHeaderHeight = window.height && window.width ? Math.min(window.width/5, window.height/4): 200
+    const minHeaderHeight = window.height && window.width ? Math.min(window.width/5, window.height/4): 200;
+    const ref = useRef(<div></div>);
+    const [height, setHeight] = useState(0);
+    // useEffect(() => {
+    //     // setHeight(ref.current.offsetHeight);
+    //     console.log(ref.current)
+    // }, [setHeight])
+    
 
 
-    const fetchEverything = async () => {
+
+    const fetchBarInfo = async () => {
         const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
             return {
@@ -69,7 +98,7 @@ export default function Bar(){
         .then(json => {
             const songs = new Array<SongType>();
             json.data.forEach((s: any) => {
-                const song: SongType = {id: s.id, title: s.name, artists: s.artists, albumart: s.images[2].url, albumartbig: s.images[0].url, explicit: s.explicit}
+                const song: SongType = parseSong(s);
                 songs.push(song);
             })
             //setTopSongs(songs)
@@ -90,14 +119,22 @@ export default function Bar(){
         userContext.barState.setBar(bar)
 
         setReady(true);
+        return bar;
     }
 
-    function payment() {
+    const fetchPendingRequests = async () => {
+        const newUser = structuredClone(userContext.user);
+        console.log('getting pending')
+        newUser.requests = await fetchWithToken(userContext.user, `tipper/requests/pending/`, 'GET').then(r => r.json())
+        .then(json => { 
+            console.log('got pending')
+            return parseRequests(json);
+        }).catch((e) => {console.log("error: ",e); return []})
 
+        userContext.setUser(newUser);
     }
     
     useEffect(() => {
-        console.log(userContext.barState.bar)
         // if() {
         //     router.navigate("code")
         // }
@@ -106,134 +143,84 @@ export default function Bar(){
             setReady(true);
             return;
         }
-        fetchEverything().catch(e => {
+        fetchBarInfo().catch(e => {
             userContext.barState.setBar(undefined)
             console.log(e)
-            // setBadLoad(true);
             setReady(true);
-        })
+        });
+        fetchPendingRequests();
     }, [])
 
     if(bar === undefined && ready === false)
-        return <LoadingScreen></LoadingScreen>
+        return <LoadingScreen/>
     else if(bar === undefined)
         return <div className="App-body" style={{display: 'flex', flexDirection: 'column', textAlign: 'center', padding: padding}}>
                     <span className="App-title" style={{color: Colors.primaryRegular}}>Oops!</span>
                     <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
                 </div>
 
-    // const TopArtistsList = (props: {artists: ArtistType[]}) => {
-    
-    //     return (
-    //     );
-    // }
+    const SongContent = () => (
+        <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
+            <div style={{paddingTop: padding/2}}>
+                <div style={{paddingLeft: padding}}>
+                    <span className='App-subtitle'>Top Artists</span>
+                </div>
+                <div style={{paddingBottom: padding/3}}></div>
+                <div style={{overflow: 'hidden', width: window.width ?? 200}}>
+                    <ScrollMenu
+                    >
+                    {topArtists.map((e, index) => (
+                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} itemId={"index"+index} dims={artistDims}></Artist></div>
+                    ))}
+                    </ScrollMenu>
+                </div>
+            </div>
+            <div style={{padding: padding, width: '100%'}}>
+                <span className='App-subtitle'>Top Songs</span>
+                <div style={{paddingBottom: padding/3}}></div>
+                <SongList songs={topSongs} dims={songDims}/>
+            </div>
+        </div>
+    )
+
+    const RequestsContentMemo = memo(RequestsContent);
 
     return(
-        <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen></LoadingScreen>}>
-            <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-                <div style={{width: '100%', minHeight: minHeaderHeight,
-                    objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                    padding: padding,
-                    display: "flex",
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    justifyContent: 'flex-end',
-                    backgroundColor:"#000",
-                    boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
-                }}
-                >
-                    <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
-                        <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
-                    </div>
-                    <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
-                    <div style={{paddingTop: padding, width: '100%'}}>
-                        <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
-                    </div>
-                </div>
-                <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
-                    <div style={{paddingTop: padding}}>
-                        <div style={{paddingLeft: padding}}>
-                            <span className='App-subtitle'>Top Artists</span>
+        <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen/>}>
+            <div className="App-body-top">
+                <div style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+                    <div style={{width: '100%', minHeight: minHeaderHeight,
+                        objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "cover",
+                        padding: padding,
+                        display: "flex",
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-end',
+                        backgroundColor:"#000",
+                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
+                    }}
+                    >
+                        <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
+                            <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
                         </div>
-                        <div style={{paddingBottom: padding/3}}></div>
-                        <div style={{overflow: 'hidden', width: window.width ?? 200}}>
-                            <ScrollMenu
-                            >
-                            {topArtists.map((e, index) => (
-                                <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} itemId={"index"+index} dims={artistDims}></Artist></div>
-                            ))}
-                            </ScrollMenu>
+                        <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
+                        <div style={{paddingTop: padding, width: '100%'}}>
+                            <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                         </div>
                     </div>
-                    <div style={{padding: padding, width: '100%'}}>
-                        <span className='App-subtitle'>Top Songs</span>
-                        <div style={{paddingBottom: padding/3}}></div>
-                        <SongList songs={topSongs} dims={songDims}/>
+                    <div style={{paddingBottom: padding/2}}></div>
+                    <div style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
+                        <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
                     </div>
+                    {view === 0 ? <SongContent/> : <RequestsContentMemo pending={userContext.user.requests} padding={padding}/>}
+                    <ProfileButton/>
                 </div>
-                <ProfileButton/>
             </div>
         </DisplayOrLoading>
     );
 }
-
-export function LeftArrow() {
-    const visibility = useContext<publicApiType>(VisibilityContext);
-    const isFirstItemVisible = visibility.useIsVisible("first", true);
-    console.log("fiv", visibility.getNextElement())
-    console.log("liv", visibility.isLastItemVisible)
-  
-    return (
-      <Arrow
-        disabled={isFirstItemVisible}
-        onClick={() => visibility.scrollPrev()}
-      >
-        Left
-      </Arrow>
-    );
-  }
-  
-  export function RightArrow() {
-    const visibility = useContext<publicApiType>(VisibilityContext);
-    const isLastItemVisible = visibility.useIsVisible("last", false);
-  
-    return (
-      <Arrow disabled={isLastItemVisible} onClick={() => visibility.scrollNext()}>
-        Right
-      </Arrow>
-    );
-  }
-  
-  function Arrow({
-    children,
-    disabled,
-    onClick,
-  }: {
-    children: React.ReactNode;
-    disabled: boolean;
-    onClick: VoidFunction;
-  }) {
-    return (
-      <button
-        disabled={disabled}
-        onClick={onClick}
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          right: "1%",
-          opacity: disabled ? "0" : "1",
-          userSelect: "none",
-        }}
-      >
-        {children}
-      </button>
-    );
-  }
-
 
 
 const styles = {
@@ -244,4 +231,20 @@ const styles = {
     subtitle: {
         color: Colors.tertiaryLight
     },
+}
+
+export function parseRequests(json: any): SongRequestType[] {
+    const reqs = new Array<SongRequestType>();
+    json.data.forEach((r: any) => {
+        const req: SongRequestType = {
+            id: r.id, song: parseSongIHateMeku(r.song_json), bar: parseBusiness(r.business_info), date: new Date(r.request_time), status: r.status }
+            reqs.push(req);
+    })
+    return reqs;
+}
+
+
+export function parseRequest(r: any): SongRequestType {
+    const req: SongRequestType = {id: r.id, song: parseSongIHateMeku(r.song_json), bar: parseBusiness(r.business_info), date: new Date(r.request_time), status: r.status }
+    return req;
 }

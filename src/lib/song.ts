@@ -42,7 +42,7 @@ export type SongRequestType = {
     id: number,
     song: SongType,
     bar: BarType,
-    tokenCount: number,
+    cost?: number,
     date: Date,
     status: "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELED"
 }
