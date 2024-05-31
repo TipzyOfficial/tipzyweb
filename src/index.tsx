@@ -42,15 +42,22 @@ export async function Logout(cookies: Cookies) {
 
 export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
   const rt = cookies.get("refresh_token");
-  console.log("refresh token = ", rt);
   if (typeof rt !== "string") cookies.remove("refresh_token")
   return rt;
 }
 
+
+/**
+ * updates the tokens in local storage
+ * @param user the user session
+ * @param tokens the new tokens
+ * @param cookies the cookies that are storing the token data
+ * @param setUser (optional) update the user if using useState()
+ */
 export async function resetTokenValues(user: Users, tokens: TokenReturnType, cookies: Cookies, setUser?: (user: Users) => void) {
   console.log("resetting token values");
-  console.log("resettting rt token = ", tokens.refresh_token);
-  await cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
+  cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
+  cookies.set("access_token", tokens.access_token, { path: '/' });
   // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
   user.access_token = tokens.access_token;
   user.expires_at = tokens.expires_at;
@@ -67,7 +74,7 @@ export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
   return(c);
 }
 
-export async function checkIfAccountExists(user: Consumer, refreshToken: string): Promise<{result: boolean, data: Consumer}>{
+export async function checkIfAccountExists(user: Consumer): Promise<{result: boolean, data: Consumer}>{
   return getTipper(user, cookies).then(json => {
       const d = json.data;
       return {
@@ -96,6 +103,7 @@ export async function fetchWithToken(user: Consumer, urlEnding: string, fetchMet
 
 async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
   cookies.set("refresh_token", refreshToken);
+  cookies.set("access_token", refreshToken);
   cookies.set("expires_at", expiresAt);
 }
 

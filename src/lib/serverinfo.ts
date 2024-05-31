@@ -1,3 +1,6 @@
+import { consumerFromJSON } from "..";
+import { Consumer } from "./user";
+
 export const ServerInfo = {
     baseurl: "https://www.tipzyapi.com/",
     login: "login",
@@ -43,6 +46,8 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
  */
 export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string): Promise<Response | null>{
     let myAccessToken = accessToken;
+
+    console.log("myAccessToken", myAccessToken)
     
     const newTokens = async () => {
         const refreshToken = await getRefreshToken();
@@ -88,12 +93,11 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
 
     return theFetch().then(response => 
         {
-            // alert(response.status);
             if(response.status === 401){
-                console.log("401 error. old Access token: ", myAccessToken)
+                console.log("401 error. Trying again.")
                 return newTokens().then((res) => {
                     if(res === 0) throw new Error("problem with your refresh token.");
-                    console.log("trying again, new AT: ", myAccessToken)
+                    console.log("trying again with new tokens now!")
                     return theFetch();
                 }).catch((e: Error) => {
                     console.log("couldn't refresh.", e.message);
@@ -118,8 +122,6 @@ export async function getUser(userType: "tipper" | "business", accessToken: stri
             throw new Error(`Bad response. Response: ${response ? response.status + ".." : "null response"}`)
         }
         return response.json();
-    }).then(json => {
-        return json;
     }).catch((e) => console.log(e));
 }
 

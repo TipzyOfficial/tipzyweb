@@ -7,6 +7,11 @@ import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
 import { getCookies } from '../App';
 
+export const defaultConsumer: () => Consumer = () => {
+    const cookies = getCookies();
+    return new Consumer(cookies.get("access_token") ?? "", parseInt(cookies.get("expires_at")) ?? 0, "")
+}
+
 export type BarStateType = {
     bar?: BarType, 
     setBar: (bar: BarType | undefined) => void
@@ -47,14 +52,16 @@ function useInterval(callback: () => any, delay: number) {
 export const getStartingUser = async (): Promise<Consumer> => {
     const cookies = getCookies();
     const rt = cookies.get("refresh_token");
+    const dc = defaultConsumer();
     // const ea = cookies.get("expires_at");
-    if(rt === null) return  new Consumer("", 0, "");
-    return checkIfAccountExists(new Consumer("", 0, ""), rt).then(r => {
+    if(rt === null) return dc;
+    return checkIfAccountExists(dc).then(r => {
         if(r.result){
             return consumerFromJSON(undefined, r.data);
         }
         cookies.remove("refresh_token"); //bad refresh
-        return new Consumer("", 0, "")
+        cookies.remove("access_token"); //bad refresh
+        return dc;
     })
 
     // getUser("tipper", "", 0, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(new Consumer("", 0, ""), tokens, cookies)).then((json) => {
@@ -137,7 +144,8 @@ export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise
 
 export function UserSessionContextProvider(props: { children: JSX.Element }) {
     const cookies = getCookies();
-    const [user, setUser] = useState<Consumer>(new Consumer("", 0, ""));
+    const dc = defaultConsumer();
+    const [user, setUser] = useState<Consumer>(dc);
     const [bar, setBar] = useState<BarType | undefined>();
     const [ready, setReady] = useState(false);
 
@@ -169,9 +177,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     useEffect(() => 
         {
             // if(location.pathname === "/login" || location.pathname === "/register") return;
-            if(!cookies.get("refresh_token") || JSON.stringify(user) === JSON.stringify(new Consumer("", 0, ""))){
-                let newUser = new Consumer("", 0, "");
-                checkIfAccountExists(user, cookies.get("refresh_token")).then((r) => {
+            if(!cookies.get("refresh_token") || !cookies.get("access_token")){
+                checkIfAccountExists(user).then((r) => {
                     refreshUserData(r.data)
                     setReady(true);
                 })
@@ -180,8 +187,16 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                     setReady(true)
                 })
             } else {
-                refreshUserData(user)
-                setReady(true);
+                refreshUserData(user);
+                getTipper(user, cookies).then((json) => {
+                    console.log("json", json.data)
+                    const u = consumerFromJSON(dc, json.data);
+                    refreshUserData(u)
+                    setReady(true);
+                }).catch((e) => {
+                    console.log("problem init user." + e)
+                    setReady(true)
+                });
             }
     }, []);
 

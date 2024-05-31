@@ -66,7 +66,7 @@ function Login() {
 
         // console.log(user.name);
 
-        checkIfAccountExists(user, refreshToken).then((result) => {
+        checkIfAccountExists(user).then((result) => {
             if(result.result){
                 storeAll(user, refreshToken).then((user) => {
                     userContext?.setUser(user);
