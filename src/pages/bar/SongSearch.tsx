@@ -155,7 +155,7 @@ export default function SongSearch() {
                 <input 
                     ref={inputRef}
                     className='input' 
-                    placeholder="Request a song!" 
+                    placeholder="Request any song..." 
                     value={searchQuery} 
                     onChange={(e) => setSearchQuery(e.target.value)} 
                     onSubmit={() => searchForSongs(searchQuery, limit)}

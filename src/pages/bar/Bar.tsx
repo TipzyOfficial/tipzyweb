@@ -233,7 +233,7 @@ export default function Bar(){
                         </div>
                         <div style={{flex: 2}}></div>
                     </div>
-                    <div style={{paddingBottom: padding, paddingTop: padding/2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                    <div style={{paddingBottom: padding, paddingTop: padding, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                         <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
@@ -242,8 +242,10 @@ export default function Bar(){
                             color: Colors.tertiaryLight,
                             paddingLeft: padding,
                         }}>{bar.type ?? "Bar"}</span>
+                        <span className='App-typetitle' style={{paddingRight: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$1.50/song</span>
                     </div>
-                    <span className='App-typetitle' style={{paddingLeft: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>Songs are $1.50</span>
+                    {/* <span className='App-typetitle' style={{paddingLeft: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$1.50/song</span> */}
+
                     <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
