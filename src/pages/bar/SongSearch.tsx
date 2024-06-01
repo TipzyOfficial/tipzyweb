@@ -85,6 +85,7 @@ export default function SongSearch() {
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
     const timeoutInterval = 500;
+    const [androidStupid, setAndroidStupid] = useState(true);
 
     const defaultResults = () => {
         if(!userContext.barState.bar) {
@@ -132,15 +133,25 @@ export default function SongSearch() {
         // if(searchQuery === "") setSearchResults(defaultResults());
         // setSearchResults(defaultResults());
 
+        const androidIsDumb = setTimeout(() => {
+            console.log("hate android");
+            setAndroidStupid(false);
+        }, 10)
+
         const delayDebounceFn = setTimeout(() => {
             getSearchResults(searchQuery, limit)
+            // setAndroidStupid(false);
         }, timeoutInterval)
 
-        return () => clearTimeout(delayDebounceFn)
+        return () => {
+            clearTimeout(delayDebounceFn);
+            clearTimeout(androidIsDumb)
+        }
     }, [searchQuery])
 
     return(
         <div className="App-body-top">
+            {!androidStupid ? <div></div> : <div style={{zIndex: 100, width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex"}}></div>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
                     className='input' 

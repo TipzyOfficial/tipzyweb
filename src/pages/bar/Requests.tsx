@@ -97,7 +97,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
             {pload ? <></> : (pendingVisible ? <>
                 <FlatList
                     list={pendingReqs}
-                    renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>Looks like you don't have any pending requests.</div>}
+                    renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>Pending requests.</div>}
                     renderItem={(item) => <RenderItem request={item} key={item.id}/>}
                 />                
                 <div style={{paddingBottom: padding/2}}></div>
@@ -107,7 +107,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
             {cload ? <></> : (completedVisible ? <>
                 <FlatList
                     list={allReqs}
-                    renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>Looks like you don't have any completed requests.</div>}
+                    renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>Completed requests.</div>}
                     renderItem={(item) => <RenderItem request={item} key={item.id}/>}
                 />
                 <div style={{paddingBottom: padding}}></div>
