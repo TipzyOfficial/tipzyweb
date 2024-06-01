@@ -10,7 +10,7 @@ import { checkIfAccountExists, storeAll } from '../index';
 import { router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
-import { Colors } from '../lib/Constants';
+import { Colors, padding } from '../lib/Constants';
 
 function Login() {
     const [loginPage, setLoginPage] = useState(true);
@@ -107,12 +107,12 @@ function Login() {
     
         const PasswordRule = () => password.length < 8 ?
         <div style={regstyles.rule}>
-            <span style={{fontSize: 12, color: Colors.secondaryLight}}>Password must have a minimum of 8 characters.</span>
+            <span style={{paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block'}}>Password must have a minimum of 8 characters.</span>
         </div> : <></>
     
         const ConfirmPasswordRule = () => !pm ?
         <div style={regstyles.rule}>
-            <span style={{fontSize: 12, color: Colors.secondaryLight}}>Passwords don't match.</span>
+            <span style={{paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block'}}>Passwords don't match.</span>
         </div> : <></>
     
         if(disabled !== checkShouldDisable()) setDisabled(checkShouldDisable());
@@ -149,9 +149,12 @@ function Login() {
         }
     
         return(
+            <div style={{flex: 1, width: '100%', justifyContent: 'center', display: "flex"}}>
             <div style={styles.jumbo}>
                 <div style={styles.header}>
-                    <span style={styles.title}>Sign Up</span>
+                    <div style={{width: "100%", justifyContent: 'center', display: 'flex'}}>
+                        <span className='App-title' style={{textAlign: 'center'}}>Sign Up</span>
+                    </div>
                 </div>
                 <div style={{paddingBottom: 10}}>
                     <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
@@ -174,9 +177,13 @@ function Login() {
                     <ConfirmPasswordRule/>
                 </div>
                 <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
-                <div style={{paddingTop:10}}>
+                <div style={{paddingTop:10, width: "100%", textAlign: 'center'}}>
                     Have an account? <a href={"#"} onClick={() => {if(!registerPressed) setLoginPage(true)}}>Sign In</a>
                 </div>
+                <div style={{fontSize: 12, paddingTop: padding, textAlign: 'center'}}>
+                    By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                </div>
+            </div>
             </div>
         )
     }
@@ -205,31 +212,38 @@ function Login() {
                 <div style={{paddingTop:10, textAlign: 'center'}}>
                     Don't have an account? <a href={"#"} onClick={() => {if(!loginPressed) setLoginPage(false)}}>Sign Up</a>
                 </div>
+                <div style={{fontSize: 12, paddingTop: padding, textAlign: 'center'}}>
+                    By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                </div>
             </div>
             : <Register/>
     )
 }
 
+const jumbo: CSSProperties = { 
+    backgroundColor: "#0000",
+    width: "80%",
+    minWidth: 200,
+    maxWidth: 300,
+    padding: 20,
+    borderRadius: 10,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+}
+
 export const styles = {
     header: {
-        paddingBottom: 20
+        paddingBottom: 20,
+        width: "100%"
     },
     loginField: {
         paddingBottom: 10
     },
+    jumbo: jumbo,
     title: {
         fontSize: 25,
         fontWeight: 'bold',
-    },
-    jumbo: {
-        backgroundColor: "#0000",
-        width: "80%",
-        minWidth: 200,
-        maxWidth: 300,
-        padding: 20,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     input: {
         color: "white",
