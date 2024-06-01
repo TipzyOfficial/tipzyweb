@@ -12,6 +12,8 @@ import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
 import { SongType } from "../../lib/song";
 import { fetchWithToken } from "../..";
+import { isAndroid } from 'react-device-detect';
+
 
 /**
  * Custom button I made. Good for if you want a quick button without worrying about
@@ -84,7 +86,7 @@ export default function SongSearch() {
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
-    const timeoutInterval = 500;
+    const timeoutInterval = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
 
     const defaultResults = () => {
@@ -140,7 +142,6 @@ export default function SongSearch() {
 
         const delayDebounceFn = setTimeout(() => {
             getSearchResults(searchQuery, limit)
-            // setAndroidStupid(false);
         }, timeoutInterval)
 
         return () => {
@@ -151,7 +152,7 @@ export default function SongSearch() {
 
     return(
         <div className="App-body-top">
-            {!androidStupid ? <div></div> : <div style={{zIndex: 100, width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex", backgroundColor: "#888"}}></div>}
+            {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex", backgroundColor: "#888"}}></div>) : <></>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
                     className='input' 
@@ -161,7 +162,7 @@ export default function SongSearch() {
                     onChange={(e) => setSearchQuery(e.target.value)} 
                     onSubmit={() => searchForSongs(searchQuery, limit)}
                     />
-                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => router.navigate(-1)}>
+                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => {if(!isAndroid || (isAndroid && androidStupid)) router.navigate(-1);}}>
                     <span className="text">Cancel</span>
                 </div>
             </div>
