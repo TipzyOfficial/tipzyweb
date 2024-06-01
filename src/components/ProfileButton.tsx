@@ -1,12 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { padding, radius, useFdim } from "../lib/Constants";
+import { Colors, padding, radius, useFdim } from "../lib/Constants";
 import { faUser as faProfile } from "@fortawesome/free-solid-svg-icons";
 import { router } from "../App";
 import { useLocation } from "react-router-dom";
 import useWindowDimensions from "../lib/useWindowDimensions";
 
 export default function ProfileButton(){
-    const dims = Math.min(100, useWindowDimensions().width/7);
+    const dims = Math.min(90, useWindowDimensions().width/6);
 
     // console.log(location.pathname)
 
@@ -30,9 +30,10 @@ export default function ProfileButton(){
                 height: dims,
                 borderRadius: dims,
                 padding: padding,
-                borderColor: 'black',
+                borderWidth: 0,
+                backgroundColor: Colors.primaryRegular,
             }}>        
-                <FontAwesomeIcon icon={faProfile} color={'black'} fontSize={dims/2}></FontAwesomeIcon>
+                <FontAwesomeIcon icon={faProfile} color={'white'} fontSize={dims/2}></FontAwesomeIcon>
             </button>
         </div>
     );

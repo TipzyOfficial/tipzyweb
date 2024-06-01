@@ -62,6 +62,11 @@ function ProfileLanding() {
     const handleAboutClick = () => {
         router.navigate("/about");
     };
+
+    const handlePaymentDetails = () => {
+        router.navigate("/paymentsetup");
+    };
+
     return (
         <div style={{
             // backgroundColor: "red",
@@ -76,6 +81,7 @@ function ProfileLanding() {
             {/* <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton> */}
             {/* <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton> */}
             <ProfileButton text="Help & Privacy" onClick={handleAboutClick}></ProfileButton>
+            <ProfileButton text="Set Up Payment Details" onClick={handlePaymentDetails}></ProfileButton>
         </div>
 
     );
@@ -114,9 +120,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
                     </span>
                     <span style={{ padding: padding, paddingTop: 0, color: "#888" }}>{props.email}</span>
                 </div>
-
             </div>
-
         </div >
     );
 }
