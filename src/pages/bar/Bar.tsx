@@ -219,16 +219,31 @@ export default function Bar(){
                     boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
                 }}
                 >
-                    <div style={{flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center',}}>
-                        <div style={{flex: 1, paddingLeft: padding, paddingTop: padding, cursor: 'pointer'}} onClick={() => router.navigate('/code')}>
+                    <div style={{
+                        flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: "#0005", position: 'sticky', top: 0}}>
+                        <div style={{
+                            flex: 1, 
+                            display: 'flex', alignItems: 'center',
+                            padding: padding/2,
+                            cursor: 'pointer', 
+                            opacity: 0.8,
+                            }} onClick={() => router.navigate('/code')}>
                                 <FontAwesomeIcon className="App-tertiarytitle" icon={faChevronLeft} ></FontAwesomeIcon>
+                                <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span>
                         </div>
                         <div style={{flex: 2}}></div>
                     </div>
-                    <div style={{paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                    <div style={{paddingBottom: padding, paddingTop: padding/2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                         <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
-                    <span className='App-typetitle' style={styles.subtitle}>{bar.type ?? "Bar"}</span>
+                    <div style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                        <span className='App-typetitle' style={{
+                            flex: 1,
+                            color: Colors.tertiaryLight,
+                            paddingLeft: padding,
+                        }}>{bar.type ?? "Bar"}</span>
+                    </div>
+                    <span className='App-typetitle' style={{paddingLeft: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>Songs are $1.50</span>
                     <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
@@ -259,10 +274,6 @@ const styles = {
     title: {
         fontSize: 25,
         fontWeight: 'bold',
-    },
-    subtitle: {
-        color: Colors.tertiaryLight,
-        paddingLeft: padding,
     },
 }
 

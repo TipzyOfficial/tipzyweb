@@ -6,6 +6,8 @@ import { router } from "../App";
 import FlatList from "flatlist-react/lib";
 import { useState } from "react";
 import RequestSongModal from "./RequestSongModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 
 export function artistsStringListToString(artists: string[]){
     let out = "";
@@ -46,7 +48,7 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                             paddingRight: 0,
                             paddingLeft: 0,
                             paddingTop: 0,
-                            paddingBottom: padding, 
+                            paddingBottom: padding*1.2, 
                             alignItems: 'center', 
                             justifyContent: 'space-between',
                             boxSizing: "border-box",
@@ -61,11 +63,14 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                     <Song key={"id" + item.id} 
                             dims={songDims}
                             song={item}/>
-                    <div style={{display: 'flex', padding: 10, 
-                                border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
-                                backgroundColor: '#8881',
-                                justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
-                        $1.50
+                    <div style={{paddingLeft: 2}}>
+                        {/* <div style={{display: 'flex', padding: 10, 
+                                    border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
+                                    backgroundColor: '#8881',
+                                    justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
+                            $1.50
+                        </div> */}
+                        <FontAwesomeIcon icon={faCirclePlus} color={'#fff8'}></FontAwesomeIcon>
                     </div>
                 </button>
     )

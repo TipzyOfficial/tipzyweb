@@ -34,10 +34,11 @@ export const getCookies = () => {
 function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
+  const session = cookies.get("bar_session");
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
   return(
-    loggedin ? <Navigate to='/code'></Navigate> : <Login></Login>
+    loggedin ? (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>) : <Login></Login>
   )
 }
 
