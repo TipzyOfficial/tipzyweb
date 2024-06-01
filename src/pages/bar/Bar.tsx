@@ -107,12 +107,13 @@ export default function Bar(){
             }
             // setBar(bar);
         }).catch((e: Error) => {
-            alert("Error loading your bar: " + e.message);
+            // alert("Error loading your bar: " + e.message);
             return undefined;
         })
 
         if(!bar) {
-            return bar;
+            userContext.barState.setBar(bar)
+            return undefined;
         }
 
         bar.topSongs = await fetchWithToken(userContext.user, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
@@ -140,8 +141,6 @@ export default function Bar(){
         })
 
         userContext.barState.setBar(bar)
-
-        setReady(true);
         return bar;
     }
     
@@ -158,19 +157,21 @@ export default function Bar(){
             setReady(true);
             return;
         }
-        fetchBarInfo().catch(e => {
+        fetchBarInfo().then(() => setReady(true))
+        .catch(e => {
             userContext.barState.setBar(undefined)
             setReady(true);
         });
         // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
     }, [])
 
-    if(bar === undefined && ready === false)
+    if(ready === false)
         return <LoadingScreen/>
     else if(bar === undefined)
         return <div className="App-body" style={{display: 'flex', flexDirection: 'column', textAlign: 'center', padding: padding}}>
-                    <span className="App-title" style={{color: Colors.primaryRegular}}>Oops!</span>
+                    <span className="App-title" style={{color: Colors.primaryRegular,paddingBottom: padding}}>Oops!</span>
                     <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
+                    <span style={{color: Colors.primaryRegular, fontWeight: 'bold', cursor: 'pointer'}} onClick={() => router.navigate("/code")}>Go back</span>
                 </div>
 
     const SongContent = () => {

@@ -22,9 +22,9 @@ function EnterCode() {
             <Container data-bs-theme="dark" >
                 <Card>
                     <Card.Header style={{textAlign: 'center'}}>
-                        <span>Welcome {userContext.user.name}!</span>
+                        <span>Scan a Tipzy QR code at your bar!</span>
                         <br></br>
-                        <span>Enter in the code for your bar:</span>
+                        <span>You can also ask a bartender for the bar's code and enter it here:</span>
                     </Card.Header>
                     <Card.Body>
                         <input 
