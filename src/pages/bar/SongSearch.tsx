@@ -6,7 +6,7 @@
  * As always, if you have any questions message me. Good luck!
  */
 
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
@@ -87,7 +87,9 @@ export default function SongSearch() {
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
     const timeoutInterval = 100;
+    const androidTimeout = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const defaultResults = () => {
         if(!userContext.barState.bar) {
@@ -138,10 +140,11 @@ export default function SongSearch() {
         const androidIsDumb = setTimeout(() => {
             console.log("hate android");
             setAndroidStupid(false);
-        }, 1000)
+            inputRef.current?.focus();
+        }, androidTimeout)
 
         const delayDebounceFn = setTimeout(() => {
-            getSearchResults(searchQuery, limit)
+            getSearchResults(searchQuery, limit);
         }, timeoutInterval)
 
         return () => {
@@ -155,8 +158,8 @@ export default function SongSearch() {
             {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex", backgroundColor: "#888"}}></div>) : <></>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
+                    ref={inputRef}
                     className='input' 
-                    autoFocus 
                     placeholder="Request a song!" 
                     value={searchQuery} 
                     onChange={(e) => setSearchQuery(e.target.value)} 
