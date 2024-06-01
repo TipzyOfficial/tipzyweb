@@ -196,9 +196,11 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                     }
                     console.log("json", r.data)
                     const u = consumerFromJSON(dc, r.data);
+                    console.log("u", u);
                     refreshUserData(u)
                     setReady(true);
-                }).catch((e) => {
+                })
+                .catch((e) => {
                     console.log("problem init user." + e)
                     setReady(true)
                 });
