@@ -82,7 +82,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
                     <span style={{paddingBottom: rqp-3, display: 'block'}}>{props.request.bar.name}</span>
                     <Song song={props.request.song}></Song>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                        <span className="App-tinytext" style={{display: 'block', color: statusColor}}>{props.request.date.toLocaleString()}</span>
+                        <span className="App-tinytext" style={{display: 'block', color: "#777"}}>{props.request.date.toLocaleString()}</span>
                         <span style={{color: statusColor}}>{props.request.status}</span>
                     </div>
                 </div>
