@@ -136,7 +136,7 @@ export default function SongSearch() {
         const androidIsDumb = setTimeout(() => {
             console.log("hate android");
             setAndroidStupid(false);
-        }, 10)
+        }, 1000)
 
         const delayDebounceFn = setTimeout(() => {
             getSearchResults(searchQuery, limit)
@@ -151,7 +151,7 @@ export default function SongSearch() {
 
     return(
         <div className="App-body-top">
-            {!androidStupid ? <div></div> : <div style={{zIndex: 100, width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex"}}></div>}
+            {!androidStupid ? <div></div> : <div style={{zIndex: 100, width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex", backgroundColor: "#888"}}></div>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
                     className='input' 
