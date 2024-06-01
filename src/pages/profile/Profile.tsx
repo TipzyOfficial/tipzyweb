@@ -31,6 +31,10 @@ function ProfileButton(props: { text: string, onClick: () => void }) {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: isHovered ? '#EDA13E' : 'transparent',
+        borderColor: isHovered ? "#8880" : "#8888",
+        borderWidth: 1,
+        borderStyle: "solid",
+        padding: padding,
         color: isHovered ? '#1B242E' : 'white',
         cursor: 'pointer',
         transition: 'background-color 0.3s ease, color 0.3s ease'
@@ -45,10 +49,10 @@ function ProfileButton(props: { text: string, onClick: () => void }) {
     );
 }
 
-function ProfileLanding(props: {}) {
+function ProfileLanding() {
     //handling clicks
     const handleAccountClick = () => {
-        console.log("Your Account clicked");
+        router.navigate("/account");
     };
 
     const handleHistoryClick = () => {
@@ -56,7 +60,7 @@ function ProfileLanding(props: {}) {
     };
 
     const handleAboutClick = () => {
-        console.log("About clicked");
+        router.navigate("/about");
     };
     return (
         <div style={{
@@ -71,7 +75,7 @@ function ProfileLanding(props: {}) {
             <ProfileButton text="Your Account" onClick={handleAccountClick}></ProfileButton>
             {/* <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton> */}
             {/* <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton> */}
-            <ProfileButton text="About" onClick={handleAboutClick}></ProfileButton>
+            <ProfileButton text="Help & Privacy" onClick={handleAboutClick}></ProfileButton>
         </div>
 
     );
@@ -96,7 +100,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
     };
     return (
         <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                     <div style={{ borderRadius: "50%" }}>
                         {props.profilePic ? (
                             <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
@@ -108,7 +112,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
                     <span className="App-subtitle" style={{ padding: padding, paddingBottom: '0', display: 'flex' }}>
                         {props.value}
                     </span>
-                    <span style={{ padding: padding, paddingTop: 0 }}>{props.email}</span>
+                    <span style={{ padding: padding, paddingTop: 0, color: "#888" }}>{props.email}</span>
                 </div>
 
             </div>
@@ -118,8 +122,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
 }
 );
 
-export default function Profile(props: {prev?: string}) {
-    const prev = props.prev ?? "#";
+export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
@@ -160,7 +163,6 @@ export default function Profile(props: {prev?: string}) {
             <div style={styles}>
                 <ProfileItem title="Name" value={usc.user.name} profilePic={user.image} email={user.email}></ProfileItem>
                 <ProfileLanding></ProfileLanding>
-                <TZButton title={"Logout"} onClick={() => Logout(cookies)}></TZButton>
             </div>
         </div>
     )

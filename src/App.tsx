@@ -22,6 +22,8 @@ import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
+import Account from './pages/profile/Account';
+import About from './pages/profile/About';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -103,6 +105,14 @@ export const router = createBrowserRouter([{
   {
     path: "/profile",
     Component: Profile
+  },
+  {
+    path: "/account",
+    Component: Account
+  },
+  {
+    path: "/about",
+    Component: About
   },
   {
     path: "/paymentsetup",

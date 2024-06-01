@@ -6,7 +6,8 @@ export default function TZHeader(props: {title: string, leftComponent?: JSX.Elem
         <div className="App-headertop"
             style={{position: 'sticky', 
             top: 0,
-            padding: padding,
+            paddingTop: padding,
+            paddingBottom: padding,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
