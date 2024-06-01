@@ -16,7 +16,7 @@ export default function ProfileButton(){
             bottom:padding,
             right:padding,
             zIndex: 20,
-            opacity: 0.7,
+            opacity: 0.85,
         }}>
             <button 
             onClick={() => router.navigate("/profile")}
