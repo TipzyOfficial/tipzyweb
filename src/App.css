@@ -84,6 +84,7 @@
 .App-subtitle {
   font-size: calc(20px + 2vmin);
   font-size: calc(20px + 2vmin);
+  line-height: 1;
   font-weight: bold;
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;

@@ -79,9 +79,9 @@ export default function Bar(){
     const toggleRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState<number | undefined>();
   
-    useEffect(() => {
-        console.log("tref", toggleRef)
-    }, [toggleRef]);
+    // useEffect(() => {
+    //     console.log("tref", toggleRef)
+    // }, [toggleRef]);
     // useEffect(() => {
     //     // setHeight(ref.current.offsetHeight);
     //     console.log(ref.current)
@@ -96,6 +96,7 @@ export default function Bar(){
     const fetchBarInfo = async () => {
         const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
+            console.log(json);
             return {
                 id: json.id,
                 name: json.business_name,
@@ -174,11 +175,10 @@ export default function Bar(){
                 </div>
 
     const SongContent = () => {
-        // alert("sorry song")
         return(
         <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
             <div style={{paddingTop: padding/2}}>
-                <div style={{paddingLeft: padding}}>
+                <div style={{paddingLeft: padding, paddingBottom: padding}}>
                     <span className='App-subtitle'>Top Artists</span>
                 </div>
                 <div style={{paddingBottom: padding/3}}></div>
@@ -192,8 +192,9 @@ export default function Bar(){
                 </div>
             </div>
             <div style={{padding: padding, width: '100%'}}>
-                <span className='App-subtitle'>Top Songs</span>
-                <div style={{paddingBottom: padding/3}}></div>
+                <div style={{paddingBottom: padding}}>
+                    <span className='App-subtitle'>Top Songs</span>
+                </div>
                 <SongList songs={topSongs} dims={songDims}/>
             </div>
         </div>
@@ -201,7 +202,7 @@ export default function Bar(){
     }
 
     const RequestsContentMemo = memo(RequestsContent);
-    
+
     return(
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen/>}>
         <div className="App-body-top">
@@ -222,20 +223,26 @@ export default function Bar(){
                     <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
                         <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
-                    <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
+                    <span className='App-tertiarytitle' style={styles.subtitle}>{bar.type ?? "Bar"}</span>
                     <div style={{paddingTop: padding, width: '100%'}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
                 </div>
-                <div style={{paddingBottom: padding/2}}></div>
-                <div ref={toggleRef} style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
+                {/* <div style={{paddingBottom: padding/2}}></div> */}
+                <div ref={toggleRef} style={{position: 'sticky', top: 0, zIndex: 2, 
+                    paddingRight: padding,
+                    paddingLeft: padding,
+                    paddingTop: padding/2,
+                    paddingBottom: padding/2,
+                    backgroundColor: Colors.background}}>
                     <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
                 </div>
                 <div>
-                    {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>}
+                    {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>} 
                 </div>
+                <div style={{height: padding*4}}></div>
                 <ProfileButton/>
-            </div>
+            </div> 
         </div>
     </DisplayOrLoading>
 

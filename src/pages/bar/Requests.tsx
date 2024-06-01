@@ -23,7 +23,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     const [cload, setCload] = useState(false);
     const height = props.height ?? 0;
     const getPending = async () => {
-        // setPload(true);
+        setPload(true);
         await fetchPendingRequests(usc).then(u => {
             setPendingReqs(u.requests);
             // if(JSON.stringify(u) !== JSON.stringify(usc.user))
@@ -34,11 +34,11 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
                 setPendingReqs([]);
             });
 
-        // setPload(false);
+        setPload(false);
     }
 
     const getCompleted = async () => {
-        // setCload(true);
+        setCload(true);
         
         const reqs = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             const reqs = new Array<SongRequestType>();
@@ -51,7 +51,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
             return reqs;
         }).catch(() => {setCload(false); return new Array<SongRequestType>()});
 
-        // setCload(false)
+        setCload(false)
         setAllReqs(reqs.sort(songRequestCompare));
     }
 
@@ -78,7 +78,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
         return(
             <div style={{paddingTop: padding, paddingLeft: padding, paddingRight: padding, width: '100%'}}>
                 <div style={{paddingBottom: rqp-3, paddingLeft: rqp, paddingRight: rqp, paddingTop: rqp-3,
-                     backgroundColor: statusColor+"77", width: '100%', borderRadius: radius}}>
+                     backgroundColor: "#8882", width: '100%', borderRadius: radius}}>
                     <span style={{paddingBottom: rqp-3, display: 'block'}}>{props.request.bar.name}</span>
                     <Song song={props.request.song}></Song>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
@@ -92,7 +92,6 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
 
     return(
     <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
-        {/* <div style={{height: 1000, width: 100, backgroundColor: 'red'}}></div> */}
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
             <ExpandHeader zI={4} height={height} loading={pload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
             {pload ? <></> : (pendingVisible ? <>
@@ -121,19 +120,18 @@ const ExpandHeader = (props: {zI: number, onClick: () => void, expanded: boolean
     return(
     <div onClick={props.onClick} 
         style={{
+        boxShadow: '0px 5px 5px rgba(23, 23, 30, 0.5)',
         display: 'flex',
         alignItems: 'center', 
         justifyContent: 'space-between',
         cursor: 'pointer',
         backgroundColor: "#292935",
-        paddingTop: padding,
-        paddingBottom: padding,
-        paddingLeft: padding,
-        paddingRight: padding,
+        padding: padding,
         position: 'sticky',
         top: props.height-1,
         float:"left",
         zIndex: props.zI,
+
         }}>
         <span className="App-tertiarytitle">{props.text}</span>
         <div style={{paddingLeft: 5}}>

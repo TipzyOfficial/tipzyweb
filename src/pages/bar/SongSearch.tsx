@@ -150,7 +150,7 @@ export default function SongSearch() {
                     onChange={(e) => setSearchQuery(e.target.value)} 
                     onSubmit={() => searchForSongs(searchQuery, limit)}
                     />
-                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => router.navigate("/bar")}>
+                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => router.navigate(-1)}>
                     <span className="text">Cancel</span>
                 </div>
             </div>

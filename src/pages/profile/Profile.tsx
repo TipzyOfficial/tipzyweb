@@ -5,6 +5,7 @@ import TZButton from "../../components/TZButton";
 import { Logout } from "../..";
 import { getCookies, router } from "../../App";
 import TZHeader from "../../components/TZHeader";
+import "../../App.css"
 
 /**
  * user: appreview, pw: appreview
@@ -22,7 +23,6 @@ import TZHeader from "../../components/TZHeader";
 function ProfileButton(props: { text: string, onClick: () => void }) {
     const [isHovered, setIsHovered] = useState(false);
     const profileButton: React.CSSProperties = {
-        fontSize: "30px",
         fontWeight: 'bold',
         margin: '5px',
         width: '100%',
@@ -40,7 +40,7 @@ function ProfileButton(props: { text: string, onClick: () => void }) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={props.onClick}>
-            {props.text}
+            <span className="App-tertiarytitle">{props.text}</span>
         </div>
     );
 }
@@ -49,10 +49,6 @@ function ProfileLanding(props: {}) {
     //handling clicks
     const handleAccountClick = () => {
         console.log("Your Account clicked");
-    };
-
-    const handleRequestsClick = () => {
-        console.log("Your Requests clicked");
     };
 
     const handleHistoryClick = () => {
@@ -73,8 +69,8 @@ function ProfileLanding(props: {}) {
             marginBottom: "10px"
         }}>
             <ProfileButton text="Your Account" onClick={handleAccountClick}></ProfileButton>
-            <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton>
-            <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton>
+            {/* <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton> */}
+            {/* <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton> */}
             <ProfileButton text="About" onClick={handleAboutClick}></ProfileButton>
         </div>
 
@@ -100,22 +96,19 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
     };
     return (
         <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ padding: padding, width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center' }}>
-                <span style={{ padding: padding }}>
+            <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center' }}>
                     <div style={{ borderRadius: "50%" }}>
                         {props.profilePic ? (
                             <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
                             :
                             (<div style={defaultProfile}>{getInitials(props.value)}</div>)
                         }
-
                     </div>
-                </span >
                 <div style={{ padding: padding, display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center', }}>
-                    <span style={{ padding: padding, paddingBottom: '0', display: 'flex', fontSize: "36px", fontWeight: "bold" }}>
+                    <span className="App-subtitle" style={{ padding: padding, paddingBottom: '0', display: 'flex' }}>
                         {props.value}
                     </span>
-                    <span style={{ padding: padding, paddingTop: '0' }}>{props.email}</span>
+                    <span style={{ padding: padding, paddingTop: 0 }}>{props.email}</span>
                 </div>
 
             </div>

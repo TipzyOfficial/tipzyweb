@@ -1,13 +1,15 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { debounce } from 'lodash';
+import { isMobile } from 'react-device-detect';
 
 export default function useWindowDimensions() {
 
-  const [size, setSize] = useState([0, 0]);
+  const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
 
   useLayoutEffect(() => {
     function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
+      if(!isMobile)
+        setSize([window.innerWidth, window.innerHeight]);
     }
 
     const debouncedUpdateSize = debounce(updateSize, 200); 

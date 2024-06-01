@@ -6,9 +6,7 @@ import { useLocation } from "react-router-dom";
 import useWindowDimensions from "../lib/useWindowDimensions";
 
 export default function ProfileButton(){
-    const fDim = useFdim();
-    const dims = useWindowDimensions().width/7;
-    const location = useLocation();
+    const dims = Math.min(100, useWindowDimensions().width/7);
 
     // console.log(location.pathname)
 
@@ -26,6 +24,8 @@ export default function ProfileButton(){
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                maxWidth: dims,
+                maxHeight: dims,
                 width: dims,
                 height: dims,
                 borderRadius: dims,
