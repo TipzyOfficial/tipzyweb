@@ -3,7 +3,7 @@ import Song from "../../components/Song";
 import { Colors, padding, radius } from "../../lib/Constants";
 import { dateTimeParser, dateTimeParserString } from "../../lib/datetime";
 import { SongRequestType, songRequestCompare } from "../../lib/song";
-import { RefObject, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { RefObject, memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { fetchWithToken } from "../..";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import { fetchPendingRequests, parseRequest, parseRequests } from "./Bar";
@@ -19,16 +19,11 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     const [allReqs, setAllReqs] = useState<SongRequestType[]>([])
     const [pendingVisible, setPendingVisible] = useState(true);
     const [completedVisible, setCompletedVisible] = useState(true);
-    const [pload, setPload] = useState(true);
-    const [cload, setCload] = useState(true);
+    const [pload, setPload] = useState(false);
+    const [cload, setCload] = useState(false);
     const height = props.height ?? 0;
-
-    const firstRef = useRef<HTMLDivElement>(null);
-    const [frH, setFrH] = useState<number | undefined>();
-
-
     const getPending = async () => {
-        setPload(true);
+        // setPload(true);
         await fetchPendingRequests(usc).then(u => {
             setPendingReqs(u.requests);
             // if(JSON.stringify(u) !== JSON.stringify(usc.user))
@@ -39,11 +34,11 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
                 setPendingReqs([]);
             });
 
-        setPload(false);
+        // setPload(false);
     }
 
     const getCompleted = async () => {
-        setCload(true);
+        // setCload(true);
         
         const reqs = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             const reqs = new Array<SongRequestType>();
@@ -56,29 +51,19 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
             return reqs;
         }).catch(() => {setCload(false); return new Array<SongRequestType>()});
 
-        setCload(false)
+        // setCload(false)
         setAllReqs(reqs.sort(songRequestCompare));
     }
 
     useEffect(() => {
         console.log("ue")
+        // alert("sorry");
         getPending();
         getCompleted();
     }, []);
 
-    // const setCompleted = async (v: boolean) => {
-    //     if(!v) {
-    //         setCompletedVisible(false);
-    //         return;
-    //     }
-
-    //     await getCompleted();
-
-    //     setCompletedVisible(true);
-    // }
-
-    const RenderItem = (props: {request: SongRequestType}) => {
-        const dt = dateTimeParser(props.request.date.toISOString());
+    const RenderItem = memo((props: {request: SongRequestType}) => {
+        // const dt = dateTimeParser(props.request.date.toISOString());
         let statusColor = Colors.primaryRegular;
         switch(props.request.status) {
             case "ACCEPTED":
@@ -97,18 +82,19 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
                     <span style={{paddingBottom: rqp-3, display: 'block'}}>{props.request.bar.name}</span>
                     <Song song={props.request.song}></Song>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-                        <span className="App-tinytext" style={{display: 'block', color: statusColor}}>{dateTimeParserString(dt)}</span>
+                        <span className="App-tinytext" style={{display: 'block', color: statusColor}}>{props.request.date.toLocaleString()}</span>
                         <span style={{color: statusColor}}>{props.request.status}</span>
                     </div>
                 </div>
             </div>
         )
-    }
+    })
 
     return(
     <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
+        {/* <div style={{height: 1000, width: 100, backgroundColor: 'red'}}></div> */}
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-            <ExpandHeader ref={firstRef} zI={4} height={height} loading={pload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
+            <ExpandHeader zI={4} height={height} loading={pload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
             {pload ? <></> : (pendingVisible ? <>
                 <FlatList
                     list={pendingReqs}
@@ -131,10 +117,9 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     </div>);
 }
 
-const ExpandHeader = (props: {ref?: RefObject<HTMLDivElement>, zI: number, onClick: () => void, expanded: boolean, loading?: boolean, text: string, height: number}) => {
+const ExpandHeader = (props: {zI: number, onClick: () => void, expanded: boolean, loading?: boolean, text: string, height: number}) => {
     return(
     <div onClick={props.onClick} 
-        ref={props.ref}
         style={{
         display: 'flex',
         alignItems: 'center', 

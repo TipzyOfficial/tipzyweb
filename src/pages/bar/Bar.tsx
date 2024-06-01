@@ -88,6 +88,7 @@ export default function Bar(){
     // }, [setHeight])
     
     const setView = (v: number) => {
+        // alert("height set");
         setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
         setViewInner(v);
     }
@@ -172,7 +173,9 @@ export default function Bar(){
                     <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
                 </div>
 
-    const SongContent = () => (
+    const SongContent = () => {
+        // alert("sorry song")
+        return(
         <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
             <div style={{paddingTop: padding/2}}>
                 <div style={{paddingLeft: padding}}>
@@ -194,46 +197,48 @@ export default function Bar(){
                 <SongList songs={topSongs} dims={songDims}/>
             </div>
         </div>
-    )
+        )
+    }
 
     const RequestsContentMemo = memo(RequestsContent);
-
+    
     return(
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen/>}>
-            <div className="App-body-top">
-                <div style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
-                    <div style={{width: '100%', minHeight: minHeaderHeight,
-                        objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: "cover",
-                        padding: padding,
-                        display: "flex",
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-end',
-                        backgroundColor:"#000",
-                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
-                    }}
-                    >
-                        <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
-                            <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
-                        </div>
-                        <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
-                        <div style={{paddingTop: padding, width: '100%'}}>
-                            <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
-                        </div>
+        <div className="App-body-top">
+            <div style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+                <div style={{width: '100%', minHeight: minHeaderHeight,
+                    objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "cover",
+                    padding: padding,
+                    display: "flex",
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    justifyContent: 'flex-end',
+                    backgroundColor:"#000",
+                    boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
+                }}
+                >
+                    <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
+                        <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
-                    {/* <div style={{paddingBottom: padding/2}}></div> */}
-                    <div ref={toggleRef} style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
-                        <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
+                    <span className='App-tertiarytitle' style={styles.subtitle}>Dive Bar</span>
+                    <div style={{paddingTop: padding, width: '100%'}}>
+                        <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
-                    <div>
-                        {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>}
-                    </div>
-                    <ProfileButton/>
                 </div>
+                <div style={{paddingBottom: padding/2}}></div>
+                <div ref={toggleRef} style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
+                    <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
+                </div>
+                <div>
+                    {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>}
+                </div>
+                <ProfileButton/>
             </div>
-        </DisplayOrLoading>
+        </div>
+    </DisplayOrLoading>
+
     );
 }
 

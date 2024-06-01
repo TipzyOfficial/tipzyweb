@@ -3,10 +3,11 @@ import { padding, radius, useFdim } from "../lib/Constants";
 import { faUser as faProfile } from "@fortawesome/free-solid-svg-icons";
 import { router } from "../App";
 import { useLocation } from "react-router-dom";
+import useWindowDimensions from "../lib/useWindowDimensions";
 
 export default function ProfileButton(){
     const fDim = useFdim();
-    const dims = fDim/10;
+    const dims = useWindowDimensions().width/7;
     const location = useLocation();
 
     // console.log(location.pathname)
@@ -14,9 +15,10 @@ export default function ProfileButton(){
     return(
         <div style={{
             position: "fixed",
-            top:padding,
+            bottom:padding,
             right:padding,
             zIndex: 20,
+            opacity: 0.7,
         }}>
             <button 
             onClick={() => router.navigate("/profile")}

@@ -76,12 +76,18 @@
   font-size: calc(20px + 5vmin);
   line-height: calc(20px + 5vmin);
   font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-subtitle {
   font-size: calc(20px + 2vmin);
   font-size: calc(20px + 2vmin);
   font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-headertop {
@@ -90,9 +96,15 @@
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   color: white;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-headertitle {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
   font-size: calc(17px + 2vmin);
   font-size: calc(17px + 2vmin);
   font-weight: bold;
