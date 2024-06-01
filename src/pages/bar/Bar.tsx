@@ -176,7 +176,7 @@ export default function Bar(){
     const SongContent = () => {
         return(
         <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
-            <div style={{paddingTop: padding/2}}>
+            <div style={{paddingTop: padding}}>
                 <div style={{paddingLeft: padding, paddingBottom: padding}}>
                     <span className='App-subtitle'>Top Artists</span>
                 </div>
@@ -191,7 +191,7 @@ export default function Bar(){
                 </div>
             </div>
             <div style={{padding: padding, width: '100%'}}>
-                <div style={{paddingBottom: padding}}>
+                <div style={{paddingBottom: padding, paddingTop: padding}}>
                     <span className='App-subtitle'>Top Songs</span>
                 </div>
                 <SongList songs={topSongs} dims={songDims}/>
@@ -227,7 +227,7 @@ export default function Bar(){
                     <div style={{paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                         <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
-                    <span className='App-tertiarytitle' style={styles.subtitle}>{bar.type ?? "Bar"}</span>
+                    <span className='App-typetitle' style={styles.subtitle}>{bar.type ?? "Bar"}</span>
                     <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>

@@ -107,18 +107,21 @@
   font-optical-sizing: auto;
   font-style: normal;
   font-size: calc(17px + 2vmin);
-  font-size: calc(17px + 2vmin);
   font-weight: bold;
 }
 
 .App-tertiarytitle {
   font-size: calc(15x + 1vmin);
-  font-size: calc(15px + 1vmin);
+  font-weight: bold;
+}
+
+.App-typetitle {
+  font-size: calc(10px + 1vmin);
   font-weight: bold;
 }
 
 .App-tertiarytoggle {
-  font-size: calc(12x + 1vmin);
+  font-size: calc(12px + 1vmin);
   font-size: calc(12px + 1vmin);
 }
 
