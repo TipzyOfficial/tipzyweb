@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Colors, radius } from '../lib/Constants';
 
-function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean}) {
+function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean, fontSize?: number}) {
     const [opacity, setOpacity] = useState(1);
 
     return(
@@ -25,7 +25,7 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
             opacity: props.disabled ? 0.7 : opacity,
             border: 'none'
         }}>
-            <span className="App-tertiarytitle" style={{color: "white", fontWeight: "bold"}}>{props.title ?? ""}</span>
+            <span className="App-tertiarytitle" style={{color: "white", fontWeight: "bold", fontSize: props.fontSize}}>{props.title ?? ""}</span>
         </button>
     )
 }

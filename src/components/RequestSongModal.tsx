@@ -100,6 +100,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
                             <Col style={{display: 'flex', justifyContent: 'center'}}>
                                 <div>
                                     <TZButton 
+                                        fontSize={Math.min(30, dims/7)}
                                         title={"$1.50"}
                                         onClick={() => onRequestClick()}/>
                                 </div>
