@@ -47,10 +47,10 @@ const LoadingScreen = () =>
 
 export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
     const newUser = structuredClone(userContext.user);
-    console.log('getting pending')
+    // console.log('getting pending')
     newUser.requests = await fetchWithToken(userContext.user, `tipper/requests/pending/`, 'GET').then(r => r.json())
     .then(json => { 
-        console.log('got pending')
+        // console.log('got pending')
         return parseRequests(json);
     }).catch((e) => {console.log("error: ",e); return []})
 
@@ -69,7 +69,6 @@ export default function Bar(){
     const topArtists = bar?.topArtists ?? [];
     const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
     const window = useWindowDimensions();
-    console.log("window", window);
     const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim/50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
@@ -96,7 +95,6 @@ export default function Bar(){
     const fetchBarInfo = async () => {
         const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
-            console.log(json);
             return {
                 id: json.id,
                 name: json.business_name,
@@ -134,10 +132,8 @@ export default function Bar(){
                 artists.push(artist);
             })
             //setTopArtists(artists)
-            console.log("toa", artists)
             return artists;
         }).catch((e) => {
-            console.log('didnt work',e)
             return undefined;
         })
 
@@ -152,15 +148,12 @@ export default function Bar(){
         //     router.navigate("code")
         // }
         //if id is the same as bar or if new id hasn't been set yet
-        console.log("onlye once")
-
         if(!id || (userContext.barState.bar && id === userContext.barState.bar.id.toString())) {
             setReady(true);
             return;
         }
         fetchBarInfo().catch(e => {
             userContext.barState.setBar(undefined)
-            console.log(e)
             setReady(true);
         });
         // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
