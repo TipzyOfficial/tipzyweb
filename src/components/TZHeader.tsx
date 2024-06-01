@@ -6,17 +6,22 @@ export default function TZHeader(props: {title: string, leftComponent?: JSX.Elem
         <div className="App-headertop"
             style={{position: 'sticky', 
             top: 0,
-            padding: padding,
+            paddingTop: padding,
+            paddingBottom: padding,
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'space-between',
+            alignItems: 'center',
             flexDirection: 'row',
             width: '100%', 
             backgroundColor: Colors.background
             }}>
-            {props.leftComponent ?? <div></div>}
-            <span className="App-headertitle">{props.title}</span>
-            {props.rightComponent ?? <div></div>}
+            <div style={{flex: 1}}>
+                {props.leftComponent ?? <div></div>}
+            </div>
+            <span className="App-headertitle" style={{flexGrow: 1, textAlign: "center"}}>{props.title}</span>
+            <div style={{flex: 1}}>
+                {props.rightComponent ?? <div></div>}
+            </div>        
         </div>
     );
 }

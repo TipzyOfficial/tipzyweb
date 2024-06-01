@@ -6,12 +6,14 @@
  * As always, if you have any questions message me. Good luck!
  */
 
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
 import { SongType } from "../../lib/song";
 import { fetchWithToken } from "../..";
+import { isAndroid } from 'react-device-detect';
+
 
 /**
  * Custom button I made. Good for if you want a quick button without worrying about
@@ -79,12 +81,23 @@ export default function SongSearch() {
      * setSearchResults sets the results of your search and rerenders the page.
      */
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<SongType[]>([]);
+    const [searchResults, setSearchResults] = useState<SongType[]>(userContext.barState.bar ? userContext.barState.bar.topSongs ?? [] : []);
     const window = useWindowDimensions();
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
-    const timeoutInterval = 500;
+    const timeoutInterval = 100;
+    const androidTimeout = 100;
+    const [androidStupid, setAndroidStupid] = useState(true);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const defaultResults = () => {
+        if(!userContext.barState.bar) {
+            router.navigate("/code");
+            throw new Error("no bar")
+        }
+        return(userContext.barState.bar.topSongs ?? []);
+    }
 
     /**
      * searches for songs related to a certain query.
@@ -94,16 +107,8 @@ export default function SongSearch() {
      */
     async function searchForSongs(query: string, limit: number): Promise<SongType[]>{
         //this function calls the backend to get the search results for a query.        
-
-        console.log("query", query);
-
         if(query.length === 0) {
-            if(!userContext.barState.bar) {
-                router.navigate("/code");
-                throw new Error("no bar")
-            }
-            console.log("ts", userContext.barState.bar.topSongs);
-            return(userContext.barState.bar.topSongs ?? []);
+            return defaultResults();
         }
         const json = await fetchWithToken(user, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
@@ -125,27 +130,37 @@ export default function SongSearch() {
     const SongResultListMemo = memo(SongList);
 
     useEffect(() => {
-        getSearchResults(searchQuery, limit)
+        // if(searchQuery === "") setSearchResults(defaultResults());
+        // setSearchResults(defaultResults());
+
+        const androidIsDumb = setTimeout(() => {
+            setAndroidStupid(false);
+            inputRef.current?.focus();
+        }, androidTimeout)
 
         const delayDebounceFn = setTimeout(() => {
-            getSearchResults(searchQuery, limit)
+            getSearchResults(searchQuery, limit);
         }, timeoutInterval)
 
-        return () => clearTimeout(delayDebounceFn)
-        }, [searchQuery])
+        return () => {
+            clearTimeout(delayDebounceFn);
+            clearTimeout(androidIsDumb)
+        }
+    }, [searchQuery])
 
     return(
         <div className="App-body-top">
+            {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex"}}></div>) : <></>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
+                    ref={inputRef}
                     className='input' 
-                    autoFocus 
-                    placeholder="Request a song!" 
+                    placeholder="Request any song..." 
                     value={searchQuery} 
                     onChange={(e) => setSearchQuery(e.target.value)} 
                     onSubmit={() => searchForSongs(searchQuery, limit)}
                     />
-                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center'}} onClick={() => router.navigate("/bar")}>
+                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => {if(!isAndroid || (isAndroid && !androidStupid)) router.navigate(-1);}}>
                     <span className="text">Cancel</span>
                 </div>
             </div>

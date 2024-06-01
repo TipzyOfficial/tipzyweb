@@ -21,7 +21,7 @@ export default function TZSearchButton(props: {onClick: () => void, dims?: numbe
         >
             <div style={{width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center'}}>
                 <FontAwesomeIcon fontSize={fontSize*0.8} icon={faSearch} color={"black"}/>                        
-                <span style={{color: 'black', paddingLeft: padding, fontSize: fontSize}}>Request a song!</span>
+                <span style={{color: 'black', paddingLeft: padding, fontSize: fontSize}}>Request any song!</span>
             </div>
         </button>
     )

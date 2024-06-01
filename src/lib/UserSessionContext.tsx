@@ -6,6 +6,7 @@ import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
 import { getCookies } from '../App';
+import { useLocation } from 'react-router-dom';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
@@ -84,7 +85,7 @@ export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise
             const s: SongType = {id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: false};
             const b: BarType = {id: bi.id, name: bi.business_name, type: bi.business_type, image_url: bi.image_url, description: bi.description, active: bi.active}
             ptc += e.token_count ?? 0;
-            p.push({id: e.id, song: s, tokenCount: e.token_count, status: e.status, bar: b, date: new Date(e.request_time)})
+            p.push({id: e.id, song: s, status: e.status, bar: b, date: new Date(e.request_time)})
         })
     })
     .catch((e: Error) => {console.log("problem getting pending: ", e)});
@@ -177,6 +178,12 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     useEffect(() => 
         {
             // if(location.pathname === "/login" || location.pathname === "/register") return;
+
+            const queryParameters = new URLSearchParams(window.location.search)
+            const barid = queryParameters.get("id");
+
+            if(barid) cookies.set("bar_session", barid);
+
             if(!cookies.get("refresh_token") || !cookies.get("access_token")){
                 checkIfAccountExists(user).then((r) => {
                     refreshUserData(r.data)
@@ -188,12 +195,17 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                 })
             } else {
                 refreshUserData(user);
-                getTipper(user, cookies).then((json) => {
-                    console.log("json", json.data)
-                    const u = consumerFromJSON(dc, json.data);
-                    refreshUserData(u)
+                checkIfAccountExists(user).then((r) => {
+                    console.log(r);
+                    if(!r.result) {
+                        Logout(cookies);
+                        setReady(true);
+                        return;
+                    }
+                    refreshUserData(r.data)
                     setReady(true);
-                }).catch((e) => {
+                })
+                .catch((e) => {
                     console.log("problem init user." + e)
                     setReady(true)
                 });

@@ -4,7 +4,7 @@
 
 .App-body {
   background-color: #17171E;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,12 +76,19 @@
   font-size: calc(20px + 5vmin);
   line-height: calc(20px + 5vmin);
   font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-subtitle {
   font-size: calc(20px + 2vmin);
   font-size: calc(20px + 2vmin);
+  line-height: 1;
   font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-headertop {
@@ -90,18 +97,43 @@
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   color: white;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 .App-headertitle {
-  font-size: calc(17px + 2vmin);
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
   font-size: calc(17px + 2vmin);
   font-weight: bold;
 }
 
 .App-tertiarytitle {
   font-size: calc(15x + 1vmin);
-  font-size: calc(15px + 1vmin);
   font-weight: bold;
+}
+
+.App-typetitle {
+  font-size: calc(10px + 1vmin);
+  font-weight: 500;
+}
+
+.App-tertiarytoggle {
+  font-size: calc(12px + 1vmin);
+  font-size: calc(12px + 1vmin);
+}
+
+.App-toggletitle {
+  font-size: calc(12px + 2vmin);
+  font-size: calc(12px + 2vmin);
+  font-weight: bold;
+}
+
+.App-tinytext {
+  font-size: calc(10px + 0.5vmin);
+  font-size: calc(10px + 0.5vmin);
 }
 
 /* unvisited link */

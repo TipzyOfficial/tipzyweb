@@ -26,33 +26,14 @@ export class Users {
 
 export class Consumer extends Users {
     birthday?: string;
-    token_count: number;
-    pending_tokens: number;
-    pending_requests: SongRequestType[];
-    stripe_id?: string;
+    requests: SongRequestType[];
 
-    constructor(token: string, expires_at: number, name: string, image?: string, email ?: string, token_count ?: number, pending_requests?: SongRequestType[], pending_tokens?: number) {
+    constructor(token: string, expires_at: number, name: string, image?: string, email ?: string, requests?: SongRequestType[]) {
         super(token, expires_at, name, image, email);
-        this.token_count = token_count ?? 0;
-        this.pending_requests = pending_requests ?? [];
-        if(!pending_tokens) {
-            let t = 0;
-            this.pending_requests.forEach((e) => {
-                t += e.tokenCount;
-            })
-            this.pending_tokens = t;
-        } else {
-            this.pending_tokens = pending_tokens;
-        }
+        this.requests = requests ?? [];
     }
 
     setBirthday(birthday?: string) {
         this.birthday = birthday;
-    }
-    setTokenCount(token_count?: number) {
-        this.token_count = token_count ?? -1;
-    }
-    setStripeID(stripe_id?: string) {
-        this.stripe_id = stripe_id;
     }
 }

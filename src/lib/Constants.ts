@@ -12,6 +12,8 @@ export const Colors =  {
     tertiaryLight: '#4DBC9E',
     tertiaryRegular: '#276756',
     tertiaryDark: '#194237',
+    green: "#50D66D",
+    red: "#e64640",
 }
 
 export const radius = 10;

@@ -1,30 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
+import { debounce } from 'lodash';
+import { isMobile } from 'react-device-detect';
 
 export default function useWindowDimensions() {
 
-  const hasWindow = typeof window !== 'undefined';
+  const [size, setSize] = useState([window.innerWidth, window.innerHeight]);
 
-  function getWindowDimensions() {
-    const width = hasWindow ? window.innerWidth : null;
-    const height = hasWindow ? window.innerHeight : null;
-    return {
-      width,
-      height,
-    };
-  }
-
-  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
-
-  useEffect(() => {
-    function handleResize() {
-      setWindowDimensions(getWindowDimensions());
+  useLayoutEffect(() => {
+    function updateSize() {
+      if(!isMobile)
+        setSize([window.innerWidth, window.innerHeight]);
     }
 
-    if (hasWindow) {
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, [hasWindow]);
+    const debouncedUpdateSize = debounce(updateSize, 200); 
 
-  return windowDimensions;
+    window.addEventListener('resize', debouncedUpdateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', debouncedUpdateSize);
+  }, []);
+
+  return {width: size[0], height: size[1]};
 }

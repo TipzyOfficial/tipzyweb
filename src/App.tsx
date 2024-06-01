@@ -23,6 +23,8 @@ import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
 import ArtistInfo from './pages/bar/ArtistInfo';
+import Account from './pages/profile/Account';
+import About from './pages/profile/About';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -33,10 +35,11 @@ export const getCookies = () => {
 function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
+  const session = cookies.get("bar_session");
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
-  return (
-    loggedin ? <Navigate to='/code'></Navigate> : <Login></Login>
+  return(
+    loggedin ? (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>) : <Login></Login>
   )
 }
 
@@ -46,15 +49,16 @@ const Layout = () => {
 
   useEffect(() => {
     // Create SetupIntent as soon as the page loads
+    
     fetchPaymentSheetParams(usc.user).then(
       (r) => {
         setClientSecret(r);
-        console.log("ClientSecret", r)
       }
     )
   }, []);
 
-  if (clientSecret === null) {
+
+  if(clientSecret === null) {
     Logout(getCookies());
     return (<Outlet></Outlet>)
   }
@@ -76,45 +80,52 @@ const Layout = () => {
 
 export const router = createBrowserRouter([{
   // element: <Layout/>,
-  children:
-    [{
-      path: "/",
-      Component: Redirect
-    },
-    {
-      path: "/login",
-      Component: Login
-    },
-    {
-      path: "/register",
-      Component: Register
-    },
-    {
-      path: "/code",
-      Component: EnterCode
-    },
-    {
-      path: "/bar",
-      Component: Bar
-    },
-    {
-      path: "/bar/search",
-      Component: SongSearch
-    },
-    {
-      path: "/profile",
-      Component: Profile
-    },
-    {
-      path: "/paymentsetup",
-      Component: PaymentSetup
-    },
-    {
-      path: "/artistInfo",
-      Component: ArtistInfo
-    }
-    ]
-}
+  children: 
+  [{
+    path: "/",
+    Component: Redirect
+  },
+  {
+    path: "/login",
+    Component: Login
+  },
+  {
+    path: "/register",
+    Component: Register
+  },
+  {
+    path: "/code",
+    Component: EnterCode
+  },
+  {
+    path: "/bar",
+    Component: Bar
+  },
+  {
+    path: "/bar/search",
+    Component: SongSearch
+  },
+  {
+    path: "/profile",
+    Component: Profile
+  },
+  {
+    path: "/account",
+    Component: Account
+  },
+  {
+    path: "/about",
+    Component: About
+  },
+  {
+    path: "/paymentsetup",
+    Component: PaymentSetup
+  },
+  {
+    path: "/artist",
+    Component: ArtistInfo
+  }
+  ]}
 ], {});
 
 function App() {

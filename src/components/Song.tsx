@@ -6,6 +6,8 @@ import { router } from "../App";
 import FlatList from "flatlist-react/lib";
 import { useState } from "react";
 import RequestSongModal from "./RequestSongModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 
 export function artistsStringListToString(artists: string[]){
     let out = "";
@@ -28,7 +30,7 @@ export default function Song(props: {song: SongType, dims?: number}){
                 <span className="onelinetext"  style={{fontSize: dims/3, color: "white", width: '100%'}}>
                     {props.song.title}
                 </span>
-                <span className="onelinetext" style={{fontSize: dims/4, color: "#888", width: '100%'}}>
+                <span className="onelinetext" style={{fontSize: dims/4, color: "#aaa", width: '100%', fontWeight: 'normal'}}>
                     {props.song.explicit ?"🅴": ""} {artistsStringListToString(props.song.artists)}
                 </span>
             </div>
@@ -46,7 +48,7 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                             paddingRight: 0,
                             paddingLeft: 0,
                             paddingTop: 0,
-                            paddingBottom: padding, 
+                            paddingBottom: padding*1.2, 
                             alignItems: 'center', 
                             justifyContent: 'space-between',
                             boxSizing: "border-box",
@@ -61,11 +63,14 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                     <Song key={"id" + item.id} 
                             dims={songDims}
                             song={item}/>
-                    <div style={{display: 'flex', padding: 10, 
-                                border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
-                                backgroundColor: '#8881',
-                                justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
-                        $1.50
+                    <div style={{paddingLeft: 2}}>
+                        {/* <div style={{display: 'flex', padding: 10, 
+                                    border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
+                                    backgroundColor: '#8881',
+                                    justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
+                            $1.50
+                        </div> */}
+                        <FontAwesomeIcon icon={faCirclePlus} color={'#fff8'}></FontAwesomeIcon>
                     </div>
                 </button>
     )
@@ -81,8 +86,8 @@ export function SongList(props: {songs: SongType[], dims: number}) {
             <FlatList
                 list={props.songs}
                 renderWhenEmpty={() => <></>}
-                renderItem={(item) => 
-                    <SongRenderItem song={item} dims={songDims} onClick={() => {
+                renderItem={(item, index) => 
+                    <SongRenderItem song={item} dims={songDims} key={item.id+"_index"+index} onClick={() => {
                         setRequestedSong(item);
                         setRequestVisible(true);
                     }}/>

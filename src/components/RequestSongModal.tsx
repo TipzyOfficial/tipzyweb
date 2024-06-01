@@ -5,13 +5,16 @@ import './Song.css'
 import { router } from "../App";
 import { artistsStringListToString } from "./Song";
 import PaymentSetup from "../pages/profile/PaymentSetup";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import TZButton from "./TZButton";
+import { fetchWithToken } from "..";
+import { UserSessionContext } from "../lib/UserSessionContext";
 
 export default function RequestSongModal(props: {song: SongType | undefined, show: boolean, handleClose: () => void}) {
     const dims = useFdim()/2;
     const song: SongType = props.song ?? {id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false}
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
+    const userContext = useContext(UserSessionContext);
 
     function PaymentScreen() {
         return (
@@ -32,8 +35,46 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
             </>
         )
     }
-    
+
     function RequestScreen() {
+
+        const sendRequest = async (): Promise<number> => {     
+            if(!userContext.barState.bar) return 0;
+
+            return await fetchWithToken(userContext.user, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
+                track_id: song?.id ?? "",
+                track_name: song?.title ?? "No title",
+                artist: song ? artistsStringListToString(song.artists) : "No artist",
+                image_url: song?.albumart ?? "",
+                token_count: 0, //TODO: THIS NEEDS TO BE CHANGED
+            })).then(response => {
+                if(response === null) throw new Error("null response");
+                if(!response.ok) throw new Error("Bad response " + response.status);    
+                return 1;        
+            }).catch((e: Error) => {
+                return 0;
+            });
+            // }
+        }
+
+        function onRequestClick(): void {
+            // setPaymentScreenVisible(true);
+            // fetch(`https://de07-201-235-133-111.ngrok-free.app/get_saved_payment3/`, {
+            //     method: 'GET',
+            //     headers: {
+            //         // Authorization: `Bearer ${myAccessToken}`,
+            //         'Content-Type': 'application/json'
+            //     },
+            // }).then(r => console.log(r.status)).catch((e) => console.log(e));
+
+            sendRequest().then(r => {
+                if(r === 0) alert("Failed to send your request. You won't been charged.");
+                else alert("Your request was sent! Thank you for using Tipzy :)")
+            });
+
+            props.handleClose()
+        }
+
         return(<>
                 <Modal.Header closeButton>
                     <Modal.Title style={{color: 'white'}}>Request a song</Modal.Title>
@@ -59,10 +100,9 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
                             <Col style={{display: 'flex', justifyContent: 'center'}}>
                                 <div>
                                     <TZButton 
+                                        fontSize={Math.min(30, dims/7)}
                                         title={"$1.50"}
-                                        onClick={() => {
-                                        setPaymentScreenVisible(true)
-                                        }}/>
+                                        onClick={() => onRequestClick()}/>
                                 </div>
                             </Col>
                         </Row>

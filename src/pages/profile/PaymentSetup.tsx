@@ -18,7 +18,6 @@ export default function PaymentSetup() {
         fetchPaymentSheetParams(usc.user).then(
         (r) => {
             setClientSecret(r);
-            console.log("ClientSecret", r)
         }
         )
     }, []);
