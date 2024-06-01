@@ -15,13 +15,14 @@ import { Navigate } from 'react-router'
 import Cookies from 'universal-cookie';
 import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessionContext';
 import SongSearch from './pages/bar/SongSearch';
-import {Elements, PaymentElement,} from '@stripe/react-stripe-js';
-import {loadStripe} from '@stripe/stripe-js';
+import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import PaymentSetup from './pages/profile/PaymentSetup';
 import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
+import ArtistInfo from './pages/bar/ArtistInfo';
 import Account from './pages/profile/Account';
 import About from './pages/profile/About';
 
@@ -56,24 +57,23 @@ const Layout = () => {
     )
   }, []);
 
-  //
 
   if(clientSecret === null) {
     Logout(getCookies());
-    return(<Outlet></Outlet>)
+    return (<Outlet></Outlet>)
   }
-  
-  return(
-    clientSecret ? 
-      <Elements 
-      stripe={stripePromise} 
-      options={{
-        clientSecret: clientSecret,
-        appearance: {theme: "night"}
-      }}
+
+  return (
+    clientSecret ?
+      <Elements
+        stripe={stripePromise}
+        options={{
+          clientSecret: clientSecret,
+          appearance: { theme: "night" }
+        }}
       >
-        <Outlet/>
-      </Elements> : 
+        <Outlet />
+      </Elements> :
       <DisplayOrLoading condition={false}></DisplayOrLoading>
   );
 }
@@ -121,24 +121,28 @@ export const router = createBrowserRouter([{
     path: "/paymentsetup",
     Component: PaymentSetup
   },
+  {
+    path: "/artist",
+    Component: ArtistInfo
+  }
   ]}
 ], {});
 
 function App() {
-  return(
+  return (
     <div className="App-body">
       <UserSessionContextProvider>
-        <div className="App-body" style={{width: '100%'}}>
-            <RouterProvider 
-            router={router}/>  
-        </div>      
+        <div className="App-body" style={{ width: '100%' }}>
+          <RouterProvider
+            router={router} />
+        </div>
       </UserSessionContextProvider>
     </div>
   )
 }
 
 export function goToLogin() {
-    router.navigate('/')
+  router.navigate('/')
 }
 
 export default App;
