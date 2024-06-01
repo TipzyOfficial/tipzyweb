@@ -1,4 +1,4 @@
-import { CSSProperties, useContext, useState } from 'react';
+import { CSSProperties, useContext, useEffect, useState } from 'react';
 import './Login.css';
 import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
@@ -20,8 +20,15 @@ function Login() {
     const [loginPage, setLoginPage] = useState(true);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loginPrompt, setLoginPrompt] = useState(false);
     const [loginPressed, setLoginPressed] = useState(false);
     const userContext = useContext(UserSessionContext);
+    const cookies = getCookies();
+    const barID = cookies.get("bar_session");
+
+    useEffect(() => {
+        if(barID) setLoginPrompt(true);
+    })
 
     const login = (at: string, rt: string, ea: number) => {
         loginWithTipzyToken(at, rt, ea);
@@ -89,8 +96,6 @@ function Login() {
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
 
         const nextPage = () => {
-            const cookies = getCookies();
-            const barID = cookies.get("bar_session");
             if(barID) router.navigate(`/bar?id=${barID}`);
             else router.navigate("/code")
         }
@@ -236,9 +241,22 @@ function Login() {
 
     return(
             loginPage ?
-            <div style={styles.jumbo}>
+            <div style={styles.jumbo}>  
+                <div style={{position: 'fixed', top:0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883'}}>
+                    <div style={{padding: padding/2}}>
+                        Please sign in to continue.
+                    </div>
+                </div>              
                 <div style={styles.header}>
                     <BigLogo></BigLogo>
+                </div>
+                <div style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <GoogleButton 
+                    style={{width: '100%'}}
+                    onClick={() => googleLogin()}/>                        
+                </div>
+                <div style={{padding:10, textAlign: 'center'}}>
+                    or
                 </div>
                 <div style={{paddingBottom: 10}}>
                     <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)}/>
@@ -247,14 +265,6 @@ function Login() {
                     <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
                 </div>
                 <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
-                <div style={{padding:10, textAlign: 'center'}}>
-                    or
-                </div>
-                <div style={{justifyContent: 'center', alignItems: 'center'}}>
-                    <GoogleButton 
-                    style={{width: '100%'}}
-                    onClick={() => googleLogin()}/>                        
-                </div>
                 <div style={{paddingTop:10, textAlign: 'center'}}>
                     Don't have an account? <a href={"#"} onClick={() => {if(!loginPressed) setLoginPage(false)}}>Sign Up</a>
                 </div>
