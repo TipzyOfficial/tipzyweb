@@ -3,7 +3,7 @@ import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
 import { Logout } from "../..";
-import { getCookies } from "../../App";
+import { getCookies, router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 
 /**
@@ -115,8 +115,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
                     <span style={{ padding: padding, paddingBottom: '0', display: 'flex', fontSize: "36px", fontWeight: "bold" }}>
                         {props.value}
                     </span>
-                    <span style={{ padding: padding, paddingTop: '0' }}>{ //starting all emails with upper case
-                        props.email.substring(0, 1).toUpperCase() + props.email.substring(1)}</span>
+                    <span style={{ padding: padding, paddingTop: '0' }}>{props.email}</span>
                 </div>
 
             </div>
@@ -126,7 +125,8 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
 }
 );
 
-export default function Profile() {
+export default function Profile(props: {prev?: string}) {
+    const prev = props.prev ?? "#";
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
@@ -134,8 +134,9 @@ export default function Profile() {
     // user.name
     // user.email
     const backButtonStyle: React.CSSProperties = {
-        position: 'absolute',
-        left: '15px',
+        // position: 'absolute',
+        // left: padding,
+        paddingLeft: padding,
         border: 'none',
         backgroundColor: 'transparent',
         color: isBackButtonHovered ? '#EDA13E' : 'white',
@@ -144,23 +145,24 @@ export default function Profile() {
         transition: 'color 0.3s ease',
     };
 
+    // const loc = useLocation();
+
     const handleBackClick = () => {
-        console.log("Back button clicked");
-        // Add your navigation logic here
+        router.navigate(-1);
     };
+
+    console.log(user.email)
+
     return (
         <div className={"App-body-top"}>
-            <div style={headerStyle}>
-                <div style={headerTitleStyle}>
-                    <TZHeader title="Your Profile" />
-                </div>
-                <button style={backButtonStyle}
+            <TZHeader title="Your Profile" leftComponent={
+                <div style={backButtonStyle}
                     onMouseEnter={() => setIsBackButtonHovered(true)}
                     onMouseLeave={() => setIsBackButtonHovered(false)}
                     onClick={handleBackClick}>
                     Back
-                </button>
-            </div>
+                </div>
+            }/>
 
             <div style={styles}>
                 <ProfileItem title="Name" value={usc.user.name} profilePic={user.image} email={user.email}></ProfileItem>
@@ -184,20 +186,4 @@ const styles: React.CSSProperties = {
     width: "100%",
     maxWidth: "600px",
     margin: '0 auto'
-};
-
-const headerStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    position: 'relative',
-};
-
-const headerTitleStyle: React.CSSProperties = {
-    flexGrow: 1,
-    textAlign: 'center',
-    fontSize: '24px',
-    color: 'white',
-    fontWeight: 'bold',
 };

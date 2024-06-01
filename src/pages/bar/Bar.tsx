@@ -5,10 +5,10 @@ import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
-import { UserSessionContext } from "../../lib/UserSessionContext";
+import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
 import TZSearchButton from "../../components/TZSearchButton";
 import '../../App.css'
-import { ArtistType, SongRequestType, SongType } from "../../lib/song";
+import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import { SongList } from "../../components/Song";
 import Artist from "../../components/Artist";
 import { ScrollMenu, } from 'react-horizontal-scrolling-menu';
@@ -45,11 +45,23 @@ const LoadingScreen = () =>
         <span>Loading bar information...</span>
     </div>;
 
+export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
+    const newUser = structuredClone(userContext.user);
+    console.log('getting pending')
+    newUser.requests = await fetchWithToken(userContext.user, `tipper/requests/pending/`, 'GET').then(r => r.json())
+    .then(json => { 
+        console.log('got pending')
+        return parseRequests(json);
+    }).catch((e) => {console.log("error: ",e); return []})
+
+    return newUser;
+}
+
 export default function Bar(){
     const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
     const [ready, setReady] = useState(false);
-    const [view, setView] = useState(0);
+    const [view, setViewInner] = useState(0);
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
     const bar = userContext.barState.bar;
@@ -57,21 +69,28 @@ export default function Bar(){
     const topArtists = bar?.topArtists ?? [];
     const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
     const window = useWindowDimensions();
+    console.log("window", window);
     const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim/50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const artistDims = fdim ?  Math.max(Math.min(fdim/4.8, 200), 50) : 120;
     const searchDims = fdim ?  Math.max(Math.min(fdim/20, 30), 15) : 15;
     const minHeaderHeight = window.height && window.width ? Math.min(window.width/5, window.height/4): 200;
-    const ref = useRef(<div></div>);
-    const [height, setHeight] = useState(0);
+    const toggleRef = useRef<HTMLDivElement>(null);
+    const [height, setHeight] = useState<number | undefined>();
+  
+    useEffect(() => {
+        console.log("tref", toggleRef)
+    }, [toggleRef]);
     // useEffect(() => {
     //     // setHeight(ref.current.offsetHeight);
     //     console.log(ref.current)
     // }, [setHeight])
     
-
-
+    const setView = (v: number) => {
+        setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
+        setViewInner(v);
+    }
 
     const fetchBarInfo = async () => {
         const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
@@ -109,29 +128,21 @@ export default function Bar(){
         .then(json => {
             const artists = new Array<ArtistType>();
             json.data.forEach((s: any) => {
-                const artist: ArtistType = {id: s.id, name: s.name, image: s.images[0].url}
+                const artist: ArtistType = {id: s.id, name: s.name, image: s.images[0] ? s.images[0].url : ""}
                 artists.push(artist);
             })
             //setTopArtists(artists)
+            console.log("toa", artists)
             return artists;
-        }).catch(() => undefined)
+        }).catch((e) => {
+            console.log('didnt work',e)
+            return undefined;
+        })
 
         userContext.barState.setBar(bar)
 
         setReady(true);
         return bar;
-    }
-
-    const fetchPendingRequests = async () => {
-        const newUser = structuredClone(userContext.user);
-        console.log('getting pending')
-        newUser.requests = await fetchWithToken(userContext.user, `tipper/requests/pending/`, 'GET').then(r => r.json())
-        .then(json => { 
-            console.log('got pending')
-            return parseRequests(json);
-        }).catch((e) => {console.log("error: ",e); return []})
-
-        userContext.setUser(newUser);
     }
     
     useEffect(() => {
@@ -139,6 +150,8 @@ export default function Bar(){
         //     router.navigate("code")
         // }
         //if id is the same as bar or if new id hasn't been set yet
+        console.log("onlye once")
+
         if(!id || (userContext.barState.bar && id === userContext.barState.bar.id.toString())) {
             setReady(true);
             return;
@@ -148,7 +161,7 @@ export default function Bar(){
             console.log(e)
             setReady(true);
         });
-        fetchPendingRequests();
+        // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
     }, [])
 
     if(bar === undefined && ready === false)
@@ -210,11 +223,13 @@ export default function Bar(){
                             <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                         </div>
                     </div>
-                    <div style={{paddingBottom: padding/2}}></div>
-                    <div style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
+                    {/* <div style={{paddingBottom: padding/2}}></div> */}
+                    <div ref={toggleRef} style={{position: 'sticky', top: 0, zIndex: 2, paddingRight: padding, paddingLeft: padding, paddingTop: padding/2, paddingBottom: padding/2, backgroundColor: Colors.background}}>
                         <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
                     </div>
-                    {view === 0 ? <SongContent/> : <RequestsContentMemo pending={userContext.user.requests} padding={padding}/>}
+                    <div>
+                        {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>}
+                    </div>
                     <ProfileButton/>
                 </div>
             </div>
@@ -240,7 +255,7 @@ export function parseRequests(json: any): SongRequestType[] {
             id: r.id, song: parseSongIHateMeku(r.song_json), bar: parseBusiness(r.business_info), date: new Date(r.request_time), status: r.status }
             reqs.push(req);
     })
-    return reqs;
+    return reqs.sort(songRequestCompare);
 }
 
 

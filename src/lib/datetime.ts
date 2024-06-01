@@ -5,17 +5,17 @@
  */
 export const parseTime = (time: string[]): string => {
     if(parseInt(time[0]) > 12){
-        return `${parseInt(time[0])-12}:${time[1]}PM`
+        return `${parseInt(time[0])-12}:${time[1]} PM`
     } 
     else {
-        if(parseInt(time[0]) === 12) return `12:${time[1]}PM`
-        if(parseInt(time[0]) === 0) return `12:${time[1]}AM`
-        return `${parseInt(time[0])}:${time[1]}AM`
+        if(parseInt(time[0]) === 12) return `12:${time[1]} PM`
+        if(parseInt(time[0]) === 0) return `12:${time[1]} AM`
+        return `${parseInt(time[0])}:${time[1]} AM`
     }
 }
 
 export const dateTimeParserString = (dt: [string[], string]) => {
-    return dt[0][0] + " " + dt[0][1] + ", " + dt[0][2] + " " + dt[1]; 
+    return dt[0][0] + " " + dt[0][1] + ", " + dt[0][2] + " @" + dt[1]; 
 }
 
 export const dateTimeParser = (str: string): [string[], string] => {

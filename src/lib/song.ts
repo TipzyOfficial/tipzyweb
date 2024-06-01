@@ -46,3 +46,8 @@ export type SongRequestType = {
     date: Date,
     status: "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELED"
 }
+
+export function songRequestCompare(r1: SongRequestType, r2: SongRequestType): number {
+    if(r1.date === r2.date) return 0;
+    return r1.date > r2.date ? -1 : 1;
+}
