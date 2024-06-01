@@ -53,7 +53,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
         const tokens: TokenReturnType | null = await getAccessToken(refreshToken)
             .catch((e) => {console.log("error access: ", e.message); return null});
         if(tokens === null) {  
-            console.log("problem getting access tokens!");
+            // console.log("problem getting access tokens!");
             return 0; 
         }
         resetTokenValues(tokens);
@@ -95,10 +95,10 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
                 console.log("401 error. Trying again.")
                 return newTokens().then((res) => {
                     if(res === 0) throw new Error("problem with your refresh token.");
-                    console.log("trying again with new tokens now!")
+                    // console.log("trying again with new tokens now!")
                     return theFetch();
                 }).catch((e: Error) => {
-                    console.log("couldn't refresh.", e.message);
+                    console.log("couldn't refresh tokens.");
                     return null;
                 });
             }
@@ -114,7 +114,6 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
  * @returns the json data of the user
  */
 export async function getUser(userType: "tipper" | "business", accessToken: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>)): Promise<any>{
-    console.log("getuser called")
     return fetchWithToken(accessToken, userType+"/", expiresAt, getRefreshToken, logout, resetTokenValues, 'GET').then(response => {
         if(response === null || !response.ok){
             throw new Error(`Bad response. Response: ${response ? response.status + ".." : "null response"}`)
@@ -142,7 +141,7 @@ export async function getAccessToken(refresh_token: string): Promise<TokenReturn
         })
     }).then(response => {
         if(response.status === 400 || response.status === 401) {
-            console.log("bad respose getting access token.", response.status)
+            // console.log("bad respose getting access token.", response.status)
             return null;
         }
         else if(!response.ok){

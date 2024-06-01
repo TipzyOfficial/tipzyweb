@@ -89,7 +89,6 @@ function ProfileLanding() {
 
 //react was re-rendering profileItem every hover state for the back button, so we memoize it.
 const ProfileItem = memo(function ProfileItem(props: { title: string, value: string, profilePic?: string, email: string, onClick?: () => void }) {
-    console.log("User is: " + props.value);
     //overriding default CSS properties by initializing within the function
     const defaultProfile: React.CSSProperties = {
         width: "100px",
@@ -150,8 +149,6 @@ export default function Profile() {
     const handleBackClick = () => {
         router.navigate(-1);
     };
-
-    console.log(user.email)
 
     return (
         <div className={"App-body-top"}>

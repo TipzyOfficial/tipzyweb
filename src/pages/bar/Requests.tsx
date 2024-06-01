@@ -42,8 +42,6 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
         
         const reqs = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             const reqs = new Array<SongRequestType>();
-            console.log("got completed")
-
             json.data.forEach((r: any) => {
                 const req = parseRequest(r);
                 if(req.status !== "PENDING") reqs.push(req);
@@ -56,7 +54,6 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     }
 
     useEffect(() => {
-        console.log("ue")
         // alert("sorry");
         getPending();
         getCompleted();

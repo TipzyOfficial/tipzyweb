@@ -86,8 +86,6 @@ function Login() {
         const img = undefined;
         const expires_at = expiresAt;
 
-        console.log("at", accessToken)
-
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
 
         // console.log(user.name);
@@ -104,12 +102,8 @@ function Login() {
                 
             } else {
                 createAccount(user).then((r) => {
-                    console.log("ca", r)
                     checkIfAccountExists(user).then(r => {
-                        console.log(user);
-                        console.log("exists", r.result);
                         if(!r.result) return undefined
-                        console.log("data", r.data);
                         return r.data;
                     }).then(newUser => {
                         if(!newUser) {

@@ -96,7 +96,6 @@ export default function SongSearch() {
             router.navigate("/code");
             throw new Error("no bar")
         }
-        console.log("ts", userContext.barState.bar.topSongs);
         return(userContext.barState.bar.topSongs ?? []);
     }
 
@@ -108,9 +107,6 @@ export default function SongSearch() {
      */
     async function searchForSongs(query: string, limit: number): Promise<SongType[]>{
         //this function calls the backend to get the search results for a query.        
-
-        console.log("query", query);
-
         if(query.length === 0) {
             return defaultResults();
         }
@@ -138,7 +134,6 @@ export default function SongSearch() {
         // setSearchResults(defaultResults());
 
         const androidIsDumb = setTimeout(() => {
-            console.log("hate android");
             setAndroidStupid(false);
             inputRef.current?.focus();
         }, androidTimeout)

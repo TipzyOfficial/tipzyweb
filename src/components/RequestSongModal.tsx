@@ -52,7 +52,6 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
                 if(!response.ok) throw new Error("Bad response " + response.status);    
                 return 1;        
             }).catch((e: Error) => {
-                console.log('QWERT confp false');
                 return 0;
             });
             // }

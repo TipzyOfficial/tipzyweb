@@ -65,7 +65,6 @@ export default function Account() {
         )
         if(s === r) {
             fetchWithToken(user, `tipper/`, 'DELETE').then(r => {
-                console.log(r);
                 Logout(cookies);
             }).catch((e) => {alert(`Error: Problem deleting account: ${e}. Please try again later.`)})
         } else {

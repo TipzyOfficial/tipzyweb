@@ -50,7 +50,6 @@ const Layout = () => {
     fetchPaymentSheetParams(usc.user).then(
       (r) => {
         setClientSecret(r);
-        console.log("ClientSecret", r)
       }
     )
   }, []);
