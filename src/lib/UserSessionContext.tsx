@@ -183,7 +183,6 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             const barid = queryParameters.get("id");
 
             if(barid) cookies.set("bar_session", barid);
-            else cookies.remove("bar_session");
 
             if(!cookies.get("refresh_token") || !cookies.get("access_token")){
                 checkIfAccountExists(user).then((r) => {

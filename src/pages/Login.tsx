@@ -242,11 +242,11 @@ function Login() {
     return(
             loginPage ?
             <div style={styles.jumbo}>  
-                <div style={{position: 'fixed', top:0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883'}}>
+                {loginPrompt ? <div style={{position: 'fixed', top:0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883'}}>
                     <div style={{padding: padding/2}}>
                         Please sign in to continue.
                     </div>
-                </div>              
+                </div> : <></>}          
                 <div style={styles.header}>
                     <BigLogo></BigLogo>
                 </div>
