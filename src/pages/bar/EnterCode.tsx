@@ -1,10 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import '../../App.css'
 import { Button, Card, Container } from "react-bootstrap";
 import { padding } from "../../lib/Constants";
 import TZButton from "../../components/TZButton";
-import { router } from "../../App";
+import { getCookies, router } from "../../App";
 import ProfileButton from "../../components/ProfileButton";
 
 function EnterCode() {
@@ -12,6 +12,7 @@ function EnterCode() {
     const [barID, setBarID] = useState("");
 
     const onClick = () => {
+        console.log("barid", barID)
         router.navigate(`/bar?id=${barID}`)
     }
 

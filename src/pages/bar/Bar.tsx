@@ -1,6 +1,6 @@
 import { Spinner, ToggleButton } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
-import { Colors, padding as basePadding, radius, useFdim } from "../../lib/Constants";
+import { Colors, padding as basePadding, padding, radius, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
@@ -18,6 +18,8 @@ import { getCookies, router } from "../../App";
 import ProfileButton from "../../components/ProfileButton";
 import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 function parseSongIHateMeku(s: any): SongType{
     return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
@@ -148,7 +150,11 @@ export default function Bar(){
         //     router.navigate("code")
         // }
         //if id is the same as bar or if new id hasn't been set yet
-        if(!id || (userContext.barState.bar && id === userContext.barState.bar.id.toString())) {
+        if(!id) {
+            router.navigate("/code");
+            return;
+        }
+        if(userContext.barState.bar && id === userContext.barState.bar.id.toString()) {
             setReady(true);
             return;
         }
@@ -204,7 +210,6 @@ export default function Bar(){
                     objectFit: 'cover', backgroundImage: `url(${bar.image_url})`, 
                     backgroundRepeat: "no-repeat",
                     backgroundSize: "cover",
-                    padding: padding,
                     display: "flex",
                     flexDirection: 'column',
                     alignItems: 'flex-start',
@@ -213,11 +218,17 @@ export default function Bar(){
                     boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
                 }}
                 >
-                    <div style={{paddingTop: padding, paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
-                        <span className='App-title' style={{width: '100%', textAlign: 'center'}}>{bar.name}</span>
+                    <div style={{flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center',}}>
+                        <div style={{flex: 1, paddingLeft: padding, paddingTop: padding, cursor: 'pointer'}} onClick={() => router.navigate('/code')}>
+                                <FontAwesomeIcon className="App-tertiarytitle" icon={faChevronLeft} ></FontAwesomeIcon>
+                        </div>
+                        <div style={{flex: 2}}></div>
+                    </div>
+                    <div style={{paddingBottom: padding, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
                     <span className='App-tertiarytitle' style={styles.subtitle}>{bar.type ?? "Bar"}</span>
-                    <div style={{paddingTop: padding, width: '100%'}}>
+                    <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>
                 </div>
@@ -249,7 +260,8 @@ const styles = {
         fontWeight: 'bold',
     },
     subtitle: {
-        color: Colors.tertiaryLight
+        color: Colors.tertiaryLight,
+        paddingLeft: padding,
     },
 }
 

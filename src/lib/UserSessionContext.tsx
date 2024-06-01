@@ -6,6 +6,7 @@ import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
 import { getCookies } from '../App';
+import { useLocation } from 'react-router-dom';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
@@ -177,6 +178,13 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     useEffect(() => 
         {
             // if(location.pathname === "/login" || location.pathname === "/register") return;
+
+            const queryParameters = new URLSearchParams(window.location.search)
+            const barid = queryParameters.get("id");
+
+            if(barid) cookies.set("bar_session", barid);
+            else cookies.remove("bar_session");
+
             if(!cookies.get("refresh_token") || !cookies.get("access_token")){
                 checkIfAccountExists(user).then((r) => {
                     refreshUserData(r.data)

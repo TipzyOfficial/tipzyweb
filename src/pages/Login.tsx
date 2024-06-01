@@ -88,13 +88,20 @@ function Login() {
 
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
 
+        const nextPage = () => {
+            const cookies = getCookies();
+            const barID = cookies.get("bar_session");
+            if(barID) router.navigate(`/bar?id=${barID}`);
+            else router.navigate("/code")
+        }
+
         // console.log(user.name);
         checkIfAccountExists(user).then((result) => {
             if(result.result){
                 storeAll(user, refreshToken).then((user) => {
                     userContext.setUser(user);
+                    nextPage();
                     // console.log(user)
-                    router.navigate("/code");
                     // props.navigation.replace('Tabs', {
                     //     user: result.data
                     // });
@@ -113,7 +120,7 @@ function Login() {
                         userContext.setUser(newUser);
                         // console.log(newUser);
                         storeAll(newUser, refreshToken).then((u) => {
-                            router.navigate("/code");
+                            nextPage();
                         });
                     })
                 }).catch(e => console.log(e));;

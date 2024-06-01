@@ -47,12 +47,15 @@ const Layout = () => {
 
   useEffect(() => {
     // Create SetupIntent as soon as the page loads
+    
     fetchPaymentSheetParams(usc.user).then(
       (r) => {
         setClientSecret(r);
       }
     )
   }, []);
+
+  //
 
   if(clientSecret === null) {
     Logout(getCookies());
