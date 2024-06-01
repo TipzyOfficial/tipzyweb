@@ -103,6 +103,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
         fontWeight: 'bold',
         textAlign: 'center',
     };
+
     return (
         <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
@@ -162,7 +163,7 @@ export default function Profile() {
             }/>
 
             <div style={styles}>
-                <ProfileItem title="Name" value={usc.user.name} profilePic={user.image} email={user.email}></ProfileItem>
+                <ProfileItem title="Name" value={user.name} profilePic={user.image} email={user.email}></ProfileItem>
                 <ProfileLanding></ProfileLanding>
             </div>
         </div>

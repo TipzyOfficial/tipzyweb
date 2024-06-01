@@ -189,17 +189,17 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             } else {
                 refreshUserData(user);
                 checkIfAccountExists(user).then((r) => {
+                    console.log(r);
                     if(!r.result) {
                         Logout(cookies);
                         setReady(true);
                         return;
                     }
-                    const u = consumerFromJSON(dc, r.data);
-                    refreshUserData(u)
+                    refreshUserData(r.data)
                     setReady(true);
                 })
                 .catch((e) => {
-                    // console.log("problem init user." + e)
+                    console.log("problem init user." + e)
                     setReady(true)
                 });
             }
