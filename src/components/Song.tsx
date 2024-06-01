@@ -81,8 +81,8 @@ export function SongList(props: {songs: SongType[], dims: number}) {
             <FlatList
                 list={props.songs}
                 renderWhenEmpty={() => <></>}
-                renderItem={(item) => 
-                    <SongRenderItem song={item} dims={songDims} onClick={() => {
+                renderItem={(item, index) => 
+                    <SongRenderItem song={item} dims={songDims} key={item.id+"_index"+index} onClick={() => {
                         setRequestedSong(item);
                         setRequestVisible(true);
                     }}/>

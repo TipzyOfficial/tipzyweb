@@ -179,7 +179,7 @@ export default function Bar(){
                     <ScrollMenu
                     >
                     {topArtists.map((e, index) => (
-                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} itemId={"index"+index} dims={artistDims}></Artist></div>
+                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} itemId={"index"+index} dims={artistDims}></Artist></div>
                     ))}
                     </ScrollMenu>
                 </div>
