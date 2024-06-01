@@ -220,7 +220,7 @@ export default function Bar(){
                 }}
                 >
                     <div style={{
-                        flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: "#0005", position: 'sticky', top: 0}}>
+                        flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: "#0003", position: 'sticky', top: 0}}>
                         <div style={{
                             flex: 1, 
                             display: 'flex', alignItems: 'center',
@@ -233,7 +233,7 @@ export default function Bar(){
                         </div>
                         <div style={{flex: 2}}></div>
                     </div>
-                    <div style={{paddingBottom: padding, paddingTop: padding, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                    <div style={{paddingBottom: padding/2, paddingTop: padding*2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                         <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
