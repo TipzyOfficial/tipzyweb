@@ -188,9 +188,14 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                 })
             } else {
                 refreshUserData(user);
-                getTipper(user, cookies).then((json) => {
-                    console.log("json", json.data)
-                    const u = consumerFromJSON(dc, json.data);
+                checkIfAccountExists(user).then((r) => {
+                    if(!r.result) {
+                        Logout(cookies);
+                        setReady(true);
+                        return;
+                    }
+                    console.log("json", r.data)
+                    const u = consumerFromJSON(dc, r.data);
                     refreshUserData(u)
                     setReady(true);
                 }).catch((e) => {

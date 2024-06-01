@@ -107,7 +107,7 @@ export default function Bar(){
             }
             // setBar(bar);
         }).catch((e: Error) => {
-            alert("error: " + e.message);
+            alert("Error loading your bar: " + e.message);
             return undefined;
         })
 

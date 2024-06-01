@@ -4,13 +4,17 @@ import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
 import { CredentialResponse, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import GoogleButton from 'react-google-button';
-import { expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
+import { ServerInfo, expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
-import { checkIfAccountExists, storeAll } from '../index';
-import { router } from '../App';
+import { checkIfAccountExists, consumerFromJSON, getTipper, storeAll } from '../index';
+import { getCookies, router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
 import { Colors, padding } from '../lib/Constants';
+
+const formatBirthday = (birthday: Date) => {
+    return `${birthday.getFullYear()}-${birthday.getMonth()+1 >= 10 ? (birthday.getMonth()+1) : "0" + (birthday.getMonth()+1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
+}
 
 function Login() {
     const [loginPage, setLoginPage] = useState(true);
@@ -53,6 +57,25 @@ function Login() {
         }
     }
 
+    const createAccount = async (user: Consumer) => {
+        const response = await fetch(`${ServerInfo.baseurl}tipper/`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                birthday: formatBirthday(new Date()),
+            })
+        }).catch((e: Error) => {
+            alert(`Error creating new account. Please try again later: ${e.message}`);
+            return null;
+        })
+
+        return response;
+    }
+
+
     function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number) {
         if (accessToken == null || refreshToken == null) {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
@@ -62,14 +85,16 @@ function Login() {
         const email = undefined;
         const img = undefined;
         const expires_at = expiresAt;
+
+        console.log("at", accessToken)
+
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
 
         // console.log(user.name);
-
         checkIfAccountExists(user).then((result) => {
             if(result.result){
                 storeAll(user, refreshToken).then((user) => {
-                    userContext?.setUser(user);
+                    userContext.setUser(user);
                     // console.log(user)
                     router.navigate("/code");
                     // props.navigation.replace('Tabs', {
@@ -78,6 +103,26 @@ function Login() {
                 });
                 
             } else {
+                createAccount(user).then((r) => {
+                    console.log("ca", r)
+                    checkIfAccountExists(user).then(r => {
+                        console.log(user);
+                        console.log("exists", r.result);
+                        if(!r.result) return undefined
+                        console.log("data", r.data);
+                        return r.data;
+                    }).then(newUser => {
+                        if(!newUser) {
+                            alert("Problem verifying account exists. Try again later.")
+                            return;
+                        }
+                        userContext.setUser(newUser);
+                        // console.log(newUser);
+                        storeAll(newUser, refreshToken).then((u) => {
+                            router.navigate("/code");
+                        });
+                    })
+                }).catch(e => console.log(e));;
                 // props.navigation.replace('CreateAccount', {
                 //     refreshToken: refreshToken,
                 //     user: user
