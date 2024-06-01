@@ -68,8 +68,8 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
             // }).then(r => console.log(r.status)).catch((e) => console.log(e));
 
             sendRequest().then(r => {
-                if(r === 0) alert("Your request failed for some reason. You have not been charged.");
-                else alert("Your request was made! Hopefully it gets accepted :)")
+                if(r === 0) alert("Failed to send your request. You won't been charged.");
+                else alert("Your request was sent! Thank you for using Tipzy :)")
             });
 
             props.handleClose()
