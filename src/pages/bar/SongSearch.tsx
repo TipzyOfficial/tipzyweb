@@ -155,7 +155,7 @@ export default function SongSearch() {
 
     return(
         <div className="App-body-top">
-            {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex", backgroundColor: "#888"}}></div>) : <></>}
+            {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex"}}></div>) : <></>}
             <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
                 <input 
                     ref={inputRef}
