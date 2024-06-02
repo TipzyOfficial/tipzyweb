@@ -1,20 +1,15 @@
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../../lib/UserSessionContext";
-import useWindowDimensions from "../../../lib/useWindowDimensions";
 import { getCookies, router } from "../../../App";
 import { AlbumType, ArtistType, SongType } from "../../../lib/song";
 import { fetchWithToken } from "../../..";
-import TZButton from "../../../components/TZButton";
-import FlatList from "flatlist-react/lib";
-import Song, { SongList, SongRenderItem } from "../../../components/Song";
+import { SongList } from "../../../components/Song";
 import { Colors, padding, useFdim } from "../../../lib/Constants";
 import TZHeader from "../../../components/TZHeader";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { NotFoundPage } from "../NotFoundPage";
 import { DisplayOrLoading } from "../../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
-import { ScrollMenu } from 'react-horizontal-scrolling-menu';
-import Album from "../../../components/Album";
 import BackButton from "../../../components/BackButton";
 
 const LoadingScreen = () => 
@@ -93,7 +88,9 @@ export default function AlbumPage() {
                     textAlign: 'center', width: '100%', padding: padding
                     }}>{album.title}</span>
                 <div style={{padding: padding}}></div>
-                <TSMemo noImage songs={songs} dims={songDims}></TSMemo>
+                <div style={{width: '100%', maxWidth: albumDims*3, alignSelf: 'center'}}>
+                    <TSMemo noImage songs={songs} dims={songDims}></TSMemo>
+                </div>
             </div>
           </div>
         </div>

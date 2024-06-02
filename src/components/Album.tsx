@@ -6,7 +6,7 @@ export default function Album(props: {album: AlbumType, dims: number, onClick?: 
     const dims = props.dims;
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} onClick={props.onClick}>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: dims}} onClick={props.onClick}>
             {props.album.albumart === "" ? 
             <div style={{height: dims, width: dims, borderRadius: dims, backgroundColor: "#888"}}></div>
             : <img src={props.album.albumart} alt={props.album.title} style={{height: dims, width: dims, objectFit: "cover"}}/>}

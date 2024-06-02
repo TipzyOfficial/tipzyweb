@@ -26,6 +26,7 @@ import ArtistInfo from './pages/bar/artist/ArtistInfo';
 import Account from './pages/profile/Account';
 import About from './pages/profile/About';
 import AlbumPage from './pages/bar/artist/AlbumPage';
+import Albums from './pages/bar/artist/Albums';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -129,6 +130,10 @@ export const router = createBrowserRouter([{
   {
     path: "/album",
     Component: AlbumPage
+  },
+  {
+    path: "/albums",
+    Component: Albums
   }
   ]}
 ], {});

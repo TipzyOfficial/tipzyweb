@@ -114,8 +114,9 @@ export default function ArtistInfo() {
             <div style={{width: '100%'}}>
               <TSMemo songs={topSongs} dims={songDims}></TSMemo>
             </div>
-            <div style={{paddingBottom: 0, paddingTop: padding, width: '100%'}}>
+            <div style={{paddingBottom: 0, paddingTop: padding, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
               <span className='App-artistsubtitle'>Albums</span>
+              <span className='App-tertiarytitle'style={{color: Colors.primaryRegular, cursor: 'pointer'}} onClick={() => router.navigate("/albums", {state:{albums: albums}})}>See more</span>
             </div>
           </div>
           <ScrollMenu>
