@@ -6,7 +6,7 @@ export default function Artist(props: {artist: ArtistType, dims: number, onClick
     const dims = props.dims;
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} onClick={props.onClick}>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer'}} onClick={props.onClick}>
             {props.artist.image === "" ? 
             <div style={{height: dims, width: dims, borderRadius: dims, backgroundColor: "#888"}}></div>
             : <img src={props.artist.image} alt={props.artist.name} style={{height: dims, width: dims, borderRadius: dims, objectFit: "cover"}}/>}
