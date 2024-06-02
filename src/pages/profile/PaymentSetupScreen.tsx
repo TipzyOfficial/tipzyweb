@@ -7,7 +7,7 @@ import PaymentSetup from "./PaymentSetup";
 export default function PaymentSetupScreen(){
     return(
         <div className="App-body-top">
-                <TZHeader title={"Set up/update payment details"} 
+                <TZHeader title={"Payment details"} 
                 leftComponent={<BackButton onClick={() => router.navigate(-1)}/>
                 }/>
                 <div style={{maxWidth: 400, padding: padding, textAlign: 'center'}}>
