@@ -20,6 +20,7 @@ export default function PaymentSetupScreen(){
                     alert("Successfully updated payment details!");
                     router.navigate(-1);
                 }}/>
+                <div style={{padding: padding}}></div>
         </div>
     )
 }
