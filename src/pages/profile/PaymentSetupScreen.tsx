@@ -11,7 +11,7 @@ export default function PaymentSetupScreen(){
                 leftComponent={<BackButton onClick={() => router.navigate(-1)}/>
                 }/>
                 <div style={{maxWidth: 400, padding: padding, textAlign: 'center'}}>
-                    <span>
+                    <span className="App-smalltext" style={{color: '#fffa'}}>
                         If you've already set up your payment details with us, you don't have fill anything
                         out here unless you need to update your information. 
                     </span>

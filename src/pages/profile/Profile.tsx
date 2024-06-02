@@ -7,6 +7,7 @@ import { getCookies, router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
 import BackButton from "../../components/BackButton";
+import ProfileButton from "../../components/TZProfileComponent";
 
 /**
  * user: appreview, pw: appreview
@@ -21,34 +22,6 @@ import BackButton from "../../components/BackButton";
  * A back button
  * 
  */
-function ProfileButton(props: { text: string, onClick: () => void }) {
-    const [isHovered, setIsHovered] = useState(false);
-    const profileButton: React.CSSProperties = {
-        fontWeight: 'bold',
-        margin: '5px',
-        width: '100%',
-        borderRadius: radius,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: isHovered ? '#EDA13E' : 'transparent',
-        borderColor: isHovered ? "#8880" : "#8888",
-        borderWidth: 1,
-        borderStyle: "solid",
-        padding: padding,
-        color: isHovered ? '#1B242E' : 'white',
-        cursor: 'pointer',
-        transition: 'background-color 0.3s ease, color 0.3s ease'
-    };
-    return (
-        <div style={profileButton}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={props.onClick}>
-            <span className="App-tertiarytitle">{props.text}</span>
-        </div>
-    );
-}
 
 function ProfileLanding() {
     //handling clicks
@@ -62,10 +35,6 @@ function ProfileLanding() {
 
     const handleAboutClick = () => {
         router.navigate("/about");
-    };
-
-    const handlePaymentDetails = () => {
-        router.navigate("/paymentsetup");
     };
 
     return (
@@ -82,7 +51,6 @@ function ProfileLanding() {
             {/* <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton> */}
             {/* <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton> */}
             <ProfileButton text="Help & Privacy" onClick={handleAboutClick}></ProfileButton>
-            <ProfileButton text="Update Payment Details" onClick={handlePaymentDetails}></ProfileButton>
         </div>
 
     );

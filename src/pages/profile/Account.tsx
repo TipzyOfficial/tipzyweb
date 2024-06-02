@@ -9,6 +9,7 @@ import "../../App.css"
 import { Cookie } from "universal-cookie";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import BackButton from "../../components/BackButton";
+import TZProfileComponent from "../../components/TZProfileComponent";
 
 function AccountComponent(props: { title: string, text: string }) {
     const profileButton: React.CSSProperties = {
@@ -63,6 +64,14 @@ export default function Account() {
         router.navigate(-1);
     };
 
+    const handlePaymentDetails = () => {
+        router.navigate("/paymentsetup");
+    };
+
+    const handleInvoices = () => {
+        router.navigate("/invoices");
+    };
+
     return (
         <div className={"App-body-top"}>
             <TZHeader title="Your Account" leftComponent={
@@ -70,8 +79,16 @@ export default function Account() {
             }/>
             <div style={styles}>
                 <div>
+                    <div style={{paddingBottom: padding/2}}>
+                        <span className="App-tertiarytitle">Your Information</span>
+                    </div>
                     <AccountComponent title="Name" text={user.name}></AccountComponent>
                     <AccountComponent title="Email" text={user.email}></AccountComponent>
+                    <div style={{paddingBottom: padding/2}}>
+                        <span className="App-tertiarytitle">Payments</span>
+                    </div>
+                    <TZProfileComponent text="Update Payment Details" onClick={handlePaymentDetails}></TZProfileComponent>
+                    <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>
                 <div style={{position: "absolute", bottom: padding, width: Math.min(600-padding*2, useWindowDimensions().width - padding*2)}}>
                     <TZButton title={"Log out"} onClick={() => Logout(cookies)}></TZButton>

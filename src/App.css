@@ -156,6 +156,10 @@
   font-weight: 500;
 }
 
+.App-smalltext {
+  font-size: calc(10px + 0.5vmin);
+}
+
 .App-tertiarytoggle {
   font-size: calc(12px + 1vmin);
   font-size: calc(12px + 1vmin);

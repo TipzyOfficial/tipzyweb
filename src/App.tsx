@@ -28,6 +28,8 @@ import About from './pages/profile/About';
 import AlbumPage from './pages/bar/artist/AlbumPage';
 import Albums from './pages/bar/artist/Albums';
 import PaymentSetupScreen from './pages/profile/PaymentSetupScreen';
+import { NotFoundPage } from './pages/bar/NotFoundPage';
+import Invoices from './pages/profile/Invoices';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -125,6 +127,10 @@ export const router = createBrowserRouter([{
     Component: PaymentSetupScreen
   },
   {
+    path: "/invoices",
+    Component: Invoices
+  },
+  {
     path: "/artist",
     Component: ArtistInfo
   },
@@ -136,7 +142,7 @@ export const router = createBrowserRouter([{
     path: "/albums",
     Component: Albums
   }
-  ]}
+  ], errorElement: <NotFoundPage title="404" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1}/>}
 ], {});
 
 function App() {

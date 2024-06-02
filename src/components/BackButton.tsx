@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { padding } from "../lib/Constants";
+import { Colors, padding } from "../lib/Constants";
 
 
 export default function BackButton(props: {onClick: () => void}){
@@ -11,7 +11,7 @@ export default function BackButton(props: {onClick: () => void}){
         paddingLeft: padding,
         border: 'none',
         backgroundColor: 'transparent',
-        color: isBackButtonHovered ? '#EDA13E' : 'white',
+        color: isBackButtonHovered ? Colors.primaryRegular : 'white',
         fontSize: '16px',
         cursor: 'pointer',
         transition: 'color 0.3s ease',
