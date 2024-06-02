@@ -239,10 +239,8 @@ export default function Bar(){
                             color: Colors.tertiaryLight,
                             paddingLeft: padding,
                         }}>{bar.type ?? "Bar"}</span>
-                        <span className='App-typetitle' style={{paddingRight: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$1.50/song</span>
+                        <span className='App-typetitle' style={{paddingRight: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$2.00/song</span>
                     </div>
-                    {/* <span className='App-typetitle' style={{paddingLeft: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$1.50/song</span> */}
-
                     <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
                     </div>

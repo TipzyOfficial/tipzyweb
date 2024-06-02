@@ -27,6 +27,7 @@ import Account from './pages/profile/Account';
 import About from './pages/profile/About';
 import AlbumPage from './pages/bar/artist/AlbumPage';
 import Albums from './pages/bar/artist/Albums';
+import PaymentSetupScreen from './pages/profile/PaymentSetupScreen';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -121,7 +122,7 @@ export const router = createBrowserRouter([{
   },
   {
     path: "/paymentsetup",
-    Component: PaymentSetup
+    Component: PaymentSetupScreen
   },
   {
     path: "/artist",

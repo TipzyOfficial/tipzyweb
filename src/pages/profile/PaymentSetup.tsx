@@ -9,7 +9,7 @@ import { Logout } from "../..";
 import { getCookies, stripePromise } from "../../App";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 
-export default function PaymentSetup() {
+export default function PaymentSetup(props: {handleSubmit?: () => void}) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
     const usc = useContext(UserSessionContext);
 
@@ -36,7 +36,7 @@ export default function PaymentSetup() {
           appearance: {theme: "night"}
         }}
         >
-            <PaymentSetupInner/>
+            <PaymentSetupInner handleSubmit={props.handleSubmit}/>
         </Elements>
         : 
         <div style={{padding: 20, display: 'flex', justifyContent: 'center'}}>
@@ -45,7 +45,7 @@ export default function PaymentSetup() {
     )
 }
 
-function PaymentSetupInner() {
+function PaymentSetupInner(props: {handleSubmit?: () => void}) {
     const stripe = useStripe();
     const elements = useElements();
 
@@ -63,9 +63,7 @@ function PaymentSetupInner() {
         const result = await stripe.confirmSetup({
         //`Elements` instance that was used to create the Payment Element
         elements,
-        confirmParams: {
-            return_url: "https://example.com/order/123/complete",
-        },
+        redirect: 'if_required'
         });
 
         if (result.error) {
@@ -75,6 +73,7 @@ function PaymentSetupInner() {
         // Your customer will be redirected to your `return_url`. For some payment
         // methods like iDEAL, your customer will be redirected to an intermediate
         // site first to authorize the payment, then redirected to the `return_url`.
+            if(props.handleSubmit) props.handleSubmit();
         }
     };
     

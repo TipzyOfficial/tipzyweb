@@ -82,7 +82,7 @@ function ProfileLanding() {
             {/* <ProfileButton text="Your Requests" onClick={handleRequestsClick}></ProfileButton> */}
             {/* <ProfileButton text="Transaction History" onClick={handleHistoryClick}></ProfileButton> */}
             <ProfileButton text="Help & Privacy" onClick={handleAboutClick}></ProfileButton>
-            <ProfileButton text="Set Up Payment Details" onClick={handlePaymentDetails}></ProfileButton>
+            <ProfileButton text="Update Payment Details" onClick={handlePaymentDetails}></ProfileButton>
         </div>
 
     );
