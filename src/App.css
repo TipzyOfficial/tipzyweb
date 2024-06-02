@@ -15,7 +15,7 @@
 
 .App-body-top {
   background-color: #17171E;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -47,11 +47,23 @@
   font-weight: bold;
 }
 
+.threelinetext {
+  font-size: calc(15x + 1vmin);
+  font-size: calc(15px + 1vmin);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  justify-content: flex-start;
+}
+
 .onelinetext {
   font-size: calc(15x + 1vmin);
   font-size: calc(15px + 1vmin);
   font-weight: bold;
-  width: 300px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
@@ -91,6 +103,16 @@
   font-style: normal;
 }
 
+.App-artistsubtitle {
+  font-size: calc(15px + 2vmin);
+  font-size: calc(15px + 2vmin);
+  line-height: 1;
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
 .App-headertop {
   background-color: #17171E;
   display: flex;
@@ -108,6 +130,20 @@
   font-style: normal;
   font-size: calc(17px + 2vmin);
   font-weight: bold;
+}
+
+.App-headertitleoneline {
+  font-size: calc(17px + 2vmin);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: bold;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  justify-content: flex-start;
 }
 
 .App-tertiarytitle {

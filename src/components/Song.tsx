@@ -17,7 +17,7 @@ export function artistsStringListToString(artists: string[]){
     return out.substring(2);
 }
 
-export default function Song(props: {song: SongType, dims?: number}){
+export default function Song(props: {song: SongType, dims?: number, noImage?: boolean, number?: number}){
     // const big = props.big ?? false;
 
     const bigDims = 128;
@@ -25,9 +25,10 @@ export default function Song(props: {song: SongType, dims?: number}){
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1}}>
-            <img src={props.song.albumart} alt={props.song.title} style={{height: dims, width: dims}}/>
-            <div style={{paddingLeft: dims/10, flex: 1, display: 'flex', flexDirection: 'column'}}>
-                <span className="onelinetext"  style={{fontSize: dims/3, color: "white", width: '100%'}}>
+            {props.number ? <span>{props.number}. </span>: <></>}
+            {props.noImage ? <></> : <img src={props.song.albumart} alt={props.song.title} style={{height: dims, width: dims}}/>}
+            <div style={{paddingLeft: props.noImage ? 0 : dims/10, flex: 1, display: 'flex', flexDirection: 'column'}}>
+                <span className="onelinetext"  style={{fontSize: dims/3, color: "white", width: '100%', fontWeight: '500'}}>
                     {props.song.title}
                 </span>
                 <span className="onelinetext" style={{fontSize: dims/4, color: "#aaa", width: '100%', fontWeight: 'normal'}}>
@@ -39,7 +40,7 @@ export default function Song(props: {song: SongType, dims?: number}){
 }
 
 
-export function SongRenderItem(props: {song: SongType, dims: number, onClick?: () =>  void}) {
+export function SongRenderItem(props: {song: SongType, dims: number, onClick?: () =>  void, noImage?: boolean, number?: number}) {
     const item = props.song;
     const songDims = props.dims;
     const onClick = props.onClick;
@@ -61,6 +62,8 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                     onClick={onClick}
                 >
                     <Song key={"id" + item.id} 
+                            noImage={props.noImage}
+                            number={props.number}
                             dims={songDims}
                             song={item}/>
                     <div style={{paddingLeft: 2}}>
@@ -70,13 +73,13 @@ export function SongRenderItem(props: {song: SongType, dims: number, onClick?: (
                                     justifyContent: 'center', alignItems: 'center', fontSize: songDims/3, color: 'white'}}>
                             $1.50
                         </div> */}
-                        <FontAwesomeIcon icon={faCirclePlus} color={'#fff8'}></FontAwesomeIcon>
+                        <FontAwesomeIcon icon={faCirclePlus} color={'#fff8'} fontSize={songDims/3}></FontAwesomeIcon>
                     </div>
                 </button>
     )
 }
 
-export function SongList(props: {songs: SongType[], dims: number}) {
+export function SongList(props: {songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean}) {
     const songDims = props.dims;
     const [requestedSong, setRequestedSong] = useState<SongType | undefined>();
     const [requestVisible, setRequestVisible] = useState(false);
@@ -87,7 +90,7 @@ export function SongList(props: {songs: SongType[], dims: number}) {
                 list={props.songs}
                 renderWhenEmpty={() => <></>}
                 renderItem={(item, index) => 
-                    <SongRenderItem song={item} dims={songDims} key={item.id+"_index"+index} onClick={() => {
+                    <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id+"_index"+index} noImage={props.noImage} onClick={() => {
                         setRequestedSong(item);
                         setRequestVisible(true);
                     }}/>

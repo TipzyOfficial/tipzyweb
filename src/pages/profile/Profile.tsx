@@ -6,6 +6,7 @@ import { Logout } from "../..";
 import { getCookies, router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
+import BackButton from "../../components/BackButton";
 
 /**
  * user: appreview, pw: appreview
@@ -130,20 +131,8 @@ export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
-    const [isBackButtonHovered, setIsBackButtonHovered] = useState(false);
     // user.name
     // user.email
-    const backButtonStyle: React.CSSProperties = {
-        // position: 'absolute',
-        // left: padding,
-        paddingLeft: padding,
-        border: 'none',
-        backgroundColor: 'transparent',
-        color: isBackButtonHovered ? '#EDA13E' : 'white',
-        fontSize: '16px',
-        cursor: 'pointer',
-        transition: 'color 0.3s ease',
-    };
 
     // const loc = useLocation();
 
@@ -154,12 +143,7 @@ export default function Profile() {
     return (
         <div className={"App-body-top"}>
             <TZHeader title="Your Profile" leftComponent={
-                <div style={backButtonStyle}
-                    onMouseEnter={() => setIsBackButtonHovered(true)}
-                    onMouseLeave={() => setIsBackButtonHovered(false)}
-                    onClick={handleBackClick}>
-                    Back
-                </div>
+                <BackButton onClick={handleBackClick}></BackButton>
             }/>
 
             <div style={styles}>

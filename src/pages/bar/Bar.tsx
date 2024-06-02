@@ -11,7 +11,7 @@ import '../../App.css'
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import { SongList } from "../../components/Song";
 import Artist from "../../components/Artist";
-import { ScrollMenu, } from 'react-horizontal-scrolling-menu';
+import { ScrollMenu } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { getCookies, router } from "../../App";
@@ -20,6 +20,7 @@ import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { NotFoundPage } from "./NotFoundPage";
 
 function parseSongIHateMeku(s: any): SongType{
     return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
@@ -74,7 +75,7 @@ export default function Bar(){
     const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim/50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
-    const artistDims = fdim ?  Math.max(Math.min(fdim/4.8, 200), 50) : 120;
+    const artistDims = fdim ?  Math.max(Math.min(fdim/4.3, 200), 50) : 120;
     const searchDims = fdim ?  Math.max(Math.min(fdim/20, 30), 15) : 15;
     const minHeaderHeight = window.height && window.width ? Math.min(window.width/5, window.height/4): 200;
     const toggleRef = useRef<HTMLDivElement>(null);
@@ -168,11 +169,7 @@ export default function Bar(){
     if(ready === false)
         return <LoadingScreen/>
     else if(bar === undefined)
-        return <div className="App-body" style={{display: 'flex', flexDirection: 'column', textAlign: 'center', padding: padding}}>
-                    <span className="App-title" style={{color: Colors.primaryRegular,paddingBottom: padding}}>Oops!</span>
-                    <span>That bar doesn't seem to exist...are you sure you got the right bar ID?</span>
-                    <span style={{color: Colors.primaryRegular, fontWeight: 'bold', cursor: 'pointer'}} onClick={() => router.navigate("/code")}>Go back</span>
-                </div>
+        return <NotFoundPage body="That bar doesn't seem to exist...are you sure you got the right bar ID?" backPath="./code"/>
 
     const SongContent = () => {
         return(
@@ -186,7 +183,7 @@ export default function Bar(){
                     <ScrollMenu
                     >
                     {topArtists.map((e, index) => (
-                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} itemId={"index"+index} dims={artistDims}></Artist></div>
+                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} dims={artistDims} onClick={() => router.navigate(`/artist/`, {state:{artist: e}})}></Artist></div>
                     ))}
                     </ScrollMenu>
                 </div>

@@ -22,9 +22,10 @@ import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
-import ArtistInfo from './pages/bar/ArtistInfo';
+import ArtistInfo from './pages/bar/artist/ArtistInfo';
 import Account from './pages/profile/Account';
 import About from './pages/profile/About';
+import AlbumPage from './pages/bar/artist/AlbumPage';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -124,6 +125,10 @@ export const router = createBrowserRouter([{
   {
     path: "/artist",
     Component: ArtistInfo
+  },
+  {
+    path: "/album",
+    Component: AlbumPage
   }
   ]}
 ], {});

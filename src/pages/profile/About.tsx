@@ -6,25 +6,10 @@ import { Logout } from "../..";
 import { getCookies, router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
+import BackButton from "../../components/BackButton";
 
 export default function About() {
     const usc = useContext(UserSessionContext)
-    const user = usc.user;
-    const cookies = getCookies();
-    const [isBackButtonHovered, setIsBackButtonHovered] = useState(false);
-    // user.name
-    // user.email
-    const backButtonStyle: React.CSSProperties = {
-        // position: 'absolute',
-        // left: padding,
-        paddingLeft: padding,
-        border: 'none',
-        backgroundColor: 'transparent',
-        color: isBackButtonHovered ? '#EDA13E' : 'white',
-        fontSize: '16px',
-        cursor: 'pointer',
-        transition: 'color 0.3s ease',
-    };
 
     // const loc = useLocation();
 
@@ -35,12 +20,7 @@ export default function About() {
     return (
         <div className={"App-body-top"}>
             <TZHeader title="Help & Privacy" leftComponent={
-                <div style={backButtonStyle}
-                    onMouseEnter={() => setIsBackButtonHovered(true)}
-                    onMouseLeave={() => setIsBackButtonHovered(false)}
-                    onClick={handleBackClick}>
-                    Back
-                </div>
+                <BackButton onClick={handleBackClick}></BackButton>
             }/>
             <div style={styles}>
                 <span>To learn more about how we gather and use your data, please check out our <a href={"https://www.tipzy.app/privacy"} target="_blank" rel="noreferrer">privacy policy.</a></span>
