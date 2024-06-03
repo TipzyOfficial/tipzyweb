@@ -13,7 +13,7 @@ export default function Invoices(){
                 }/>
                 <div style={{maxWidth: 550, padding: padding, textAlign: 'center', display: 'flex', flexDirection: 'column'}}>
                     <span className="App-smalltext" style={{paddingBottom: 5, color: '#fffa'}}>
-                        Once your requested song gets accepted, you don't be charged automatically.
+                        Once your requested song gets accepted, you don't get charged immediately.
                         Instead, we batch all payments you've made recently into a single invoice that gets charged
                         to you every week.
                     </span>
