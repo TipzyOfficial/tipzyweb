@@ -21,6 +21,8 @@ import RequestsContent from "./Requests";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
+import Lottie from 'react-lottie';
+import speakerAnimation from '../../assets/Speakers.json'; 
 
 function parseSongIHateMeku(s: any): SongType{
     return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
@@ -263,7 +265,17 @@ export default function Bar(){
                 <div>
                     {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>} 
                     <div style={{padding: padding, opacity: 0}}>
-                        <ProfileButton position="relative"/>
+                        <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
+                            <div style={{width: "100%",
+                                padding: padding,
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}>
+                                <div style={{flexGrow: 1}}>
+                                    <Song song={{title: "No song playing", artists: ["No artist"], explicit: false, id:"-1", albumart: ""}} dims={songDims ? songDims * 0.9 : undefined}></Song> 
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div style={{
@@ -275,7 +287,8 @@ export default function Bar(){
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                    <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800}}>
+                    <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
+                    }}>
                         <CurrentlyPlaying bar={bar} songDims={songDims}/>
                     </div>
                     <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
@@ -309,7 +322,6 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
     const timeout = 3000;
     const usc = useContext(UserSessionContext);
     const [current, setCurrent] = useState<SongType | undefined>(undefined);
-    const wdim = useWindowDimensions();
 
     const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchWithToken(usc.user, `tipper/business/queue/?business_id=${props.bar.id}`, "GET").then(response => { 
@@ -330,30 +342,59 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
     }
 
 
+    const refresh = () => {
+        getCurrentQueue().then((r) => {
+            if(!r) return;
+            const [c, q] = r;
+            setCurrent(c);
+        })
+    }
+
     useEffect(() => {
+        refresh();
         const timer = setTimeout(() => {
-            getCurrentQueue().then((r) => {
-                if(!r) return;
-                const [c, q] = r;
-                setCurrent(c);
-            })
+            refresh();
             return () => clearTimeout(timer);
         }, timeout)
-    }, [current])
+    }, [current]);
+
+    const speakerAnimationOptions = {
+        loop: true,
+        autoplay: true,
+        animationData: speakerAnimation,
+        rendererSettings: {
+          preserveAspectRatio: "xMidYMid slice"
+        }
+      };
 
 
     return(
         <>
             <div style={{width: "100%", backgroundColor: Colors.secondaryRegular, borderRadius: radius,
                 padding: padding,
+                boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
             }}>
-                <Song song={current ?? {title: "No song playing", artists: ["No artist"], explicit: false, id:"-1", albumart: ""}} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song> 
+                <div style={{flexGrow: 1}}>
+                    <Song song={current ?? {title: "No song playing", artists: ["No artist"], explicit: false, id:"-1", albumart: ""}} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song> 
+                </div>
+                <div style={{width: (props.songDims ?? 40) * 0.7}}>
+                    <Lottie 
+                        options={speakerAnimationOptions}
+                        height={(props.songDims ?? 40) * 0.7}
+                        width={(props.songDims ?? 40) * 0.7}
+                    />
+                </div>
             </div>
-            <div style={{paddingLeft: radius, paddingRight: radius, width: "100%"}}>
+            <div style={{paddingLeft: radius, paddingRight: radius, width: "100%",
+                
+            }}>
                 <div style={{
                     width: "100%", height: padding/2, backgroundColor: Colors.secondaryDark, 
                     borderBottomLeftRadius: radius,
                     borderBottomRightRadius: radius,
+                    boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.5)'
                 }}></div>
             </div>
 

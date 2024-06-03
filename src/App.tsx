@@ -17,7 +17,7 @@ import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessio
 import SongSearch from './pages/bar/SongSearch';
 import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import PaymentSetup from './pages/profile/PaymentSetup';
+import PaymentSetup from './components/PaymentSetup';
 import { fetchWithToken, Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';

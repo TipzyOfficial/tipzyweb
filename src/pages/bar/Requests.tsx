@@ -17,47 +17,58 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     const rqp = 8;
     const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([])
     const [allReqs, setAllReqs] = useState<SongRequestType[]>([])
+    const [tick, setTick] = useState(0);
     const [pendingVisible, setPendingVisible] = useState(true);
     const [completedVisible, setCompletedVisible] = useState(true);
-    const [pload, setPload] = useState(false);
     const [cload, setCload] = useState(false);
     const height = props.height ?? 0;
-    const getPending = async () => {
-        setPload(true);
-        await fetchPendingRequests(usc).then(u => {
-            setPendingReqs(u.requests);
-            // if(JSON.stringify(u) !== JSON.stringify(usc.user))
-            //     usc.setUser(u);
-        }).catch(() => 
-            {
-                setPload(false);
-                setPendingReqs([]);
-            });
+    const timeout = 5000;
 
-        setPload(false);
-    }
-
-    const getCompleted = async () => {
-        setCload(true);
+    const getCompleted = async (indicator: boolean) => {
         
-        const reqs = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+        if(indicator) setCload(true);
+        
+        console.log("about to send!")
+        const allr = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+            console.log("got back this: ", json)
             const reqs = new Array<SongRequestType>();
+            const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
                 const req = parseRequest(r);
-                if(req.status !== "PENDING") reqs.push(req);
+                if(req.status === "PENDING") preqs.push(req);
+                else reqs.push(req);
             })
-            return reqs;
-        }).catch(() => {setCload(false); return new Array<SongRequestType>()});
+            return [preqs, reqs];
+        }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
 
-        setCload(false)
-        setAllReqs(reqs.sort(songRequestCompare));
+        const [p, r] = allr;
+
+        setPendingReqs(p.sort(songRequestCompare));
+        setAllReqs(r.sort(songRequestCompare));
+
+        setCload(false);
+
     }
+    
 
     useEffect(() => {
         // alert("sorry");
-        getPending();
-        getCompleted();
-    }, []);
+        // getPending();
+        if(tick === 0) getCompleted(true);
+        
+        console.log("tick", tick)
+        
+        const timer = setTimeout(() => {
+            getCompleted(false).then(() => {
+                if(tick === 0) setTick(2);
+                else setTick(tick%2 === 0 ? tick+1 : tick-1);
+            });
+            return () => {
+                console.log("out");
+                clearTimeout(timer);
+            }
+        }, timeout)
+    }, [tick]);
 
     const RenderItem = memo((props: {request: SongRequestType}) => {
         // const dt = dateTimeParser(props.request.date.toISOString());
@@ -90,8 +101,8 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
     return(
     <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-            <ExpandHeader zI={4} height={height} loading={pload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
-            {pload ? <></> : (pendingVisible ? <>
+            <ExpandHeader zI={4} height={height} loading={cload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
+            {cload ? <></> : (pendingVisible ? <>
                 <FlatList
                     list={pendingReqs}
                     renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No pending requests.</div>}

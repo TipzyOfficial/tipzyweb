@@ -1,13 +1,13 @@
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
-import TZButton from "../../components/TZButton";
-import { Colors, padding } from "../../lib/Constants";
-import { UserSessionContext } from "../../lib/UserSessionContext";
-import { fetchPaymentSheetParams } from "../../lib/stripe";
-import { Logout } from "../..";
-import { getCookies, stripePromise } from "../../App";
-import { DisplayOrLoading } from "../../components/DisplayOrLoading";
+import TZButton from "./TZButton";
+import { Colors, padding } from "../lib/Constants";
+import { UserSessionContext } from "../lib/UserSessionContext";
+import { fetchPaymentSheetParams } from "../lib/stripe";
+import { Logout } from "..";
+import { getCookies, stripePromise } from "../App";
+import { DisplayOrLoading } from "./DisplayOrLoading";
 
 export default function PaymentSetup(props: {handleSubmit?: () => void}) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);

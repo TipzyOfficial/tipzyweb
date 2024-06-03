@@ -32,6 +32,7 @@ export default function ProfileButton(props: {position?: "fixed" | "relative", d
                 padding: padding,
                 borderWidth: 0,
                 backgroundColor: Colors.primaryRegular,
+                boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.5)'
             }}>        
                 <FontAwesomeIcon icon={faProfile} color={'white'} fontSize={dims/2}></FontAwesomeIcon>
             </button>

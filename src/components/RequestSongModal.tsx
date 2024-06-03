@@ -4,7 +4,7 @@ import { SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import { artistsStringListToString } from "./Song";
-import PaymentSetup from "../pages/profile/PaymentSetup";
+import PaymentSetup from "./PaymentSetup";
 import { useContext, useState } from "react";
 import TZButton from "./TZButton";
 import { fetchWithToken } from "..";
@@ -65,6 +65,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
     }
 
     function RequestScreen() {
+        const [disabled, setDisabled] = useState(false);
 
         const checkStripe = async (): Promise<boolean> => {
             return fetchWithToken(userContext.user, `get_saved_payment3`,'GET')
@@ -77,6 +78,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
         }
 
         async function onRequestClick() {
+            setDisabled(true);
             const hasStripe = await checkStripe();
 
             if(!hasStripe) setPaymentScreenVisible(true);
@@ -123,6 +125,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
                                 <div>
                                     <TZButton 
                                         fontSize={Math.min(30, dims/7)}
+                                        disabled={disabled}
                                         title={"$2.00"}
                                         onClick={() => onRequestClick()}/>
                                 </div>

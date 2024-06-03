@@ -11,6 +11,7 @@ import { getCookies, router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
 import { Colors, padding } from '../lib/Constants';
+import { Spinner } from 'react-bootstrap';
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth()+1 >= 10 ? (birthday.getMonth()+1) : "0" + (birthday.getMonth()+1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
@@ -18,6 +19,7 @@ const formatBirthday = (birthday: Date) => {
 
 function Login() {
     const [loginPage, setLoginPage] = useState(true);
+    const [globalDisable, setGlobalDisable] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loginPrompt, setLoginPrompt] = useState(false);
@@ -31,7 +33,12 @@ function Login() {
     })
 
     const login = (at: string, rt: string, ea: number) => {
-        loginWithTipzyToken(at, rt, ea);
+        loginWithTipzyToken(at, rt, ea)
+        .then(() => setGlobalDisable(false))
+        .catch(() => {
+            setGlobalDisable(false);
+            setLoginPressed(false);
+        })
     }
 
     function loginWithGoogleToken(token: string | null){
@@ -40,9 +47,12 @@ function Login() {
             return;
         }
 
+        setGlobalDisable(true);
+
         loginWithGoogleAccessToken(token).then((value) => login(value.access_token, value.refresh_token, value.expires_at)).catch(
             (e: Error) => {
                 console.log(`Error logging into Tipzy servers via Google:`, `${e}`);
+                setGlobalDisable(false);
             })
     }
 
@@ -55,7 +65,6 @@ function Login() {
             setLoginPressed(true);
             loginWithUsernamePassword(username, password)
             .then(json => {
-                setLoginPressed(false);
                 login(json.access_token, json.refresh_token, expiresInToAt(json.expires_in));
             }).catch(e => {
                 setLoginPressed(false);
@@ -83,7 +92,7 @@ function Login() {
     }
 
 
-    function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number) {
+    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number) {
         if (accessToken == null || refreshToken == null) {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
             return;
@@ -101,7 +110,7 @@ function Login() {
         }
 
         // console.log(user.name);
-        checkIfAccountExists(user).then((result) => {
+        await checkIfAccountExists(user).then((result) => {
             if(result.result){
                 storeAll(user, refreshToken).then((user) => {
                     userContext.setUser(user);
@@ -173,7 +182,7 @@ function Login() {
                 setRegisterPressed(true);
                 if (!emailRegex.test(email)){
                     alert("Invalid email. Please enter in a valid email.");
-                    setRegisterPressed(false)
+                    setRegisterPressed(false);
                     return;
                 }
                 if(confirmPassword !== password) {
@@ -240,7 +249,8 @@ function Login() {
     }
 
     return(
-            loginPage ?
+        <>
+            {loginPage ?
             <div style={styles.jumbo}>  
                 {loginPrompt ? <div style={{position: 'fixed', top:0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883'}}>
                     <div style={{padding: padding/2}}>
@@ -272,7 +282,14 @@ function Login() {
                     By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                 </div>
             </div>
-            : <Register/>
+            : <Register/>}
+            {(globalDisable || loginPressed) ? 
+                <div className='App-body' style={{position: 'fixed', top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background+"aa"}}>
+                    <Spinner style={{color: Colors.primaryRegular, width: 75, height: 75}}></Spinner>
+                </div>
+                : <></>
+            }
+        </>
     )
 }
 

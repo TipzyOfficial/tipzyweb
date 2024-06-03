@@ -6,7 +6,7 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
 
     return(
         <button 
-        onClick={props.onClick}
+        onClick={() =>{if(!props.disabled && props.onClick) props.onClick()}}
         onPointerDown={() => {
             setOpacity(0.7);
         }}

@@ -2,7 +2,7 @@ import { router } from "../../App";
 import BackButton from "../../components/BackButton";
 import TZHeader from "../../components/TZHeader";
 import { padding } from "../../lib/Constants";
-import PaymentSetup from "./PaymentSetup";
+import PaymentSetup from "../../components/PaymentSetup";
 
 export default function PaymentSetupScreen(){
     return(
