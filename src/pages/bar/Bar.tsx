@@ -5,7 +5,7 @@ import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
-import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
+import { UserSessionContext, UserSessionContextType, useInterval } from "../../lib/UserSessionContext";
 import TZSearchButton from "../../components/TZSearchButton";
 import '../../App.css'
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
@@ -62,6 +62,10 @@ export const fetchPendingRequests = async (userContext: UserSessionContextType) 
     return newUser;
 }
 
+let currentPCache: SongType | undefined = undefined;
+let pendingReqsCache: SongRequestType[] = [];
+let allReqsCache: SongRequestType[] = [];
+
 export default function Bar(){
     const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
@@ -82,6 +86,14 @@ export default function Bar(){
     const minHeaderHeight = window.height && window.width ? Math.min(window.width/5, window.height/4): 200;
     const toggleRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState<number | undefined>();
+
+    const RequestsContentMemo = memo(RequestsContent);
+    const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>(pendingReqsCache);
+    const [allReqs, setAllReqs] = useState<SongRequestType[]>(allReqsCache);
+    const [cload, setCload] = useState(false);
+    const timeout = 4000;
+    const usc = useContext(UserSessionContext);
+    const [current, setCurrent] = useState<SongType | undefined>(currentPCache);
   
     // useEffect(() => {
     //     console.log("tref", toggleRef)
@@ -93,13 +105,76 @@ export default function Bar(){
     
     const setView = (v: number) => {
         if(v !== view) {
-            console.log("hi")
             // userContext.abortController?.abort("switching pages");
             // alert("height set");
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
         }
     }
+
+    const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
+        return fetchWithToken(usc, `tipper/business/queue/?business_id=${id}`, "GET").then(response => { 
+            if(response === null) throw new Error("null response");
+            if(!response.ok) throw new Error("Bad response:" + response.status);
+            return response.json();
+        }).then(json => {
+            if(json.data === undefined) return undefined;
+            const np = json.data.now_playing;
+            const nowplaying = np ? {title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit} : undefined;
+            const q: SongType[] = [];
+            json.data.queue.forEach((e: any) => {
+                const song: SongType = {title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit};
+                q.push(song);
+            });
+            return [nowplaying, q];
+        });
+    }
+
+    const refreshCurrent = () => {
+        getCurrentQueue().then((r) => {
+            if(!r) return;
+            const [c, q] = r;
+            setCurrent(c);
+            currentPCache = c;
+        })
+    }
+
+    const refreshAllReqs = async (indicator: boolean) => {
+        if(indicator) setCload(true);
+        const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+            // console.log("got back this: ", json)
+            const reqs = new Array<SongRequestType>();
+            const preqs = new Array<SongRequestType>();
+            json.data.forEach((r: any) => {
+                const req = parseRequest(r);
+                if(req.status === "PENDING") preqs.push(req);
+                else reqs.push(req);
+            })
+            return [preqs, reqs];
+        }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
+
+        const [p, r] = allr;
+
+        const psort = p.sort(songRequestCompare);
+        const asort = r.sort(songRequestCompare);
+
+        setPendingReqs(psort);
+        pendingReqsCache = psort;
+        setAllReqs(asort);
+        allReqsCache = asort;
+
+        setCload(false);
+    }
+
+    const allRefresh = (indicator: boolean) => {
+        console.log("refreshing data...")
+        refreshCurrent();
+        refreshAllReqs(indicator);
+    }
+
+    // useEffect(() => console.log("rerendered everything"), [])
+    useInterval(() => allRefresh(false), timeout);
+
 
     const fetchBarInfo = async () => {
         const bar: BarType | undefined = await fetchWithToken(userContext, `tipper/business/${id}`, 'GET').then(r => r.json())
@@ -148,14 +223,11 @@ export default function Bar(){
         })
 
         userContext.barState.setBar(bar)
+
         return bar;
     }
     
     useEffect(() => {
-        // if() {
-        //     router.navigate("code")
-        // }
-        //if id is the same as bar or if new id hasn't been set yet
         if(!id) {
             router.navigate("/code");
             return;
@@ -169,6 +241,7 @@ export default function Bar(){
             userContext.barState.setBar(undefined)
             setReady(true);
         });
+        allRefresh(true);
         // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
     }, [])
 
@@ -203,8 +276,6 @@ export default function Bar(){
         </div>
         )
     }
-
-    const RequestsContentMemo = memo(RequestsContent);
 
     return(
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen/>}>
@@ -266,8 +337,36 @@ export default function Bar(){
                             <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
                         </div>
                 </div>
+
+
+                <>
+                    {
+                    view === 0 ? 
+                    <SongContent/> 
+                    : 
+                    <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload}/> 
+                    }
+                    <div style={{
+                            position: "fixed",
+                            bottom: 0,
+                            width: window.width,
+                            display: 'flex',
+                            // flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
+                            }}>
+                                <CurrentlyPlaying current={current} songDims={songDims}/>
+                            </div>
+                            <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
+                                <ProfileButton position="relative"/>
+                            </div>
+                    </div>
+                </>
+
+
                 <div>
-                    {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>} 
                     <div style={{padding: padding, opacity: 0}}>
                         <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
                             <div style={{width: "100%",
@@ -280,23 +379,6 @@ export default function Bar(){
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div style={{
-                    position: "fixed",
-                    bottom: 0,
-                    width: window.width,
-                    display: 'flex',
-                    // flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                    <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
-                    }}>
-                        <CurrentlyPlaying bar={bar} songDims={songDims}/>
-                    </div>
-                    <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
-                        <ProfileButton position="relative"/>
                     </div>
                 </div>
             </div> 
@@ -322,47 +404,8 @@ export function parseRequest(r: any): SongRequestType {
     return req;
 }
 
-function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Element {
-    const timeout = 3000;
-    const usc = useContext(UserSessionContext);
-    const [tick, setTick] = useState(false);
-    const [current, setCurrent] = useState<SongType | undefined>(undefined);
-
-    const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
-        return fetchWithToken(usc, `tipper/business/queue/?business_id=${props.bar.id}`, "GET").then(response => { 
-            if(response === null) throw new Error("null response");
-            if(!response.ok) throw new Error("Bad response:" + response.status);
-            return response.json();
-        }).then(json => {
-            if(json.data === undefined) return undefined;
-            const np = json.data.now_playing;
-            const nowplaying = np ? {title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit} : undefined;
-            const q: SongType[] = [];
-            json.data.queue.forEach((e: any) => {
-                const song: SongType = {title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit};
-                q.push(song);
-            });
-            return [nowplaying, q];
-        });
-    }
-
-
-    const refresh = () => {
-        getCurrentQueue().then((r) => {
-            if(!r) return;
-            const [c, q] = r;
-            setCurrent(c);
-        })
-    }
-
-    useEffect(() => {
-        refresh();
-        const timer = setTimeout(() => {
-            setTick(!tick);
-            refresh();
-            return () => clearTimeout(timer);
-        }, timeout)
-    }, [tick]);
+function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.Element {
+    const current = props.current;
 
     const speakerAnimationOptions = {
         loop: true,
@@ -407,3 +450,98 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
         </>
     )
 }
+
+
+
+const RefreshableContent = (props: {view: number}) => {
+    // const RequestsContentMemo = memo(RequestsContent);
+    // const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([]);
+    // const [allReqs, setAllReqs] = useState<SongRequestType[]>([]);
+    // const [cload, setCload] = useState(false);
+    // const timeout = 4000;
+    // const usc = useContext(UserSessionContext);
+    // const [current, setCurrent] = useState<SongType | undefined>(undefined);
+
+    // const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
+    //     if(!bar) return;
+    //     return fetchWithToken(usc, `tipper/business/queue/?business_id=${bar.id}`, "GET").then(response => { 
+    //         if(response === null) throw new Error("null response");
+    //         if(!response.ok) throw new Error("Bad response:" + response.status);
+    //         return response.json();
+    //     }).then(json => {
+    //         if(json.data === undefined) return undefined;
+    //         const np = json.data.now_playing;
+    //         const nowplaying = np ? {title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit} : undefined;
+    //         const q: SongType[] = [];
+    //         json.data.queue.forEach((e: any) => {
+    //             const song: SongType = {title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit};
+    //             q.push(song);
+    //         });
+    //         return [nowplaying, q];
+    //     });
+    // }
+
+    // const refreshCurrent = () => {
+    //     getCurrentQueue().then((r) => {
+    //         if(!r) return;
+    //         const [c, q] = r;
+    //         setCurrent(c);
+    //     })
+    // }
+
+    // const refreshAllReqs = async (indicator: boolean) => {
+    //     if(indicator) setCload(true);
+    //     console.log("about to send!")
+    //     const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+    //         // console.log("got back this: ", json)
+    //         const reqs = new Array<SongRequestType>();
+    //         const preqs = new Array<SongRequestType>();
+    //         json.data.forEach((r: any) => {
+    //             const req = parseRequest(r);
+    //             if(req.status === "PENDING") preqs.push(req);
+    //             else reqs.push(req);
+    //         })
+    //         return [preqs, reqs];
+    //     }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
+
+    //     const [p, r] = allr;
+
+    //     setPendingReqs(p.sort(songRequestCompare));
+    //     setAllReqs(r.sort(songRequestCompare));
+
+    //     setCload(false);
+    // }
+
+    // const allRefresh = () => {
+    //     console.log("timed func running");
+    //     refreshCurrent();
+    //     refreshAllReqs(true);
+    // }
+
+    // useInterval(allRefresh, timeout);
+
+    // useEffect(() => console.log("rerendered everything"), [])
+
+    // useEffect(() => {
+    //     console.log(tick);
+
+    //     if(tick === 0){
+    //         setTick(2)
+    //         refreshCurrent();
+    //         getCompleted(true);
+    //     }
+    //     const timer = setTimeout(() => {
+    //         console.log("timer function running")
+    //         if(tick === 0) setTick(2)
+    //         else setTick(tick === 2 ? 3 : 2);
+    //         refreshCurrent();
+    //         getCompleted(false);
+    //         return () => clearTimeout(timer);
+    //     }, timeout);
+        
+    // }, [tick]);
+
+    // return(
+       
+    // );
+};

@@ -49,6 +49,8 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
 export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response | null>{
     // const c = getCookies();
 
+    // console.log("fwt at url:", urlEnding, "at and ea", accessToken, expiresAt)
+
     let myAccessToken = accessToken;//c.get("access_token");
         
     const newTokens = async () => {

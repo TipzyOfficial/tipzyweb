@@ -64,6 +64,7 @@ function Login() {
             setLoginPressed(true);
             loginWithUsernamePassword(username, password)
             .then(json => {
+                console.log("ei", json.expires_in);
                 login(json.access_token, json.refresh_token, expiresInToAt(json.expires_in));
             }).catch(e => {
                 setLoginPressed(false);
@@ -104,27 +105,31 @@ function Login() {
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
         usc.setUser(user);
 
+        console.log("login", user);
+
         const nextPage = () => {
             if(barID) router.navigate(`/bar?id=${barID}`);
             else router.navigate("/code")
         }
 
         // console.log(user.name);
-        console.log("usc user", usc.user);
+        // console.log("usc user", usc.user);
         await checkIfAccountExists({
             user: user,
             setUser: () => {},
             barState: {setBar: () => {}}
         }).then((result) => {
-
             if(result.result){
-                storeAll(usc, refreshToken).then((user) => {
+                console.log("ciae", usc);
+                console.log("ciae user", user);
+                storeAll({
+                    user: user,
+                    setUser: usc.setUser,
+                    barState: usc.barState,
+                }, refreshToken).then((user) => {
+                    console.log("resulting user", user);
                     usc.setUser(user);
                     nextPage();
-                    // console.log(user)
-                    // props.navigation.replace('Tabs', {
-                    //     user: result.data
-                    // });
                 });
                 
             } else {

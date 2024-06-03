@@ -11,64 +11,69 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown as faDown, faChevronUp as faUp,  } from "@fortawesome/free-solid-svg-icons";
 import { Spinner } from "react-bootstrap";
 
-const RequestsContent = (props: {padding: number, height: number | undefined}) => {
+const RequestsContent = (props: {padding: number, height: number | undefined, cload: boolean, 
+    pr: SongRequestType[], cr: SongRequestType[]}) => {
     const usc = useContext(UserSessionContext);
     const padding = props.padding
     const rqp = 8;
-    const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([])
-    const [allReqs, setAllReqs] = useState<SongRequestType[]>([])
+    // const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([])
+    // const [allReqs, setAllReqs] = useState<SongRequestType[]>([])
+    const pendingReqs = props.pr;
+    const allReqs = props.cr;
     const [tick, setTick] = useState(0);
     const [pendingVisible, setPendingVisible] = useState(true);
     const [completedVisible, setCompletedVisible] = useState(true);
-    const [cload, setCload] = useState(false);
+    // const [cload, setCload] = useState(false);
+    const cload = props.cload;
     const height = props.height ?? 0;
     const timeout = 5000;
 
-    const getCompleted = async (indicator: boolean) => {
+
+    // const getCompleted = async (indicator: boolean) => {
         
-        if(indicator) setCload(true);
+    //     if(indicator) setCload(true);
         
-        console.log("about to send!")
-        const allr = await fetchWithToken(usc, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
-            console.log("got back this: ", json)
-            const reqs = new Array<SongRequestType>();
-            const preqs = new Array<SongRequestType>();
-            json.data.forEach((r: any) => {
-                const req = parseRequest(r);
-                if(req.status === "PENDING") preqs.push(req);
-                else reqs.push(req);
-            })
-            return [preqs, reqs];
-        }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
+    //     console.log("about to send!")
+    //     const allr = await fetchWithToken(usc, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+    //         console.log("got back this: ", json)
+    //         const reqs = new Array<SongRequestType>();
+    //         const preqs = new Array<SongRequestType>();
+    //         json.data.forEach((r: any) => {
+    //             const req = parseRequest(r);
+    //             if(req.status === "PENDING") preqs.push(req);
+    //             else reqs.push(req);
+    //         })
+    //         return [preqs, reqs];
+    //     }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
 
-        const [p, r] = allr;
+    //     const [p, r] = allr;
 
-        setPendingReqs(p.sort(songRequestCompare));
-        setAllReqs(r.sort(songRequestCompare));
+    //     setPendingReqs(p.sort(songRequestCompare));
+    //     setAllReqs(r.sort(songRequestCompare));
 
-        setCload(false);
-
-    }
+    //     setCload(false);
+    // }
     
 
-    useEffect(() => {
-        // alert("sorry");
-        // getPending();
-        if(tick === 0) getCompleted(true);
+    // useEffect(() => {
+    //     // alert("sorry");
+    //     // getPending();
+    //     if(tick === 0) getCompleted(true);
         
-        console.log("tick", tick)
+    //     console.log("tick", tick)
         
-        const timer = setTimeout(() => {
-            getCompleted(false).then(() => {
-                if(tick === 0) setTick(2);
-                else setTick(tick%2 === 0 ? tick+1 : tick-1);
-            });
-            return () => {
-                console.log("out");
-                clearTimeout(timer);
-            }
-        }, timeout)
-    }, [tick]);
+    //     const timer = setTimeout(() => {
+    //         getCompleted(false).then(() => {
+    //             if(tick === 0) setTick(2);
+    //             else setTick(tick%2 === 0 ? tick+1 : tick-1);
+    //         });
+    //         return () => {
+    //             console.log("out");
+    //             clearTimeout(timer);
+    //         }
+    //     }, timeout)
+    // }, [tick]);
+
 
     const RenderItem = memo((props: {request: SongRequestType}) => {
         // const dt = dateTimeParser(props.request.date.toISOString());

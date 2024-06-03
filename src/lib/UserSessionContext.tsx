@@ -1,7 +1,7 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import { Consumer, Users } from './user'
 import { SongRequestType, SongType } from './song';
-import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, rootGetRefreshToken } from '../index'
+import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, rootGetRefreshToken, storeAll, storeTokens } from '../index'
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
@@ -153,6 +153,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
 
     const editUser = (user: Consumer) => {
+        // console.log("usc edit to", user);
+        // storeTokens(user.access_token, cookies.get("refresh_token"), user.expires_at);
         setUser(user);
     }
 
@@ -189,6 +191,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
             if(!cookies.get("refresh_token") || !cookies.get("access_token")){
                 checkIfAccountExists(usc).then((r) => {
+                    console.log("rdata", r.data)
                     refreshUserData(r.data)
                     setReady(true);
                 })

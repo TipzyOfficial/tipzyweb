@@ -59,8 +59,10 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
  * @param setUser (optional) update the user if using useState()
  */
 async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType, cookies: Cookies) {
-  cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
-  cookies.set("access_token", tokens.access_token, { path: '/' });
+  console.log("resetting tokens to!", tokens)
+
+  await storeTokens(tokens.access_token, tokens.refresh_token, tokens.expires_at)
+
   // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
   const newUser = structuredClone(usc.user);
   newUser.access_token = tokens.access_token;
@@ -111,9 +113,9 @@ export async function fetchWithToken(usc: UserSessionContextType, urlEnding: str
   return response;
 }
 
-async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
+export async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
+  cookies.set("access_token", accessToken);
   cookies.set("refresh_token", refreshToken);
-  cookies.set("access_token", refreshToken);
   cookies.set("expires_at", expiresAt);
 }
 

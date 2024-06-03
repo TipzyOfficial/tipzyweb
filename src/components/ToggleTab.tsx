@@ -24,7 +24,7 @@ const ToggleTab = (props: {
                 <button style={{
                     flex: 1,
                     padding: 8, 
-                    backgroundColor: props.value === v ? Colors.secondaryDark : "#0000", 
+                    backgroundColor: props.value === v ? activeColor : "#0000", 
                     zIndex: props.value === v ? 1 : 0,
                     borderRadius: radius,
                     color: 'white',
