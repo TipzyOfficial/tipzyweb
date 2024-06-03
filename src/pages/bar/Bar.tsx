@@ -228,7 +228,7 @@ export default function Bar(){
                             opacity: 0.8,
                             }} onClick={() => router.navigate('/code')}>
                                 <FontAwesomeIcon className="App-tertiarytitle" icon={faArrowLeft} ></FontAwesomeIcon>
-                                <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span>
+                                {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
                         </div>
                         <div style={{flex: 2}}></div>
                     </div>
