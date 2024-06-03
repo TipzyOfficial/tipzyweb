@@ -354,7 +354,7 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
     useEffect(() => {
         refresh();
         const timer = setTimeout(() => {
-            setTick(true);
+            setTick(!tick);
             refresh();
             return () => clearTimeout(timer);
         }, timeout)
