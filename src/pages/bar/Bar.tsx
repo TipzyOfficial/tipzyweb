@@ -321,6 +321,7 @@ export function parseRequest(r: any): SongRequestType {
 function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Element {
     const timeout = 3000;
     const usc = useContext(UserSessionContext);
+    const [tick, setTick] = useState(false);
     const [current, setCurrent] = useState<SongType | undefined>(undefined);
 
     const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
@@ -353,10 +354,11 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
     useEffect(() => {
         refresh();
         const timer = setTimeout(() => {
+            setTick(true);
             refresh();
             return () => clearTimeout(timer);
         }, timeout)
-    }, [current]);
+    }, [tick]);
 
     const speakerAnimationOptions = {
         loop: true,
