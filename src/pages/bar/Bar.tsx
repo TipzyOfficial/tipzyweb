@@ -92,9 +92,13 @@ export default function Bar(){
     // }, [setHeight])
     
     const setView = (v: number) => {
-        // alert("height set");
-        setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
-        setViewInner(v);
+        if(v !== view) {
+            console.log("hi")
+            // userContext.abortController?.abort("switching pages");
+            // alert("height set");
+            setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
+            setViewInner(v);
+        }
     }
 
     const fetchBarInfo = async () => {

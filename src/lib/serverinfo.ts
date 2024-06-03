@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from "react";
 import { consumerFromJSON } from "..";
 import { getCookies } from "../App";
 import { Consumer } from "./user";
@@ -45,7 +46,7 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
  * @param fetchMethod the method field in fetch. by default it is POST, but usually they will be GET, POST, PATCH, or DELETE
  * @returns returns whatever the response is.
  */
-export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string): Promise<Response | null>{
+export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response | null>{
     // const c = getCookies();
 
     let myAccessToken = accessToken;//c.get("access_token");
@@ -55,7 +56,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
         if(refreshToken === null) { console.log("no refresh token stored!"); return 0; }
         const tokens: TokenReturnType | null = await getAccessToken(refreshToken)
             .catch((e) => {console.log("error access: ", e.message); return null});
-        if(tokens === null) {  
+        if(tokens === null) {
             // console.log("problem getting access tokens!");
             return 0; 
         }
@@ -80,7 +81,8 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
                     Authorization: `Bearer ${myAccessToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: body ?? ""
+                body: body ?? "",
+                signal: signal,
             })
         :
             fetch(`${ServerInfo.baseurl}${urlEnding}`, {
@@ -88,26 +90,59 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
                 headers: {
                     Authorization: `Bearer ${myAccessToken}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                signal: signal,
             })
     }
 
-    return theFetch().then(response => 
-        {
-            if(response.status === 401){
-                console.log("401 error. Trying again.")
-                return newTokens().then((res) => {
-                    if(res === 0) throw new Error("problem with your refresh token.");
-                    // console.log("trying again with new tokens now!")
-                    return theFetch();
-                }).catch((e: Error) => {
-                    console.log("couldn't refresh tokens.");
-                    return null;
-                });
-            }
-            return response;
+    const response = await theFetch();
+
+    if(response.status === 401){
+        console.log("401 error. Trying again.");
+        const newt = await newTokens().catch(() => {
+            //throw new Error("problem with your refresh token.");
+            console.log("problem with your refresh token.");
+            logout();
+            return;
+        });
+
+        if(newt === 0) {
+            console.log("problem with your refresh token.");
+            logout();
+            return null;
         }
-    );
+
+        //throw new Error("problem with your refresh token.");
+        // console.log("trying again with new tokens now!")
+        const response2 = await theFetch();
+
+        if(response.status === 401) {
+            console.log("for some reason, your access token failed again. signing out.")
+            logout();
+            return null;
+        }
+        
+        return response2;
+        
+        
+        
+        // .then((res) => {
+
+        // }).catch((e: Error) => {
+        //     console.log("couldn't refresh tokens.");
+        //     // logout();
+        //     return null;
+        // });
+    }
+    return response;
+
+    
+
+
+    // return theFetch().then(response => 
+    //     {
+    //     }
+    // );
 }
 
 /**
@@ -132,7 +167,6 @@ export async function getUser(userType: "tipper" | "business", accessToken: stri
  */
 export async function getAccessToken(refresh_token: string): Promise<TokenReturnType | null> {
     // console.log("id", process.env.REACT_APP_CLIENT_ID, "Secret", process.env.REACT_APP_CLIENT_SECRET);
-
     return fetch(`${ServerInfo.baseurl}auth/token`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -143,16 +177,21 @@ export async function getAccessToken(refresh_token: string): Promise<TokenReturn
             refresh_token: refresh_token
         })
     }).then(response => {
-        if(response.status === 400 || response.status === 401) {
-            // console.log("bad respose getting access token.", response.status)
-            return null;
+        if(response.status === 401) {
+            console.log("bad response getting access token.", response.status, response.statusText)
+            return response.text();
         }
         else if(!response.ok){
-            throw new Error(`Bad response. Response: ${response.status}`);
+            // throw new Error(`Bad response. Response: ${response.status}`);
+            console.log("bad response.", response.status, response.statusText)
+            return response.text();
         }
         return response.json();
     }).then(json => {
-        if(json === null) return null;
+        if((typeof json) === "string") {
+            console.log("text", json)
+            return null;
+        }
         return convertToTokenReturnType(json.access_token, json.refresh_token, json.expires_in);
     }).catch((error: Error) => {throw error})
 }
@@ -237,3 +276,9 @@ export async function loginWithUsernamePassword(username: string, password: stri
         throw error;
     })
 }
+
+export const useAbortSignal = () => {
+    const controller = useMemo(() => new AbortController(), [])
+    useEffect(() => () => controller.abort(), [])
+    return controller.signal // returns a boolean
+};

@@ -29,6 +29,8 @@ root.render(
 );
 
 export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
+  console.log("abortcontroller", usc.abortController)
+  usc.abortController?.abort();
   usc.setUser(defaultConsumer());
   const clearCookies = async () => {
       await cookies.remove("access_token");
@@ -98,9 +100,14 @@ async function handleResponse (response: Response | null) {
 }
 
 export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {  
-  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies), fetchMethod, body).then(response => {
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
-  }).catch(e => {throw new Error(e);});
+  }).catch((e: Error) => {
+    if (e.name === "AbortError") {
+      console.log("fetch aborted" + e);
+    }
+    throw new Error(e.message);
+  });
   return response;
 }
 

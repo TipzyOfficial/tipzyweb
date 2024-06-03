@@ -21,16 +21,17 @@ export type BarStateType = {
 export type UserSessionContextType = {
     user: Consumer,
     setUser: (user: Consumer) => void; //do we even need this? or can i just load for asyncstorage
-    barState: BarStateType
+    barState: BarStateType;
+    abortController?: AbortController;
 }
 
 export const DefaultUserSessionContext: UserSessionContextType = {
     user: new Consumer("", 0, ""),
     setUser: () => {},
-    barState: {bar: undefined, setBar: () => {}}
+    barState: {bar: undefined, setBar: () => {}},
 }
 
-function useInterval(callback: () => any, delay: number) {
+export function useInterval(callback: () => any, delay: number) {
     const savedCallback = useRef<typeof callback>();
 
     // Remember the latest callback.
@@ -147,6 +148,9 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     const [user, setUser] = useState<Consumer>(dc);
     const [bar, setBar] = useState<BarType | undefined>();
     const [ready, setReady] = useState(false);
+    const abortController = new AbortController();
+    // const signal = abortController.signal;
+
 
     const editUser = (user: Consumer) => {
         setUser(user);
@@ -173,12 +177,11 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         editUser(c);
     }
 
-    const usc = { user: user, setUser: editUser, barState: {bar: bar, setBar: editBar}};
+    const usc = { user: user, setUser: editUser, barState: {bar: bar, setBar: editBar}, abortController: abortController};
     
     useEffect(() => 
         {
             // if(location.pathname === "/login" || location.pathname === "/register") return;
-
             const queryParameters = new URLSearchParams(window.location.search)
             const barid = queryParameters.get("id");
 
