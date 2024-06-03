@@ -9,7 +9,7 @@ import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessio
 import TZSearchButton from "../../components/TZSearchButton";
 import '../../App.css'
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
-import { SongList } from "../../components/Song";
+import Song, { SongList } from "../../components/Song";
 import Artist from "../../components/Artist";
 import { ScrollMenu } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
@@ -251,27 +251,42 @@ export default function Bar(){
                     paddingLeft: padding,
                     paddingTop: padding/2,
                     paddingBottom: padding/2,
-                    backgroundColor: Colors.background}}>
-                    <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
+                    backgroundColor: Colors.background,
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+                    >
+                        <div style={{flex: 1}}>
+                            <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
+                        </div>
                 </div>
                 <div>
                     {view === 0 ? <SongContent/> : <RequestsContentMemo height={height} padding={padding}/>} 
+                    <div style={{padding: padding, opacity: 0}}>
+                        <ProfileButton position="relative"/>
+                    </div>
                 </div>
-                <div style={{height: padding*4}}></div>
-                <ProfileButton/>
+                <div style={{
+                    position: "fixed",
+                    bottom: 0,
+                    width: window.width,
+                    display: 'flex',
+                    // flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800}}>
+                        <CurrentlyPlaying bar={bar} songDims={songDims}/>
+                    </div>
+                    <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
+                        <ProfileButton position="relative"/>
+                    </div>
+                </div>
             </div> 
         </div>
     </DisplayOrLoading>
 
     );
-}
-
-
-const styles = {
-    title: {
-        fontSize: 25,
-        fontWeight: 'bold',
-    },
 }
 
 export function parseRequests(json: any): SongRequestType[] {
@@ -288,4 +303,60 @@ export function parseRequests(json: any): SongRequestType[] {
 export function parseRequest(r: any): SongRequestType {
     const req: SongRequestType = {id: r.id, song: parseSongIHateMeku(r.song_json), bar: parseBusiness(r.business_info), date: new Date(r.request_time), status: r.status }
     return req;
+}
+
+function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Element {
+    const timeout = 3000;
+    const usc = useContext(UserSessionContext);
+    const [current, setCurrent] = useState<SongType | undefined>(undefined);
+    const wdim = useWindowDimensions();
+
+    const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
+        return fetchWithToken(usc.user, `tipper/business/queue/?business_id=${props.bar.id}`, "GET").then(response => { 
+            if(response === null) throw new Error("null response");
+            if(!response.ok) throw new Error("Bad response:" + response.status);
+            return response.json();
+        }).then(json => {
+            if(json.data === undefined) return undefined;
+            const np = json.data.now_playing;
+            const nowplaying = np ? {title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit} : undefined;
+            const q: SongType[] = [];
+            json.data.queue.forEach((e: any) => {
+                const song: SongType = {title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit};
+                q.push(song);
+            });
+            return [nowplaying, q];
+        });
+    }
+
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            getCurrentQueue().then((r) => {
+                if(!r) return;
+                const [c, q] = r;
+                setCurrent(c);
+            })
+            return () => clearTimeout(timer);
+        }, timeout)
+    }, [current])
+
+
+    return(
+        <>
+            <div style={{width: "100%", backgroundColor: Colors.secondaryRegular, borderRadius: radius,
+                padding: padding,
+            }}>
+                <Song song={current ?? {title: "No song playing", artists: ["No artist"], explicit: false, id:"-1", albumart: ""}} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song> 
+            </div>
+            <div style={{paddingLeft: radius, paddingRight: radius, width: "100%"}}>
+                <div style={{
+                    width: "100%", height: padding/2, backgroundColor: Colors.secondaryDark, 
+                    borderBottomLeftRadius: radius,
+                    borderBottomRightRadius: radius,
+                }}></div>
+            </div>
+
+        </>
+    )
 }

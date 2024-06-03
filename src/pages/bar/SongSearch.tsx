@@ -86,7 +86,7 @@ export default function SongSearch() {
     const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
     const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
     const limit = 50;
-    const timeoutInterval = 100;
+    const timeoutInterval = 1000;
     const androidTimeout = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);

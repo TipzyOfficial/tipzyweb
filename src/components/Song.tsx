@@ -23,15 +23,18 @@ export default function Song(props: {song: SongType, dims?: number, noImage?: bo
     const bigDims = 128;
     const dims = props.dims ?? 50;
 
+    const Img = () => props.song.albumart === "" ? <div style={{height: dims, width: dims, backgroundColor: "#888"}}></div>
+                        : <img src={props.song.albumart} alt={props.song.title} style={{height: dims, width: dims}}/>
+
     return (
         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1}}>
             {props.number ? <span>{props.number}. </span>: <></>}
-            {props.noImage ? <></> : <img src={props.song.albumart} alt={props.song.title} style={{height: dims, width: dims}}/>}
+            {props.noImage ? <></> : <Img></Img>}
             <div style={{paddingLeft: props.noImage ? 0 : dims/10, flex: 1, display: 'flex', flexDirection: 'column'}}>
                 <span className="onelinetext"  style={{fontSize: dims/3, color: "white", width: '100%', fontWeight: '500'}}>
                     {props.song.title}
                 </span>
-                <span className="onelinetext" style={{fontSize: dims/4, color: "#aaa", width: '100%', fontWeight: 'normal'}}>
+                <span className="onelinetext" style={{fontSize: dims/4, color: "#fffa", width: '100%', fontWeight: 'normal'}}>
                     {props.song.explicit ?"🅴": ""} {artistsStringListToString(props.song.artists)}
                 </span>
             </div>

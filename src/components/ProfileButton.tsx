@@ -5,21 +5,21 @@ import { router } from "../App";
 import { useLocation } from "react-router-dom";
 import useWindowDimensions from "../lib/useWindowDimensions";
 
-export default function ProfileButton(){
+export default function ProfileButton(props: {position?: "fixed" | "relative", disabled?: boolean}){
     const dims = Math.min(90, useWindowDimensions().width/6);
-
+    const position = props.position ?? "fixed";
     // console.log(location.pathname)
 
     return(
         <div style={{
-            position: "fixed",
-            bottom:padding,
-            right:padding,
+            position: position,
+            bottom: position === "fixed" ? padding : undefined,
+            right: position === "fixed" ? padding : undefined,
             zIndex: 20,
             opacity: 0.85,
         }}>
             <button 
-            onClick={() => router.navigate("/profile")}
+            onClick={() => {if(!props.disabled) router.navigate("/profile")}}
             style={{
                 display: 'flex',
                 justifyContent: 'center',
