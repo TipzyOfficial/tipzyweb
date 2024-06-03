@@ -34,7 +34,6 @@ function Login() {
 
     const login = (at: string, rt: string, ea: number) => {
         loginWithTipzyToken(at, rt, ea)
-        .then(() => setGlobalDisable(false))
         .catch(() => {
             setGlobalDisable(false);
             setLoginPressed(false);
