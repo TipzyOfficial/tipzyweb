@@ -19,7 +19,7 @@ import ProfileButton from "../../components/ProfileButton";
 import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
 import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json'; 
@@ -227,7 +227,7 @@ export default function Bar(){
                             cursor: 'pointer', 
                             opacity: 0.8,
                             }} onClick={() => router.navigate('/code')}>
-                                <FontAwesomeIcon className="App-tertiarytitle" icon={faChevronLeft} ></FontAwesomeIcon>
+                                <FontAwesomeIcon className="App-tertiarytitle" icon={faArrowLeft} ></FontAwesomeIcon>
                                 <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span>
                         </div>
                         <div style={{flex: 2}}></div>
