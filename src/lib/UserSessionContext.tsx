@@ -32,17 +32,45 @@ export const DefaultUserSessionContext: UserSessionContextType = {
 }
 
 export function useInterval(callback: () => any, delay: number) {
+
+    const [enabled, setEnabled] = useState(true);
+
     const savedCallback = useRef<typeof callback>();
+
+    const onVisChange = () => {
+        if(document.hidden) {
+            if(enabled) {
+                console.log("Tab is now hidden. Disabling useInterval");
+                setEnabled(false);
+            }
+        }
+        else {
+            if(!enabled) {
+                console.log("Tab is now in focus. Enabling useInterval");
+                setEnabled(true);
+            }
+        }
+    };
 
     // Remember the latest callback.
     useEffect(() => {
+        document.addEventListener("visibilitychange", onVisChange);
+
         savedCallback.current = callback;
+
+        onVisChange();
+        
+        // Specify how to clean up after this effect:
+        return () => {
+            document.removeEventListener("visibilitychange", onVisChange);
+        };
+
     }, [callback]);
 
     // Set up the interval.
     useEffect(() => {
         function tick() {
-          savedCallback.current ? savedCallback.current() : (() => {})()
+          savedCallback.current && enabled ? savedCallback.current() : (() => {})()
         }
         if (delay !== null) {
           let id = setInterval(tick, delay);
