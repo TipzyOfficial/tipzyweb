@@ -29,7 +29,7 @@ const RequestsContent = (props: {padding: number, height: number | undefined}) =
         if(indicator) setCload(true);
         
         console.log("about to send!")
-        const allr = await fetchWithToken(usc.user, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+        const allr = await fetchWithToken(usc, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             console.log("got back this: ", json)
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();

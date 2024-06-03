@@ -48,7 +48,7 @@ export default function ArtistInfo() {
   async function fetchArtist(id: string): Promise<ArtistType | undefined> {
     if(!barID) return;
     if(!artistName) return;
-    const albums = await fetchWithToken(usc.user, `tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    const albums = await fetchWithToken(usc, `tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
       .then(r => r.json())
       .then(json => {
           const data = json.data;
@@ -61,7 +61,7 @@ export default function ArtistInfo() {
       })
       .catch((e: Error) => {console.log(`Error: ${e.message}`);  return undefined});
 
-    const topSongs = await fetchWithToken(usc.user, `tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    const topSongs = await fetchWithToken(usc, `tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
     .then(r => r.json())
     .then(json => {
         const data = json.data;

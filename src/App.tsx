@@ -17,8 +17,7 @@ import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessio
 import SongSearch from './pages/bar/SongSearch';
 import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import PaymentSetup from './components/PaymentSetup';
-import { fetchWithToken, Logout } from '.';
+import { Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
@@ -55,7 +54,7 @@ const Layout = () => {
   useEffect(() => {
     // Create SetupIntent as soon as the page loads
     
-    fetchPaymentSheetParams(usc.user).then(
+    fetchPaymentSheetParams(usc).then(
       (r) => {
         setClientSecret(r);
       }
@@ -64,7 +63,7 @@ const Layout = () => {
 
 
   if(clientSecret === null) {
-    Logout(getCookies());
+    Logout(usc, getCookies());
     return (<Outlet></Outlet>)
   }
 
@@ -159,7 +158,9 @@ function App() {
 }
 
 export function goToLogin() {
-  router.navigate('/')
+  router.navigate('/').then(() => {
+    // window.location.replace("/");
+  });
 }
 
 export default App;

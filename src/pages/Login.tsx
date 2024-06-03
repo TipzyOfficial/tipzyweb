@@ -24,7 +24,7 @@ function Login() {
     const [password, setPassword] = useState("");
     const [loginPrompt, setLoginPrompt] = useState(false);
     const [loginPressed, setLoginPressed] = useState(false);
-    const userContext = useContext(UserSessionContext);
+    const usc = useContext(UserSessionContext);
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
 
@@ -103,6 +103,7 @@ function Login() {
         const expires_at = expiresAt;
 
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
+        usc.setUser(user);
 
         const nextPage = () => {
             if(barID) router.navigate(`/bar?id=${barID}`);
@@ -110,10 +111,16 @@ function Login() {
         }
 
         // console.log(user.name);
-        await checkIfAccountExists(user).then((result) => {
+        console.log("usc user", usc.user);
+        await checkIfAccountExists({
+            user: user,
+            setUser: () => {},
+            barState: {setBar: () => {}}
+        }).then((result) => {
+
             if(result.result){
-                storeAll(user, refreshToken).then((user) => {
-                    userContext.setUser(user);
+                storeAll(usc, refreshToken).then((user) => {
+                    usc.setUser(user);
                     nextPage();
                     // console.log(user)
                     // props.navigation.replace('Tabs', {
@@ -123,7 +130,7 @@ function Login() {
                 
             } else {
                 createAccount(user).then((r) => {
-                    checkIfAccountExists(user).then(r => {
+                    checkIfAccountExists(usc).then(r => {
                         if(!r.result) return undefined
                         return r.data;
                     }).then(newUser => {
@@ -131,9 +138,13 @@ function Login() {
                             alert("Problem verifying account exists. Try again later.")
                             return;
                         }
-                        userContext.setUser(newUser);
+                        usc.setUser(newUser);
                         // console.log(newUser);
-                        storeAll(newUser, refreshToken).then((u) => {
+                        storeAll({
+                            user: newUser,
+                            setUser: usc.setUser,
+                            barState: usc.barState,
+                        }, refreshToken).then((u) => {
                             nextPage();
                         });
                     })
@@ -143,7 +154,10 @@ function Login() {
                 //     user: user
                 // });
             }
-        }).catch((e: Error) => {alert(`Can't check if account exists: ${e.message}`)})
+        }).catch((e: Error) => {
+            alert(`Can't check if account exists: ${e.message}`);
+            setLoginPressed(false);
+        })
     }
 
     function Register() {

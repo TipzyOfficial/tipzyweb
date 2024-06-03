@@ -1,7 +1,7 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import { Consumer, Users } from './user'
 import { SongRequestType, SongType } from './song';
-import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, resetTokenValues, rootGetRefreshToken } from '../index'
+import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, rootGetRefreshToken } from '../index'
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
@@ -50,31 +50,29 @@ function useInterval(callback: () => any, delay: number) {
       }, [delay]);
 }
 
-export const getStartingUser = async (): Promise<Consumer> => {
-    const cookies = getCookies();
-    const rt = cookies.get("refresh_token");
-    const dc = defaultConsumer();
-    // const ea = cookies.get("expires_at");
-    if(rt === null) return dc;
-    return checkIfAccountExists(dc).then(r => {
-        if(r.result){
-            return consumerFromJSON(undefined, r.data);
-        }
-        cookies.remove("refresh_token"); //bad refresh
-        cookies.remove("access_token"); //bad refresh
-        return dc;
-    })
+// export const getStartingUser = async (): Promise<Consumer> => {
+//     const cookies = getCookies();
+//     const rt = cookies.get("refresh_token");
+//     const dc = defaultConsumer();
+//     // const ea = cookies.get("expires_at");
+//     if(rt === null) return dc;
+//     return checkIfAccountExists(dc).then(r => {
+//         if(r.result){
+//             return consumerFromJSON(undefined, r.data);
+//         }
+//         cookies.remove("refresh_token"); //bad refresh
+//         cookies.remove("access_token"); //bad refresh
+//         return dc;
+//     })
+// }
 
-    // getUser("tipper", "", 0, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(new Consumer("", 0, ""), tokens, cookies)).then((json) => {
-    //     json.data
-    // })
-}
+
 export const UserSessionContext = createContext<UserSessionContextType>({user: new Consumer("",0,""), setUser: () => {}, barState: {bar: undefined, setBar: () => {}}});
 
-export const getPending = async (user: Consumer, ignoreReqs?: boolean) : Promise<[SongRequestType[], number]> => {
+export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boolean) : Promise<[SongRequestType[], number]> => {
     const p: SongRequestType[] = [];
     let ptc: number = 0;
-    await fetchWithToken(user, `tipper/requests/pending/`, 'GET').then(r => {
+    await fetchWithToken(usc, `tipper/requests/pending/`, 'GET').then(r => {
         return r.json();
     })
     .then(json => {
@@ -174,6 +172,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
         editUser(c);
     }
+
+    const usc = { user: user, setUser: editUser, barState: {bar: bar, setBar: editBar}};
     
     useEffect(() => 
         {
@@ -185,7 +185,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             if(barid) cookies.set("bar_session", barid);
 
             if(!cookies.get("refresh_token") || !cookies.get("access_token")){
-                checkIfAccountExists(user).then((r) => {
+                checkIfAccountExists(usc).then((r) => {
                     refreshUserData(r.data)
                     setReady(true);
                 })
@@ -195,10 +195,10 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                 })
             } else {
                 refreshUserData(user);
-                checkIfAccountExists(user).then((r) => {
+                checkIfAccountExists(usc).then((r) => {
                     console.log(r);
                     if(!r.result) {
-                        Logout(cookies);
+                        Logout(usc, cookies);
                         setReady(true);
                         return;
                     }
@@ -215,7 +215,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     // useInterval(() => setTokenPendingData({user, setUser, barState}), refreshRate);
 
     return (
-        <UserSessionContext.Provider value={{ user: user, setUser: editUser, barState: {bar: bar, setBar: editBar}}}>
+        <UserSessionContext.Provider value={usc}>
             <DisplayOrLoading condition={ready}>
                 {props.children}
             </DisplayOrLoading>

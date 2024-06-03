@@ -6,9 +6,10 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
 
     return(
         <button 
+        disabled={props.disabled}
         onClick={() =>{if(!props.disabled && props.onClick) props.onClick()}}
         onPointerDown={() => {
-            setOpacity(0.7);
+            setOpacity(0.5);
         }}
         onPointerUp={() => {
             setOpacity(1);
@@ -22,7 +23,7 @@ function TZButton(props: {onClick?: () => void; title?: string, backgroundColor?
             boxSizing: "border-box",
             WebkitBoxSizing: "border-box",
             MozBoxSizing: "border-box",
-            opacity: props.disabled ? 0.7 : opacity,
+            opacity: props.disabled ? 0.5 : opacity,
             border: 'none'
         }}>
             <span className="App-tertiarytitle" style={{color: "white", fontWeight: "bold", fontSize: props.fontSize}}>{props.title ?? ""}</span>

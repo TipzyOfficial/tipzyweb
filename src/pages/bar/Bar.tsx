@@ -53,7 +53,7 @@ const LoadingScreen = () =>
 export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
     const newUser = structuredClone(userContext.user);
     // console.log('getting pending')
-    newUser.requests = await fetchWithToken(userContext.user, `tipper/requests/pending/`, 'GET').then(r => r.json())
+    newUser.requests = await fetchWithToken(userContext, `tipper/requests/pending/`, 'GET').then(r => r.json())
     .then(json => { 
         // console.log('got pending')
         return parseRequests(json);
@@ -98,7 +98,7 @@ export default function Bar(){
     }
 
     const fetchBarInfo = async () => {
-        const bar: BarType | undefined = await fetchWithToken(userContext.user, `tipper/business/${id}`, 'GET').then(r => r.json())
+        const bar: BarType | undefined = await fetchWithToken(userContext, `tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
             return {
                 id: json.id,
@@ -119,7 +119,7 @@ export default function Bar(){
             return undefined;
         }
 
-        bar.topSongs = await fetchWithToken(userContext.user, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topSongs = await fetchWithToken(userContext, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
             const songs = new Array<SongType>();
             json.data.forEach((s: any) => {
@@ -130,7 +130,7 @@ export default function Bar(){
             return songs;
         }).catch(() => undefined)
 
-        bar.topArtists = await fetchWithToken(userContext.user, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topArtists = await fetchWithToken(userContext, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
         .then(json => {
             const artists = new Array<ArtistType>();
             json.data.forEach((s: any) => {
@@ -325,7 +325,7 @@ function CurrentlyPlaying(props: {bar: BarType, songDims?: number}) : JSX.Elemen
     const [current, setCurrent] = useState<SongType | undefined>(undefined);
 
     const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
-        return fetchWithToken(usc.user, `tipper/business/queue/?business_id=${props.bar.id}`, "GET").then(response => { 
+        return fetchWithToken(usc, `tipper/business/queue/?business_id=${props.bar.id}`, "GET").then(response => { 
             if(response === null) throw new Error("null response");
             if(!response.ok) throw new Error("Bad response:" + response.status);
             return response.json();

@@ -19,7 +19,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
     const sendRequest = async (): Promise<number> => {     
         if(!userContext.barState.bar) return 0;
 
-        return await fetchWithToken(userContext.user, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
+        return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
             track_id: song?.id ?? "",
             track_name: song?.title ?? "No title",
             artist: song ? artistsStringListToString(song.artists) : "No artist",
@@ -68,7 +68,7 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
         const [disabled, setDisabled] = useState(false);
 
         const checkStripe = async (): Promise<boolean> => {
-            return fetchWithToken(userContext.user, `get_saved_payment3`,'GET')
+            return fetchWithToken(userContext, `get_saved_payment3`,'GET')
             .then(r => r.json())
             .then(json => {
                 console.log("json gsp", json)

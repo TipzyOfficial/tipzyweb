@@ -39,7 +39,7 @@ export default function AlbumPage() {
     if(!barID) return;
     if(!album) return;
 
-    await fetchWithToken(usc.user, `tipper/spotify/album/?business_id=${barID}&album_id=${id}`, "GET")
+    await fetchWithToken(usc, `tipper/spotify/album/?business_id=${barID}&album_id=${id}`, "GET")
     .then(r => r.json())
     .then(json => {
         const data = json.data;

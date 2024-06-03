@@ -1,8 +1,9 @@
 import { fetchWithToken } from "..";
+import { UserSessionContextType } from "./UserSessionContext";
 import { Consumer } from "./user";
 
-export async function fetchPaymentSheetParams (user: Consumer) {
-    const response = await fetchWithToken(user, `create_setup_intent/`, 'POST').then(r => {
+export async function fetchPaymentSheetParams (usc: UserSessionContextType) {
+    const response = await fetchWithToken(usc, `create_setup_intent/`, 'POST').then(r => {
         if(!r.ok) throw new Error("bad response: " + r.status)
         return r.json();
     }).then(json=> {

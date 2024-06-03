@@ -1,4 +1,5 @@
 import { consumerFromJSON } from "..";
+import { getCookies } from "../App";
 import { Consumer } from "./user";
 
 export const ServerInfo = {
@@ -45,7 +46,9 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
  * @returns returns whatever the response is.
  */
 export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string): Promise<Response | null>{
-    let myAccessToken = accessToken;
+    // const c = getCookies();
+
+    let myAccessToken = accessToken;//c.get("access_token");
         
     const newTokens = async () => {
         const refreshToken = await getRefreshToken();

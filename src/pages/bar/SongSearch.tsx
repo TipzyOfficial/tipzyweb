@@ -110,7 +110,7 @@ export default function SongSearch() {
         if(query.length === 0) {
             return defaultResults();
         }
-        const json = await fetchWithToken(user, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
+        const json = await fetchWithToken(userContext, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
             songs.push({title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit});

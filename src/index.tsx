@@ -10,6 +10,7 @@ import { Consumer, Users } from './lib/user';
 import Cookies from 'universal-cookie';
 import { fetchWithToken as sharedFetchWithToken } from './lib/serverinfo';
 import { useCookies } from 'react-cookie';
+import { UserSessionContextType, defaultConsumer } from './lib/UserSessionContext';
 
 const cookies = getCookies();
 
@@ -27,7 +28,8 @@ root.render(
   </React.StrictMode>
 );
 
-export async function Logout(cookies: Cookies) {
+export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
+  usc.setUser(defaultConsumer());
   const clearCookies = async () => {
       await cookies.remove("access_token");
       await cookies.remove("refresh_token");
@@ -54,17 +56,19 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
  * @param cookies the cookies that are storing the token data
  * @param setUser (optional) update the user if using useState()
  */
-export async function resetTokenValues(user: Users, tokens: TokenReturnType, cookies: Cookies, setUser?: (user: Users) => void) {
+async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType, cookies: Cookies) {
   cookies.set("refresh_token", tokens.refresh_token, { path: '/' });
   cookies.set("access_token", tokens.access_token, { path: '/' });
   // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
-  user.access_token = tokens.access_token;
-  user.expires_at = tokens.expires_at;
-  if(setUser) setUser(user);
+  const newUser = structuredClone(usc.user);
+  newUser.access_token = tokens.access_token;
+  newUser.expires_at = tokens.expires_at
+  
+  usc.setUser(newUser);
 }
 
-export async function getTipper(user: Consumer, cookies: Cookies){
-  return getUser("tipper", user.access_token, user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(user, tokens, cookies));
+export async function getTipper(usc: UserSessionContextType, cookies: Cookies){
+  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies));
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
@@ -73,12 +77,12 @@ export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
   return(c);
 }
 
-export async function checkIfAccountExists(user: Consumer): Promise<{result: boolean, data: Consumer}>{
-  return getTipper(user, cookies).then(json => {
+export async function checkIfAccountExists(usc: UserSessionContextType): Promise<{result: boolean, data: Consumer}>{
+  return getTipper(usc, cookies).then(json => {
       const d = json.data;
       return {
           result: json.status === 200, 
-          data: json.status !== 200 ? user : consumerFromJSON(user, d)
+          data: json.status !== 200 ? usc.user : consumerFromJSON(usc.user, d)
       }
   })
   .catch(e => {throw e})
@@ -93,8 +97,8 @@ async function handleResponse (response: Response | null) {
   return response;
 }
 
-export async function fetchWithToken(user: Consumer, urlEnding: string, fetchMethod: string, body?: string) {  
-  const response = await sharedFetchWithToken(user.access_token, urlEnding, user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(cookies), (tokens: TokenReturnType) => resetTokenValues(user, tokens, cookies), fetchMethod, body).then(response => {
+export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {  
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies), fetchMethod, body).then(response => {
     return handleResponse(response);
   }).catch(e => {throw new Error(e);});
   return response;
@@ -106,11 +110,11 @@ async function storeTokens(accessToken: string, refreshToken: string, expiresAt:
   cookies.set("expires_at", expiresAt);
 }
 
-export async function storeAll(user: Consumer, refreshToken: string) {
-  await storeTokens(user.access_token, refreshToken, user.expires_at);
-  const json = await getTipper(user, cookies);
+export async function storeAll(usc: UserSessionContextType, refreshToken: string) {
+  await storeTokens(usc.user.access_token, refreshToken, usc.user.expires_at);
+  const json = await getTipper(usc, cookies);
 
-  return consumerFromJSON(user, json.data);
+  return consumerFromJSON(usc.user, json.data);
 }
 
 // If you want to start measuring performance in your app, pass a function

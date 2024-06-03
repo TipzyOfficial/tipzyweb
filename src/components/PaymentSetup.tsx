@@ -15,7 +15,7 @@ export default function PaymentSetup(props: {handleSubmit?: () => void}) {
 
     useEffect(() => {
         // Create SetupIntent as soon as the page loads
-        fetchPaymentSheetParams(usc.user).then(
+        fetchPaymentSheetParams(usc).then(
         (r) => {
             setClientSecret(r);
         }
@@ -23,7 +23,7 @@ export default function PaymentSetup(props: {handleSubmit?: () => void}) {
     }, []);
 
     if(clientSecret === null) {
-        Logout(getCookies());
+        Logout(usc, getCookies());
         return(<></>)
     }
 
@@ -46,10 +46,13 @@ export default function PaymentSetup(props: {handleSubmit?: () => void}) {
 }
 
 function PaymentSetupInner(props: {handleSubmit?: () => void}) {
+    const [disabled, setDisabled] = useState(false);
+
     const stripe = useStripe();
     const elements = useElements();
 
     const handleSubmit = async (event: FormEvent) => {
+        setDisabled(true);
         // We don't want to let default form submission happen here,
         // which would refresh the page.
         event.preventDefault();
@@ -68,7 +71,8 @@ function PaymentSetupInner(props: {handleSubmit?: () => void}) {
 
         if (result.error) {
         // Show error to your customer (for example, payment details incomplete)
-        console.log(result.error.message);
+            setDisabled(false);
+            console.log(result.error.message);
         } else {
         // Your customer will be redirected to your `return_url`. For some payment
         // methods like iDEAL, your customer will be redirected to an intermediate
@@ -95,7 +99,7 @@ function PaymentSetupInner(props: {handleSubmit?: () => void}) {
         <form onSubmit={handleSubmit}>
             <PaymentElement/>
             <div style={{paddingTop: padding}}>
-                <TZButton title={"Submit"}/>
+                <TZButton title={"Submit"} disabled={disabled}/>
             </div>
         </form>
     );

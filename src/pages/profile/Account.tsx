@@ -52,8 +52,8 @@ export default function Account() {
             `WARNINGL: You're about to permanently delete your account and all your data. This action is NOT REVERSIBLE and your transactions WILL NOT be refunded. ${"\n\n"} If you still want to continue, enter "${r}" below.`,
         )
         if(s === r) {
-            fetchWithToken(user, `tipper/`, 'DELETE').then(r => {
-                Logout(cookies);
+            fetchWithToken(usc, `tipper/`, 'DELETE').then(r => {
+                Logout(usc, cookies);
             }).catch((e) => {alert(`Error: Problem deleting account: ${e}. Please try again later.`)})
         } else {
             alert("Account not deleted. You didn't enter in the right code.")
@@ -91,7 +91,7 @@ export default function Account() {
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>
                 <div style={{position: "absolute", bottom: padding, width: Math.min(600-padding*2, useWindowDimensions().width - padding*2)}}>
-                    <TZButton title={"Log out"} onClick={() => Logout(cookies)}></TZButton>
+                    <TZButton title={"Log out"} onClick={() => Logout(usc, cookies)}></TZButton>
                     <div style={{paddingBottom: padding}}></div>
                     <TZButton title={"Delete account"} backgroundColor="#800" onClick={DeleteAccount}></TZButton>
                 </div>
