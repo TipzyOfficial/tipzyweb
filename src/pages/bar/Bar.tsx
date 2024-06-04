@@ -442,6 +442,7 @@ function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.
                                 }
                               }
                         }
+                        speed={current ? 1 : 0}
                         height={(props.songDims ?? 40) * 0.7}
                         width={(props.songDims ?? 40) * 0.7}
                     />
