@@ -2,7 +2,7 @@ import { Spinner, ToggleButton } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import { Colors, padding as basePadding, padding, radius, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
@@ -25,6 +25,7 @@ import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json'; 
 
 import '../../App.css'
+import React from "react";
 
 function parseSongIHateMeku(s: any): SongType{
     return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
@@ -71,7 +72,7 @@ let allReqsCache: SongRequestType[] = [];
 export default function Bar(){
     const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
-    const [ready, setReady] = useState(false);
+    const [ready, setReadyUn] = useState(false);
     const [view, setViewInner] = useState(0);
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
@@ -90,12 +91,18 @@ export default function Bar(){
     const [height, setHeight] = useState<number | undefined>();
 
     const RequestsContentMemo = memo(RequestsContent);
-    const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>(pendingReqsCache);
-    const [allReqs, setAllReqs] = useState<SongRequestType[]>(allReqsCache);
-    const [cload, setCload] = useState(false);
+    const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
+    const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
+    const [cload, setCloadUn] = useState(false);
     const timeout = 4000;
     const usc = useContext(UserSessionContext);
-    const [current, setCurrent] = useState<SongType | undefined>(currentPCache);
+    const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
+
+    const setPendingReqs = useCallback((p: SongRequestType[]) => setPendingReqsUn(p), [setPendingReqsUn]);
+    const setAllReqs = useCallback((r: SongRequestType[]) => setAllReqsUn(r), [setAllReqsUn]);
+    const setCurrent = useCallback((c: SongType | undefined) => setCurrentUn(c), [setCurrentUn]);
+    const setCload = useCallback((c: boolean) => setCloadUn(c), [setCloadUn]);
+    const setReady = useCallback((r: boolean) => setReadyUn(r), [setReadyUn]);
   
     // useEffect(() => {
     //     console.log("tref", toggleRef)
@@ -171,7 +178,7 @@ export default function Bar(){
     const allRefresh = (indicator: boolean) => {
         console.log("refreshing data...")
         refreshCurrent();
-        refreshAllReqs(indicator);
+        // refreshAllReqs(indicator);
     }
 
     // useEffect(() => console.log("rerendered everything"), [])
@@ -252,33 +259,6 @@ export default function Bar(){
     else if(bar === undefined)
         return <NotFoundPage body="That bar doesn't seem to exist...are you sure you got the right bar ID?" backPath="./code"/>
 
-    const SongContent = () => {
-        return(
-        <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
-            <div style={{paddingTop: padding}}>
-                <div style={{paddingLeft: padding, paddingBottom: padding}}>
-                    <span className='App-subtitle'>Top Artists</span>
-                </div>
-                <div style={{paddingBottom: padding/3}}></div>
-                <div style={{overflow: 'hidden', width: window.width ?? 200}}>
-                    <ScrollMenu
-                    >
-                    {topArtists.map((e, index) => (
-                        <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} dims={artistDims} onClick={() => router.navigate(`/artist/`, {state:{artist: e}})}></Artist></div>
-                    ))}
-                    </ScrollMenu>
-                </div>
-            </div>
-            <div style={{padding: padding, width: '100%'}}>
-                <div style={{paddingBottom: padding, paddingTop: padding}}>
-                    <span className='App-subtitle'>Top Songs</span>
-                </div>
-                <SongList songs={topSongs} dims={songDims}/>
-            </div>
-        </div>
-        )
-    }
-
     return(
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen/>}>
         <div className="App-body-top">
@@ -344,7 +324,7 @@ export default function Bar(){
                 <>
                     {
                     view === 0 ? 
-                    <SongContent/> 
+                    <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims}/> 
                     : 
                     <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload}/> 
                     }
@@ -466,95 +446,36 @@ function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.
 
 
 
-const RefreshableContent = (props: {view: number}) => {
-    // const RequestsContentMemo = memo(RequestsContent);
-    // const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([]);
-    // const [allReqs, setAllReqs] = useState<SongRequestType[]>([]);
-    // const [cload, setCload] = useState(false);
-    // const timeout = 4000;
-    // const usc = useContext(UserSessionContext);
-    // const [current, setCurrent] = useState<SongType | undefined>(undefined);
+const SongContent = React.memo((props: {topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number}) => {
+    const SongListMemo = memo(SongList, (prev, curr) => {console.log("prev", prev, "curr", curr); return true});
+    const topArtists = props.topArtists;
+    const topSongs = props.topSongs;
 
-    // const getCurrentQueue = async () : Promise<[SongType | undefined, SongType[]] | undefined | null> => {
-    //     if(!bar) return;
-    //     return fetchWithToken(usc, `tipper/business/queue/?business_id=${bar.id}`, "GET").then(response => { 
-    //         if(response === null) throw new Error("null response");
-    //         if(!response.ok) throw new Error("Bad response:" + response.status);
-    //         return response.json();
-    //     }).then(json => {
-    //         if(json.data === undefined) return undefined;
-    //         const np = json.data.now_playing;
-    //         const nowplaying = np ? {title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit} : undefined;
-    //         const q: SongType[] = [];
-    //         json.data.queue.forEach((e: any) => {
-    //             const song: SongType = {title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit};
-    //             q.push(song);
-    //         });
-    //         return [nowplaying, q];
-    //     });
-    // }
+    const window = useWindowDimensions();
 
-    // const refreshCurrent = () => {
-    //     getCurrentQueue().then((r) => {
-    //         if(!r) return;
-    //         const [c, q] = r;
-    //         setCurrent(c);
-    //     })
-    // }
-
-    // const refreshAllReqs = async (indicator: boolean) => {
-    //     if(indicator) setCload(true);
-    //     console.log("about to send!")
-    //     const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
-    //         // console.log("got back this: ", json)
-    //         const reqs = new Array<SongRequestType>();
-    //         const preqs = new Array<SongRequestType>();
-    //         json.data.forEach((r: any) => {
-    //             const req = parseRequest(r);
-    //             if(req.status === "PENDING") preqs.push(req);
-    //             else reqs.push(req);
-    //         })
-    //         return [preqs, reqs];
-    //     }).catch(() => {setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()]});
-
-    //     const [p, r] = allr;
-
-    //     setPendingReqs(p.sort(songRequestCompare));
-    //     setAllReqs(r.sort(songRequestCompare));
-
-    //     setCload(false);
-    // }
-
-    // const allRefresh = () => {
-    //     console.log("timed func running");
-    //     refreshCurrent();
-    //     refreshAllReqs(true);
-    // }
-
-    // useInterval(allRefresh, timeout);
-
-    // useEffect(() => console.log("rerendered everything"), [])
-
-    // useEffect(() => {
-    //     console.log(tick);
-
-    //     if(tick === 0){
-    //         setTick(2)
-    //         refreshCurrent();
-    //         getCompleted(true);
-    //     }
-    //     const timer = setTimeout(() => {
-    //         console.log("timer function running")
-    //         if(tick === 0) setTick(2)
-    //         else setTick(tick === 2 ? 3 : 2);
-    //         refreshCurrent();
-    //         getCompleted(false);
-    //         return () => clearTimeout(timer);
-    //     }, timeout);
-        
-    // }, [tick]);
-
-    // return(
-       
-    // );
-};
+    console.log("rerendered")
+    return(
+    <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
+        <div style={{paddingTop: padding}}>
+            <div style={{paddingLeft: padding, paddingBottom: padding}}>
+                <span className='App-subtitle'>Top Artists</span>
+            </div>
+            <div style={{paddingBottom: padding/3}}></div>
+            <div style={{overflow: 'hidden', width: window.width ?? 200}}>
+                <ScrollMenu
+                >
+                {topArtists.map((e, index) => (
+                    <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} dims={props.artistDims} onClick={() => router.navigate(`/artist/`, {state:{artist: e}})}></Artist></div>
+                ))}
+                </ScrollMenu>
+            </div>
+        </div>
+        <div style={{padding: padding, width: '100%'}}>
+            <div style={{paddingBottom: padding, paddingTop: padding}}>
+                <span className='App-subtitle'>Top Songs</span>
+            </div>
+            <SongListMemo songs={topSongs} dims={props.songDims}/>
+        </div>
+    </div>
+    )
+}, () => true)
