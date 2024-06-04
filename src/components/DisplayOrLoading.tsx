@@ -21,8 +21,9 @@ export function DisplayOrLoading(props: {children?: JSX.Element, condition: bool
         return(
         props.loadingScreen ?? 
         <div className="App-header">
-        <Spinner animation="grow" style={{color: Colors.primaryRegular, width: 75, height: 75}}/>
+        <Spinner style={{color: Colors.primaryRegular, width: 75, height: 75}}/>
         <br></br>
+        
         </div>);
     }
 

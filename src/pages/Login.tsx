@@ -105,7 +105,7 @@ function Login() {
         const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
         usc.setUser(user);
 
-        console.log("login", user);
+        // console.log("login", user);
 
         const nextPage = () => {
             if(barID) router.navigate(`/bar?id=${barID}`);
@@ -120,8 +120,6 @@ function Login() {
             barState: {setBar: () => {}}
         }).then((result) => {
             if(result.result){
-                console.log("ciae", usc);
-                console.log("ciae user", user);
                 storeAll({
                     user: user,
                     setUser: usc.setUser,

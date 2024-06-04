@@ -355,13 +355,14 @@ export default function Bar(){
                             display: 'flex',
                             // flexDirection: 'column',
                             alignItems: 'center',
-                            justifyContent: 'center',
+                            justifyContent: current ? 'center' : 'flex-end',
+                            zIndex: 10,
                         }}>
-                            <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
+                            {current ? <div style={{flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
                             }}>
                                 <CurrentlyPlaying current={current} songDims={songDims}/>
-                            </div>
-                            <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding}}>
+                            </div> : <></>}
+                            <div style={{flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding, paddingBottom: current ? undefined : padding}}>
                                 <ProfileButton position="relative"/>
                             </div>
                     </div>
