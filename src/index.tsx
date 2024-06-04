@@ -59,7 +59,7 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
  * @param setUser (optional) update the user if using useState()
  */
 async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType, cookies: Cookies) {
-  console.log("resetting tokens to!", tokens)
+  // console.log("resetting tokens to!", tokens)
 
   await storeTokens(tokens.access_token, tokens.refresh_token, tokens.expires_at)
 

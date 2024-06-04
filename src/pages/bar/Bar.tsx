@@ -5,9 +5,9 @@ import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
-import { UserSessionContext, UserSessionContextType, useInterval } from "../../lib/UserSessionContext";
+import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
+import { useInterval } from "../../lib/utils";
 import TZSearchButton from "../../components/TZSearchButton";
-import '../../App.css'
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import Song, { SongList } from "../../components/Song";
 import Artist from "../../components/Artist";
@@ -23,6 +23,8 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
 import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json'; 
+
+import '../../App.css'
 
 function parseSongIHateMeku(s: any): SongType{
     return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
@@ -407,14 +409,14 @@ export function parseRequest(r: any): SongRequestType {
 function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.Element {
     const current = props.current;
 
-    const speakerAnimationOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: speakerAnimation,
-        rendererSettings: {
-          preserveAspectRatio: "xMidYMid slice"
-        }
-      };
+    // const speakerAnimationOptions = {
+    //     loop: true,
+    //     autoplay: true,
+    //     animationData: speakerAnimation,
+    //     rendererSettings: {
+    //       preserveAspectRatio: "xMidYMid slice"
+    //     }
+    //   };
 
 
     return(
@@ -430,7 +432,16 @@ function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.
                 </div>
                 <div style={{width: (props.songDims ?? 40) * 0.7}}>
                     <Lottie 
-                        options={speakerAnimationOptions}
+                        options={
+                            {
+                                loop: true,
+                                autoplay: true,
+                                animationData: speakerAnimation,
+                                rendererSettings: {
+                                  preserveAspectRatio: "xMidYMid slice"
+                                }
+                              }
+                        }
                         height={(props.songDims ?? 40) * 0.7}
                         width={(props.songDims ?? 40) * 0.7}
                     />
