@@ -471,7 +471,6 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                 cursor: 'pointer',
             }}
                 onClick={() => setV(!v)}
-                onDrag={() => setV(!v)}
             >
                 <div style={{ flexGrow: 1 }}>
                     <Song song={current ?? { title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "" }} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song>
