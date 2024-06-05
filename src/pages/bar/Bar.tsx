@@ -410,6 +410,7 @@ export function parseRequest(r: any): SongRequestType {
 function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDims?: number }): JSX.Element {
     const current = props.current;
     const [v, setV] = useState(false);
+    const rad = Math.max(Math.min(useWindowDimensions().width / 100, radius), 5);
 
     // const speakerAnimationOptions = {
     //     loop: true,
@@ -423,14 +424,14 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
     return (
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column-reverse' }}>
             <div style={{
-                paddingLeft: radius, paddingRight: radius, width: "100%",
+                paddingLeft: rad, paddingRight: rad, width: "100%",
             }}>
 
                 <div style={{
                     zIndex: 10,
                     width: "100%", backgroundColor: Colors.secondaryDark,
-                    borderBottomLeftRadius: radius,
-                    borderBottomRightRadius: radius,
+                    borderBottomLeftRadius: rad,
+                    borderBottomRightRadius: rad,
                     boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.4)',
                     minHeight: padding / 2,
                     // transition: "paddingBottom 0.6s ease",
@@ -461,7 +462,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                 </div>
             </div>
             <div style={{
-                width: "100%", backgroundColor: Colors.secondaryRegular, borderRadius: radius,
+                width: "100%", backgroundColor: Colors.secondaryRegular, borderRadius: rad,
                 padding: padding,
                 boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.4)',
                 display: 'flex',
