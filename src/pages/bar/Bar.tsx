@@ -301,12 +301,13 @@ export default function Bar(){
                         <span className='App-title' style={{flex: 7, width: '100%', textAlign: 'center'}}>{bar.name}</span>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                        <span className='App-typetitle' style={{paddingLeft: padding, textAlign: 'left', flex: 1, color: Colors.primaryRegular}}>$2.00/song</span>
                         <span className='App-typetitle' style={{
                             flex: 1,
                             color: Colors.tertiaryLight,
-                            paddingLeft: padding,
+                            paddingRight: padding,
+                            textAlign: 'right',
                         }}>{bar.type ?? "Bar"}</span>
-                        <span className='App-typetitle' style={{paddingRight: padding, textAlign: 'right', flex: 1, color: Colors.primaryRegular}}>$2.00/song</span>
                     </div>
                     <div style={{paddingTop: padding, width: '100%', padding: padding,}}>
                         <TZSearchButton dims={searchDims} onClick={() => {router.navigate(`/bar/search`)}}/>
