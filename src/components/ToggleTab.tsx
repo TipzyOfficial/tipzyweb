@@ -1,7 +1,7 @@
 import { Colors, padding, radius } from "../lib/Constants";
 import '../App.css'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle as faNoti } from "@fortawesome/free-solid-svg-icons";
+import { faCircle as faNoti } from "@fortawesome/free-solid-svg-icons";
 
 
 const ToggleTab = (props: {
@@ -40,7 +40,7 @@ const ToggleTab = (props: {
                 >
                     <span className="App-toggletitle">{props.label}</span>
                     <div style={{paddingLeft: padding/2}}></div>
-                    {props.noti ? <FontAwesomeIcon icon={faNoti} color={Colors.secondaryRegular}></FontAwesomeIcon> : <></>}
+                    {props.noti ? <FontAwesomeIcon icon={faNoti} color={Colors.primaryRegular}></FontAwesomeIcon> : <></>}
                 </button>
             </div>
 
