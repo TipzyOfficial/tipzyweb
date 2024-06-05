@@ -11,10 +11,6 @@ export async function fetchPaymentSheetParams (usc: UserSessionContextType) {
         return json;
     }).catch(e => console.log(`bad create setup intent: ${e}`));
 
-    console.log("ngrok stuff");
-
-    console.log("response: ", response);
-
     if(response == null) return null;
 
     // if(!response.ok) throw new Error("bad response " + response.status + response);

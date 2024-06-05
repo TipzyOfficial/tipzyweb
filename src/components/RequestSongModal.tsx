@@ -24,12 +24,15 @@ export default function RequestSongModal(props: {song: SongType | undefined, sho
             track_name: song?.title ?? "No title",
             artist: song ? artistsStringListToString(song.artists) : "No artist",
             image_url: song?.albumart ?? "",
-            token_count: 0, //TODO: THIS NEEDS TO BE CHANGED
+            token_count: 0,
+            explicit: song.explicit,
         })).then(response => {
             if(response === null) throw new Error("null response");
-            if(!response.ok) throw new Error("Bad response " + response.status);    
+            if(!response.ok) throw new Error("Bad response " + response.status);   
+            // console.log("re", response) 
             return 1;        
         }).catch((e: Error) => {
+            console.log("error: ", e)
             return 0;
         });
         // }

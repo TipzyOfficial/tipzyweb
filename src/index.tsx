@@ -29,7 +29,7 @@ root.render(
 );
 
 export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
-  console.log("abortcontroller", usc.abortController)
+  // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
   usc.setUser(defaultConsumer());
   const clearCookies = async () => {

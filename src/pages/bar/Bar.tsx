@@ -28,7 +28,7 @@ import '../../App.css'
 import React from "react";
 
 function parseSongIHateMeku(s: any): SongType{
-    return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: false}
+    return {id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false}
 }
 
 function parseSong(s: any): SongType{

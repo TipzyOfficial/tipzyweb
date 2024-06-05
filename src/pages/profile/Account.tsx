@@ -1,4 +1,4 @@
-import { useContext, useState, memo } from "react";
+import { useContext, useState, memo, useEffect } from "react";
 import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
@@ -10,6 +10,8 @@ import { Cookie } from "universal-cookie";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import BackButton from "../../components/BackButton";
 import TZProfileComponent from "../../components/TZProfileComponent";
+import { DisplayOrLoading } from "../../components/DisplayOrLoading";
+import { Spinner } from "react-bootstrap";
 
 function AccountComponent(props: { title: string, text: string }) {
     const profileButton: React.CSSProperties = {
@@ -36,13 +38,61 @@ function AccountComponent(props: { title: string, text: string }) {
     );
 }
 
+type CardDetailsType = {
+    brand: string,
+    last4: string,
+    expMonth: number,
+    expYear: number,
+}
 
 export default function Account() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
+    
 
     // const loc = useLocation();
+
+    function CardDetails(){
+        const [details, setDetails] = useState<CardDetailsType | undefined>();
+        const [ready, setReady] = useState(false);
+
+        async function getCardDetails() {
+            const deets = await fetchWithToken(usc, `get_saved_card_details/`, 'GET').then((r) => r.json()).then((json) => {
+                const d = json.card_details;
+                return {brand: d.brand, last4: d.last4, expMonth: d.exp_month, expYear: d.exp_year}
+            }).catch(() => {console.log("can't find payment details"); return undefined})
+
+            setDetails(deets);
+            setReady(true);
+        }
+        
+        useEffect(() => {
+            getCardDetails();
+        }, [])
+
+        return(
+            <>
+            <div style={{width: "100%", padding: padding, borderColor: "#8888", borderStyle: 'solid', borderRadius: radius}}>
+                <div style={{paddingBottom: padding/2}}>
+                <span>Your card details:</span>
+                </div>
+                <DisplayOrLoading condition={ready} loadingScreen={<div style={{display: "flex", justifyContent: 'center', alignContent: 'center', padding: padding}}><Spinner></Spinner></div>}>
+                    <div style={{width: "100%", padding: padding, backgroundColor: "#8883"}}>
+                        {details ?
+                            <div style={{display: 'flex', flexDirection: 'column'}}>
+                                <span style={{fontFamily: 'monospace'}}>{details.brand.toUpperCase()} ****{details.last4}</span>
+                                <span style={{fontFamily: 'monospace'}}>Expiration: {details.expMonth}/{details.expYear}</span>
+                            </div>
+                        :   <span>No card details saved–please update your payment information.</span>
+                        }
+                    </div>
+                </DisplayOrLoading>
+            </div>
+            <div style={{paddingBottom: padding}}></div>
+            </>
+        )
+    }
 
     function DeleteAccount(){
         const mr = Math.random()*1000000;
@@ -87,6 +137,7 @@ export default function Account() {
                     <div style={{paddingBottom: padding/2}}>
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
+                    <CardDetails></CardDetails>
                     <TZProfileComponent text="Update Payment Details" onClick={handlePaymentDetails}></TZProfileComponent>
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>

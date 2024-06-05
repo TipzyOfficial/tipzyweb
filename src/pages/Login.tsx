@@ -64,7 +64,7 @@ function Login() {
             setLoginPressed(true);
             loginWithUsernamePassword(username, password)
             .then(json => {
-                console.log("ei", json.expires_in);
+                // console.log("ei", json.expires_in);
                 login(json.access_token, json.refresh_token, expiresInToAt(json.expires_in));
             }).catch(e => {
                 setLoginPressed(false);
@@ -125,7 +125,7 @@ function Login() {
                     setUser: usc.setUser,
                     barState: usc.barState,
                 }, refreshToken).then((user) => {
-                    console.log("resulting user", user);
+                    // console.log("resulting user", user);
                     usc.setUser(user);
                     nextPage();
                 });
