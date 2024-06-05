@@ -111,7 +111,7 @@ export default function Invoices(){
                         <>
                         <FlatList
                             list={pending}
-                            renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No pending invoice. Go request something!</div>}
+                            renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No pending invoices. Go request something!</div>}
                             renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
                         >
                         </FlatList>
