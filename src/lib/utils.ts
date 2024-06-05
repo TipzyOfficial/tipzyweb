@@ -1,22 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useInterval(callback: () => any, delay: number) {
+export function useInterval(callback: () => any, delay: number, firstDelay?: number) {
 
     const [enabled, setEnabled] = useState(true);
+    const [d, setdi] = useState(firstDelay ?? delay);
+    const setd = (n: number) => {
+        if (n !== d) setdi(n);
+    }
     // let enabled = true;
     // const setEnabled = (e: boolean) => {enabled = e;}
 
     const savedCallback = useRef<typeof callback>();
 
     const onVisChange = () => {
-        if(document.hidden) {
-            if(enabled) {
+        if (document.hidden) {
+            if (enabled) {
                 setEnabled(false);
                 console.log("Tab is now hidden. Disabling useInterval");
             }
         }
         else {
-            if(!enabled) {
+            if (!enabled) {
                 setEnabled(true);
                 console.log("Tab is now in focus. Enabling useInterval");
             }
@@ -30,7 +34,7 @@ export function useInterval(callback: () => any, delay: number) {
         savedCallback.current = callback;
 
         onVisChange();
-        
+
         // Specify how to clean up after this effect:
         return () => {
             document.removeEventListener("visibilitychange", onVisChange);
@@ -41,12 +45,14 @@ export function useInterval(callback: () => any, delay: number) {
     // Set up the interval.
     useEffect(() => {
         function tick() {
+            if (delay !== null) setd(delay);
             // console.log("tick ended. enabled",enabled);
-            if(enabled) savedCallback.current ? savedCallback.current() : (() => {})()
+            if (enabled) savedCallback.current ? savedCallback.current() : (() => { })()
         }
         if (delay !== null) {
-          let id = setInterval(tick, delay);
-          return () => clearInterval(id);
+            console.log(d);
+            let id = setInterval(tick, d);
+            return () => { clearInterval(id); }
         }
-      }, [delay, enabled]);
+    }, [d, enabled]);
 }
