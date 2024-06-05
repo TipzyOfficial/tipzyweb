@@ -444,7 +444,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                         duration={300}
                         height={v ? 'auto' : 0} // see props documentation below
                     >
-                        <div style={{ paddingTop: padding / 2, paddingBottom: padding / 2 }}>
+                        <div style={{ paddingTop: padding / 2, paddingBottom: padding / 4 }}>
                             <span className="App-tertiarytitle">Next up:</span>
                         </div>
                         <FlatList
