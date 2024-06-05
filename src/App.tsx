@@ -122,7 +122,7 @@ export const router = createBrowserRouter([{
     Component: About
   },
   {
-    path: "/paymentsetup",
+    path: "/payments",
     Component: PaymentSetupScreen
   },
   {

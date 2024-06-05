@@ -115,7 +115,7 @@ export default function Account() {
     };
 
     const handlePaymentDetails = () => {
-        router.navigate("/paymentsetup");
+        router.navigate("/payments");
     };
 
     const handleInvoices = () => {
@@ -138,7 +138,7 @@ export default function Account() {
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
                     <CardDetails></CardDetails>
-                    <TZProfileComponent text="Update Payment Details" onClick={handlePaymentDetails}></TZProfileComponent>
+                    <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails}></TZProfileComponent>
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>
                 <div style={{position: "absolute", bottom: padding, width: Math.min(600-padding*2, useWindowDimensions().width - padding*2)}}>
