@@ -73,7 +73,7 @@ export default function Account() {
 
         return(
             <>
-            <div style={{width: "100%", padding: padding, borderColor: "#8888", borderStyle: 'solid', borderRadius: radius}}>
+            <div style={{width: "100%", padding: padding, borderColor: "#8888", borderStyle: 'solid', borderWidth: 1, borderRadius: radius}}>
                 <div style={{paddingBottom: padding/2}}>
                 <span>Your card details:</span>
                 </div>
@@ -137,7 +137,7 @@ export default function Account() {
                     <div style={{paddingBottom: padding/2}}>
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
-                    <CardDetails></CardDetails>
+                    <CardDetails/>
                     <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails}></TZProfileComponent>
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>
