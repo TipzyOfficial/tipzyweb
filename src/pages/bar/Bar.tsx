@@ -103,19 +103,9 @@ export default function Bar(){
     const setCurrent = useCallback((c: SongType | undefined) => setCurrentUn(c), [setCurrentUn]);
     const setCload = useCallback((c: boolean) => setCloadUn(c), [setCloadUn]);
     const setReady = useCallback((r: boolean) => setReadyUn(r), [setReadyUn]);
-  
-    // useEffect(() => {
-    //     console.log("tref", toggleRef)
-    // }, [toggleRef]);
-    // useEffect(() => {
-    //     // setHeight(ref.current.offsetHeight);
-    //     console.log(ref.current)
-    // }, [setHeight])
     
     const setView = (v: number) => {
         if(v !== view) {
-            // userContext.abortController?.abort("switching pages");
-            // alert("height set");
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
         }

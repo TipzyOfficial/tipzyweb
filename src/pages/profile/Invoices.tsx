@@ -4,7 +4,7 @@ import TZHeader from "../../components/TZHeader";
 import { padding, radius } from "../../lib/Constants";
 import "../../App.css";
 import HelpButton from "../../components/HelpButton";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { fetchWithToken } from "../..";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
@@ -31,6 +31,8 @@ export default function Invoices(){
     const [completed, setCompleted] = useState<InvoiceType[]>([]);
     const [ready, setReady] = useState(false);
     const usc = useContext(UserSessionContext);
+    const headerRef = useRef<HTMLDivElement>(null);
+    const [height, setHeight] = useState<number | undefined>();
 
     const getInvoices = async () => {
         const json = await fetchWithToken(usc, `get_customer_invoice_items/`, 'GET').then(r => r.json());
@@ -53,6 +55,10 @@ export default function Invoices(){
 
         setReady(true);
     }
+
+    useLayoutEffect(() => {
+
+    })
 
     useEffect(() => {
         getInvoices();
@@ -82,15 +88,26 @@ export default function Invoices(){
 
     return(
         <div className="App-body-top">
+            <div ref={headerRef} 
+                style={{position: 'sticky', 
+                top: 0,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexDirection: 'row',
+                width: '100%', 
+            }}
+            >
             <TZHeader title={"Invoices"} 
                 leftComponent={<BackButton onClick={() => router.navigate(-1)}/>}
                 rightComponent={<HelpButton 
                     text="Once your requested song gets accepted, you don't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here."></HelpButton>}
                 />
+            </div>
                 <div
                     style={{flex: 1, display: 'flex', flexDirection: 'column', paddingLeft: padding, paddingRight: padding, width: "100%"}}
                 >
-                    <ExpandHeader zI={4} height={0} loading={!ready} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}>
+                    <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}>
                         <>
                         <FlatList
                             list={pending}
@@ -102,7 +119,7 @@ export default function Invoices(){
                         </>
                     </ExpandHeader>
                     <div style={{padding: padding/2}}></div>
-                    <ExpandHeader zI={4} height={0} loading={!ready} text="Completed" onClick={() => setCompletedVisible(!completedVisible)} expanded={completedVisible}>
+                    <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Completed" onClick={() => setCompletedVisible(!completedVisible)} expanded={completedVisible}>
                         <FlatList
                             list={completed}
                             renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No completed invoices–yet!</div>}
