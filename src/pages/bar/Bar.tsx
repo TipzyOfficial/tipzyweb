@@ -74,6 +74,7 @@ export default function Bar(){
     const userContext = useContext(UserSessionContext);
     const [ready, setReadyUn] = useState(false);
     const [view, setViewInner] = useState(0);
+    // const [requestNoti, setRequestNoti] = useState(false)
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
     const bar = userContext.barState.bar;
@@ -90,13 +91,21 @@ export default function Bar(){
     const toggleRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState<number | undefined>();
 
-    const RequestsContentMemo = memo(RequestsContent);
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
     const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
     const [cload, setCloadUn] = useState(false);
     const timeout = 4000;
     const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
+
+    const [requestNoti, setRequestNotiIn] = useState(cookies.get("notis") ?? "False");
+
+    const setRequestNoti = (b: boolean) => {
+        const v = b ? "True" : "False";
+        cookies.set("notis", v);
+        setRequestNotiIn(v);
+        console.log(requestNoti);
+    }
 
     const setPendingReqs = useCallback((p: SongRequestType[]) => setPendingReqsUn(p), [setPendingReqsUn]);
     const setAllReqs = useCallback((r: SongRequestType[]) => setAllReqsUn(r), [setAllReqsUn]);
@@ -108,6 +117,9 @@ export default function Bar(){
         if(v !== view) {
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
+            if(v === 1){
+                setRequestNoti(false);
+            }
         }
     }
 
@@ -157,10 +169,16 @@ export default function Bar(){
         const psort = p.sort(songRequestCompare);
         const asort = r.sort(songRequestCompare);
 
-        setPendingReqs(psort);
-        pendingReqsCache = psort;
-        setAllReqs(asort);
-        allReqsCache = asort;
+        if(JSON.stringify(psort) !== JSON.stringify(pendingReqsCache)){
+            setPendingReqs(psort);
+            pendingReqsCache = psort;
+        }
+
+        if(JSON.stringify(asort) !== JSON.stringify(allReqsCache)){
+            setAllReqs(asort);
+            if(allReqsCache.length !== 0 && view === 0) setRequestNoti(true);
+            allReqsCache = asort;
+        }
 
         setCload(false);
     }
@@ -306,7 +324,7 @@ export default function Bar(){
                 }}
                     >
                         <div style={{flex: 1}}>
-                            <ToggleTab labels={["Songs", "Requests"]} value={view} setValue={setView}></ToggleTab>
+                            <ToggleTab labels={[{label: "Songs", noti: false}, {label: "Requests", noti: requestNoti === "True"}]} value={view} setValue={setView}></ToggleTab>
                         </div>
                 </div>
 
@@ -434,7 +452,7 @@ function CurrentlyPlaying(props: {current?: SongType, songDims?: number}) : JSX.
     )
 }
 
-
+const RequestsContentMemo = memo(RequestsContent);
 
 const SongContent = React.memo((props: {topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number}) => {
     const SongListMemo = memo(SongList, (prev, curr) => {console.log("prev", prev, "curr", curr); return true});

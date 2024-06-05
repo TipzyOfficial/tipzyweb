@@ -13,7 +13,6 @@ import ExpandHeader from "../../components/ExpandHeader";
 
 const RequestsContent = (props: {padding: number, height: number | undefined, cload: boolean, 
     pr: SongRequestType[], cr: SongRequestType[]}) => {
-    const usc = useContext(UserSessionContext);
     const padding = props.padding
     const rqp = 8;
     // const [pendingReqs, setPendingReqs] = useState<SongRequestType[]>([])
