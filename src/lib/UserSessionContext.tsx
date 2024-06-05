@@ -182,7 +182,6 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             } else {
                 refreshUserData(user);
                 checkIfAccountExists(usc).then((r) => {
-                    console.log(r);
                     if(!r.result) {
                         Logout(usc, cookies);
                         setReady(true);

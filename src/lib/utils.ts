@@ -41,7 +41,7 @@ export function useInterval(callback: () => any, delay: number) {
     // Set up the interval.
     useEffect(() => {
         function tick() {
-            console.log("tick ended. enabled",enabled);
+            // console.log("tick ended. enabled",enabled);
             if(enabled) savedCallback.current ? savedCallback.current() : (() => {})()
         }
         if (delay !== null) {

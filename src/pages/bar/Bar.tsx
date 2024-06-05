@@ -176,9 +176,9 @@ export default function Bar(){
     }
 
     const allRefresh = (indicator: boolean) => {
-        console.log("refreshing data...")
+        // console.log("refreshing data...")
         refreshCurrent();
-        // refreshAllReqs(indicator);
+        refreshAllReqs(indicator);
     }
 
     // useEffect(() => console.log("rerendered everything"), [])
@@ -453,7 +453,6 @@ const SongContent = React.memo((props: {topArtists: ArtistType[], topSongs: Song
 
     const window = useWindowDimensions();
 
-    console.log("rerendered")
     return(
     <div style={{justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column'}}>
         <div style={{paddingTop: padding}}>
@@ -465,7 +464,7 @@ const SongContent = React.memo((props: {topArtists: ArtistType[], topSongs: Song
                 <ScrollMenu
                 >
                 {topArtists.map((e, index) => (
-                    <div style={{opacity:1, paddingLeft: padding}}><Artist artist={e} key={"index"+index+"e"+e.id} dims={props.artistDims} onClick={() => router.navigate(`/artist/`, {state:{artist: e}})}></Artist></div>
+                    <div key={index + e.id} style={{opacity:1, paddingLeft: padding}}><Artist artist={e} dims={props.artistDims} onClick={() => router.navigate(`/artist/`, {state:{artist: e}})}></Artist></div>
                 ))}
                 </ScrollMenu>
             </div>
@@ -478,4 +477,4 @@ const SongContent = React.memo((props: {topArtists: ArtistType[], topSongs: Song
         </div>
     </div>
     )
-}, () => true)
+})
