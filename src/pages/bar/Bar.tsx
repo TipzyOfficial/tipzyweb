@@ -1,4 +1,4 @@
-import { Spinner, ToggleButton } from "react-bootstrap";
+import { Modal, Spinner, ToggleButton } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import { Colors, padding as basePadding, padding, radius, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
@@ -23,9 +23,11 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
 import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json';
+import AnimateHeight from 'react-animate-height';
 
 import '../../App.css'
 import React from "react";
+import FlatList from "flatlist-react/lib";
 
 function parseSongIHateMeku(s: any): SongType {
     return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false }
@@ -97,6 +99,7 @@ export default function Bar() {
     const timeout = 4000;
     const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
+    const [queue, setQueueUn] = useState<SongType[]>([]);
 
     const [requestNoti, setRequestNotiIn] = useState(cookies.get("notis") ?? "False");
 
@@ -110,6 +113,7 @@ export default function Bar() {
     const setPendingReqs = useCallback((p: SongRequestType[]) => setPendingReqsUn(p), [setPendingReqsUn]);
     const setAllReqs = useCallback((r: SongRequestType[]) => setAllReqsUn(r), [setAllReqsUn]);
     const setCurrent = useCallback((c: SongType | undefined) => setCurrentUn(c), [setCurrentUn]);
+    const setQueue = useCallback((c: SongType[]) => setQueueUn(c), [setQueueUn]);
     const setCload = useCallback((c: boolean) => setCloadUn(c), [setCloadUn]);
     const setReady = useCallback((r: boolean) => setReadyUn(r), [setReadyUn]);
 
@@ -146,6 +150,7 @@ export default function Bar() {
             if (!r) return;
             const [c, q] = r;
             setCurrent(c);
+            setQueue(q.splice(0, 4));
             currentPCache = c;
         })
     }
@@ -346,16 +351,16 @@ export default function Bar() {
                             width: window.width,
                             display: 'flex',
                             // flexDirection: 'column',
-                            alignItems: 'center',
+                            alignItems: 'flex-end',
                             justifyContent: current ? 'center' : 'flex-end',
                             zIndex: 10,
                         }}>
                             {current ? <div style={{
                                 flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
                             }}>
-                                <CurrentlyPlaying current={current} songDims={songDims} />
+                                <CurrentlyPlaying current={current} queue={queue} songDims={songDims} />
                             </div> : <></>}
-                            <div style={{ flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding, paddingBottom: current ? undefined : padding }}>
+                            <div style={{ flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding, paddingBottom: padding }}>
                                 <ProfileButton position="relative" />
                             </div>
                         </div>
@@ -402,8 +407,9 @@ export function parseRequest(r: any): SongRequestType {
     return req;
 }
 
-function CurrentlyPlaying(props: { current?: SongType, songDims?: number }): JSX.Element {
+function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDims?: number }): JSX.Element {
     const current = props.current;
+    const [v, setV] = useState(false);
 
     // const speakerAnimationOptions = {
     //     loop: true,
@@ -414,16 +420,56 @@ function CurrentlyPlaying(props: { current?: SongType, songDims?: number }): JSX
     //     }
     //   };
 
-
     return (
-        <>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column-reverse' }}>
+            <div style={{
+                paddingLeft: radius, paddingRight: radius, width: "100%",
+            }}>
+
+                <div style={{
+                    zIndex: 10,
+                    width: "100%", backgroundColor: Colors.secondaryDark,
+                    borderBottomLeftRadius: radius,
+                    borderBottomRightRadius: radius,
+                    boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.4)',
+                    minHeight: padding / 2,
+                    // transition: "paddingBottom 0.6s ease",
+                    // paddingBottom: padding / 2,
+                    paddingRight: padding,
+                    paddingLeft: padding,
+                }}>
+                    <AnimateHeight
+                        id="currentlyplaying"
+                        duration={300}
+                        height={v ? 'auto' : 0} // see props documentation below
+                    >
+                        <div style={{ paddingTop: padding / 2, paddingBottom: padding / 2 }}>
+                            <span className="App-tertiarytitle">Next up:</span>
+                        </div>
+                        <FlatList
+                            list={props.queue}
+                            renderItem={(item, key) =>
+                                <>
+                                    <Song song={item} key={key}></Song>
+                                    <div style={{ paddingBottom: padding }}></div>
+                                </>
+                            }
+                        >
+
+                        </FlatList>
+                    </AnimateHeight>
+                </div>
+            </div>
             <div style={{
                 width: "100%", backgroundColor: Colors.secondaryRegular, borderRadius: radius,
                 padding: padding,
-                boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.5)',
+                boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.4)',
                 display: 'flex',
                 alignItems: 'center',
-            }}>
+                zIndex: 15,
+            }}
+                onClick={() => setV(!v)}
+            >
                 <div style={{ flexGrow: 1 }}>
                     <Song song={current ?? { title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "" }} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song>
                 </div>
@@ -445,19 +491,7 @@ function CurrentlyPlaying(props: { current?: SongType, songDims?: number }): JSX
                     />
                 </div>
             </div>
-            <div style={{
-                paddingLeft: radius, paddingRight: radius, width: "100%",
-
-            }}>
-                <div style={{
-                    width: "100%", height: padding / 2, backgroundColor: Colors.secondaryDark,
-                    borderBottomLeftRadius: radius,
-                    borderBottomRightRadius: radius,
-                    boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.5)'
-                }}></div>
-            </div>
-
-        </>
+        </div>
     )
 }
 
