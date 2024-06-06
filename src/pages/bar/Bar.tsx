@@ -83,13 +83,13 @@ export default function Bar() {
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
     const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
-    const window = useWindowDimensions();
+    const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const artistDims = fdim ? Math.max(Math.min(fdim / 4.3, 200), 50) : 120;
     const searchDims = fdim ? Math.max(Math.min(fdim / 20, 30), 15) : 15;
-    const minHeaderHeight = window.height && window.width ? Math.min(window.width / 5, window.height / 4) : 200;
+    const minHeaderHeight = wdim.height && wdim.width ? Math.min(wdim.width / 5, wdim.height / 4) : 200;
     const toggleRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState<number | undefined>();
 
@@ -119,6 +119,11 @@ export default function Bar() {
 
     const setView = (v: number) => {
         if (v !== view) {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "instant",
+            })
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
             if (v === 1) {
@@ -348,7 +353,7 @@ export default function Bar() {
                         <div style={{
                             position: "fixed",
                             bottom: 0,
-                            width: window.width,
+                            width: wdim.width,
                             display: 'flex',
                             // flexDirection: 'column',
                             alignItems: 'flex-end',
