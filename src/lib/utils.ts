@@ -21,6 +21,7 @@ export function useInterval(callback: () => any, delay: number, firstDelay?: num
         }
         else {
             if (!enabled) {
+                setd(firstDelay ?? delay);
                 setEnabled(true);
                 console.log("Tab is now in focus. Enabling useInterval");
             }
