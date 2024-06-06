@@ -33,18 +33,20 @@ export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
   usc.abortController?.abort();
   usc.setUser(defaultConsumer());
   const clearCookies = async () => {
-      await cookies.remove("access_token");
-      await cookies.remove("refresh_token");
-      await cookies.remove("expires_at");
-      await cookies.remove("name");
-      await cookies.remove("email");
-      goToLogin();
+    await cookies.remove("access_token");
+    await cookies.remove("refresh_token");
+    await cookies.remove("expires_at");
+    await cookies.remove("name");
+    await cookies.remove("notifs");
+    await cookies.remove("notis");
+    await cookies.remove("email");
+    goToLogin();
   }
   googleLogout();
   clearCookies();
 }
 
-export function rootGetRefreshToken(cookies: Cookies): Promise<string | null>{
+export function rootGetRefreshToken(cookies: Cookies): Promise<string | null> {
   const rt = cookies.get("refresh_token");
   if (typeof rt !== "string") cookies.remove("refresh_token")
   return rt;
@@ -67,41 +69,41 @@ async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturn
   const newUser = structuredClone(usc.user);
   newUser.access_token = tokens.access_token;
   newUser.expires_at = tokens.expires_at
-  
+
   usc.setUser(newUser);
 }
 
-export async function getTipper(usc: UserSessionContextType, cookies: Cookies){
+export async function getTipper(usc: UserSessionContextType, cookies: Cookies) {
   return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies));
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
   const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user ? user.image : undefined, d.user_info.email, user ? user.requests : undefined)
   c.setBirthday(d.birthday);
-  return(c);
+  return (c);
 }
 
-export async function checkIfAccountExists(usc: UserSessionContextType): Promise<{result: boolean, data: Consumer}>{
+export async function checkIfAccountExists(usc: UserSessionContextType): Promise<{ result: boolean, data: Consumer }> {
   return getTipper(usc, cookies).then(json => {
-      const d = json.data;
-      return {
-          result: json.status === 200, 
-          data: json.status !== 200 ? usc.user : consumerFromJSON(usc.user, d)
-      }
+    const d = json.data;
+    return {
+      result: json.status === 200,
+      data: json.status !== 200 ? usc.user : consumerFromJSON(usc.user, d)
+    }
   })
-  .catch(e => {throw e})
+    .catch(e => { throw e })
 }
 
-async function handleResponse (response: Response | null) {
-  if(response === null) throw new Error("Null response.");
-  if(!response.ok) {
+async function handleResponse(response: Response | null) {
+  if (response === null) throw new Error("Null response.");
+  if (!response.ok) {
     const t = await response.text()
     throw new Error(`Bad response. Code: ${response.status}. ${t}`);
   }
   return response;
 }
 
-export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {  
+export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {
   const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
   }).catch((e: Error) => {
@@ -113,7 +115,7 @@ export async function fetchWithToken(usc: UserSessionContextType, urlEnding: str
   return response;
 }
 
-export async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number){
+export async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number) {
   cookies.set("access_token", accessToken);
   cookies.set("refresh_token", refreshToken);
   cookies.set("expires_at", expiresAt);

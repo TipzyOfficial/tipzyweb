@@ -101,13 +101,14 @@ export default function Bar() {
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
 
-    const [requestNoti, setRequestNotiIn] = useState(cookies.get("notis") ?? "False");
+    const notisCookie = cookies.get("notis")
 
-    const setRequestNoti = (b: boolean) => {
-        const v = b ? "True" : "False";
+    const [requestNoti, setRequestNotiIn] = useState(notisCookie ? parseInt(notisCookie) : 0);
+
+    const setRequestNoti = (n: number) => {
+        const v = Math.max(n, 0);
         cookies.set("notis", v);
         setRequestNotiIn(v);
-        console.log(requestNoti);
     }
 
     const setPendingReqs = useCallback((p: SongRequestType[]) => setPendingReqsUn(p), [setPendingReqsUn]);
@@ -127,7 +128,7 @@ export default function Bar() {
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
             if (v === 1) {
-                setRequestNoti(false);
+                setRequestNoti(0);
             }
         }
     }
@@ -185,8 +186,12 @@ export default function Bar() {
         }
 
         if (JSON.stringify(asort) !== JSON.stringify(allReqsCache)) {
+            // console.log(allReqsCache);
+            if (allReqsCache.length !== 0 && view === 0) {
+                // console.log("allReqsCache" + allReqsCache.length);
+                setRequestNoti(requestNoti + asort.length - allReqs.length);
+            }
             setAllReqs(asort);
-            if (allReqsCache.length !== 0 && view === 0) setRequestNoti(true);
             allReqsCache = asort;
         }
 
@@ -194,7 +199,7 @@ export default function Bar() {
     }
 
     const allRefresh = (indicator: boolean) => {
-        console.log("refreshing data...")
+        // console.log("refreshing data...")
         refreshCurrent();
         refreshAllReqs(indicator);
     }
@@ -338,7 +343,7 @@ export default function Bar() {
                     }}
                     >
                         <div style={{ flex: 1 }}>
-                            <ToggleTab labels={[{ label: "Songs", noti: false }, { label: "Requests", noti: requestNoti === "True" }]} value={view} setValue={setView}></ToggleTab>
+                            <ToggleTab labels={[{ label: "Songs", noti: false }, { label: "Requests", noti: requestNoti !== 0 }]} value={view} setValue={setView}></ToggleTab>
                         </div>
                     </div>
 
@@ -455,10 +460,10 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                         <FlatList
                             list={props.queue}
                             renderItem={(item, key) =>
-                                <>
-                                    <Song song={item} key={key}></Song>
+                                <div key={item.id + key}>
+                                    <Song song={item}></Song>
                                     <div style={{ paddingBottom: padding }}></div>
-                                </>
+                                </div>
                             }
                         >
 
@@ -505,7 +510,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
 const RequestsContentMemo = memo(RequestsContent);
 
 const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number }) => {
-    const SongListMemo = memo(SongList, (prev, curr) => { console.log("prev", prev, "curr", curr); return true });
+    const SongListMemo = memo(SongList, (prev, curr) => { return true });
     const topArtists = props.topArtists;
     const topSongs = props.topSongs;
 

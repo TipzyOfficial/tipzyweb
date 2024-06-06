@@ -51,7 +51,7 @@ export function useInterval(callback: () => any, delay: number, firstDelay?: num
             if (enabled) savedCallback.current ? savedCallback.current() : (() => { })()
         }
         if (delay !== null) {
-            console.log(d);
+            // console.log(d);
             let id = setInterval(tick, d);
             return () => { clearInterval(id); }
         }
