@@ -119,11 +119,11 @@ export default function Bar() {
 
     const setView = (v: number) => {
         if (v !== view) {
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: "instant",
-            })
+            // window.scrollTo({
+            //     top: 0,
+            //     left: 0,
+            //     behavior: "instant",
+            // })
             setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
             setViewInner(v);
             if (v === 1) {
