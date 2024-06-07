@@ -31,7 +31,8 @@ root.render(
 export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
   // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
-  usc.setUser(defaultConsumer());
+  usc.setUser(new Consumer("", 0, ""));
+  usc.barState.setBar(undefined);
   const clearCookies = async () => {
     await cookies.remove("access_token");
     await cookies.remove("refresh_token");
@@ -62,6 +63,10 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null> {
  */
 async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType, cookies: Cookies) {
   // console.log("resetting tokens to!", tokens)
+  const access = cookies.get("access_token");
+  const refresh = cookies.get("refresh_token");
+  const expa = cookies.get("expires_at");
+  if (!refresh || !access || !expa) return;
 
   await storeTokens(tokens.access_token, tokens.refresh_token, tokens.expires_at)
 
@@ -116,6 +121,7 @@ export async function fetchWithToken(usc: UserSessionContextType, urlEnding: str
 }
 
 export async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number) {
+  console.log("storing tokens");
   cookies.set("access_token", accessToken);
   cookies.set("refresh_token", refreshToken);
   cookies.set("expires_at", expiresAt);

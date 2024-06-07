@@ -106,6 +106,7 @@ export default function Bar() {
     const [requestNoti, setRequestNotiIn] = useState(notisCookie ? parseInt(notisCookie) : 0);
 
     const setRequestNoti = (n: number) => {
+        console.log(n);
         const v = Math.max(n, 0);
         cookies.set("notis", v);
         setRequestNotiIn(v);
@@ -189,7 +190,7 @@ export default function Bar() {
             // console.log(allReqsCache);
             if (allReqsCache.length !== 0 && view === 0) {
                 // console.log("allReqsCache" + allReqsCache.length);
-                setRequestNoti(requestNoti + asort.length - allReqs.length);
+                if (asort.length - allReqs.length > 0) setRequestNoti(requestNoti + asort.length - allReqs.length);
             }
             setAllReqs(asort);
             allReqsCache = asort;
@@ -343,7 +344,7 @@ export default function Bar() {
                     }}
                     >
                         <div style={{ flex: 1 }}>
-                            <ToggleTab labels={[{ label: "Songs", noti: false }, { label: "Requests", noti: requestNoti !== 0 }]} value={view} setValue={setView}></ToggleTab>
+                            <ToggleTab labels={[{ label: "Songs", noti: 0 }, { label: "Requests", noti: requestNoti }]} value={view} setValue={setView}></ToggleTab>
                         </div>
                     </div>
 

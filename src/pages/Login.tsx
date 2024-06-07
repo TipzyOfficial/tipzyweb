@@ -14,7 +14,7 @@ import { Colors, padding } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 
 const formatBirthday = (birthday: Date) => {
-    return `${birthday.getFullYear()}-${birthday.getMonth()+1 >= 10 ? (birthday.getMonth()+1) : "0" + (birthday.getMonth()+1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
+    return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
 }
 
 function Login() {
@@ -28,19 +28,21 @@ function Login() {
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
 
+    console.log("usc login", usc, cookies);
+
     useEffect(() => {
-        if(barID) setLoginPrompt(true);
+        if (barID) setLoginPrompt(true);
     })
 
     const login = (at: string, rt: string, ea: number) => {
         loginWithTipzyToken(at, rt, ea)
-        .catch(() => {
-            setGlobalDisable(false);
-            setLoginPressed(false);
-        })
+            .catch(() => {
+                setGlobalDisable(false);
+                setLoginPressed(false);
+            })
     }
 
-    function loginWithGoogleToken(token: string | null){
+    function loginWithGoogleToken(token: string | null) {
         if (token == null) {
             alert("Null token when logging into Google. Contact an admin for more information.")
             return;
@@ -60,16 +62,16 @@ function Login() {
     });
 
     const onLogin = () => {
-        if(!loginPressed) {
+        if (!loginPressed) {
             setLoginPressed(true);
             loginWithUsernamePassword(username, password)
-            .then(json => {
-                // console.log("ei", json.expires_in);
-                login(json.access_token, json.refresh_token, expiresInToAt(json.expires_in));
-            }).catch(e => {
-                setLoginPressed(false);
-                console.log(e);
-            })
+                .then(json => {
+                    // console.log("ei", json.expires_in);
+                    login(json.access_token, json.refresh_token, expiresInToAt(json.expires_in));
+                }).catch(e => {
+                    setLoginPressed(false);
+                    console.log(e);
+                })
         }
     }
 
@@ -97,7 +99,7 @@ function Login() {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
             return;
         }
-        const name =  "Guest";
+        const name = "Guest";
         const email = undefined;
         const img = undefined;
         const expires_at = expiresAt;
@@ -108,7 +110,7 @@ function Login() {
         // console.log("login", user);
 
         const nextPage = () => {
-            if(barID) router.navigate(`/bar?id=${barID}`);
+            if (barID) router.navigate(`/bar?id=${barID}`);
             else router.navigate("/code")
         }
 
@@ -116,12 +118,12 @@ function Login() {
         // console.log("usc user", usc.user);
         await checkIfAccountExists({
             user: user,
-            setUser: () => {},
-            barState: {setBar: () => {}}
+            setUser: () => { },
+            barState: { setBar: () => { } }
         }).then((result) => {
-            if(result.result){
+            if (result.result) {
                 storeAll({
-                    user: user,
+                    user: result.data,
                     setUser: usc.setUser,
                     barState: usc.barState,
                 }, refreshToken).then((user) => {
@@ -129,14 +131,19 @@ function Login() {
                     usc.setUser(user);
                     nextPage();
                 });
-                
+
             } else {
                 createAccount(user).then((r) => {
-                    checkIfAccountExists(usc).then(r => {
-                        if(!r.result) return undefined
+                    console.log("creating account.", usc);
+                    checkIfAccountExists({
+                        user: user,
+                        setUser: () => { },
+                        barState: { setBar: () => { } }
+                    }).then(r => {
+                        if (!r.result) return undefined
                         return r.data;
                     }).then(newUser => {
-                        if(!newUser) {
+                        if (!newUser) {
                             alert("Problem verifying account exists. Try again later.")
                             return;
                         }
@@ -172,43 +179,42 @@ function Login() {
         const [pm, setPm] = useState(true);
         const [disabled, setDisabled] = useState(true);
         const [registerPressed, setRegisterPressed] = useState(false);
-    
+
         const emailRegex = new RegExp(".@.*\..");
-    
-    
+
+
         const checkShouldDisable = () => {
-            if(password.length < 8) return true;
+            if (password.length < 8) return true;
             return Math.min(firstName.length, lastName.length, username.length, email.length, password.length) === 0;
         }
-    
+
         const PasswordRule = () => password.length < 8 ?
-        <div style={regstyles.rule}>
-            <span style={{paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block'}}>Password must have a minimum of 8 characters.</span>
-        </div> : <></>
-    
+            <div style={regstyles.rule}>
+                <span style={{ paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block' }}>Password must have a minimum of 8 characters.</span>
+            </div> : <></>
+
         const ConfirmPasswordRule = () => !pm ?
-        <div style={regstyles.rule}>
-            <span style={{paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block'}}>Passwords don't match.</span>
-        </div> : <></>
-    
-        if(disabled !== checkShouldDisable()) setDisabled(checkShouldDisable());
-    
+            <div style={regstyles.rule}>
+                <span style={{ paddingTop: 2, fontSize: 12, color: Colors.secondaryLight, lineHeight: 1, display: 'block' }}>Passwords don't match.</span>
+            </div> : <></>
+
+        if (disabled !== checkShouldDisable()) setDisabled(checkShouldDisable());
+
         const onRegister = () => {
-            if(!registerPressed) {
+            if (!registerPressed) {
                 setRegisterPressed(true);
-                if (!emailRegex.test(email)){
+                if (!emailRegex.test(email)) {
                     alert("Invalid email. Please enter in a valid email.");
                     setRegisterPressed(false);
                     return;
                 }
-                if(confirmPassword !== password) {
+                if (confirmPassword !== password) {
                     setRegisterPressed(false)
                     setPm(false); return;
                 }
                 setPm(true);
-        
-                registerUsernamePassword(firstName, lastName, email, username, password).then((response) => response.json()).then(json => 
-                    {
+
+                registerUsernamePassword(firstName, lastName, email, username, password).then((response) => response.json()).then(json => {
                     setRegisterPressed(false)
                     if (json.status === 201) {
                         alert("Woohoo! Account successfully created! Please log in.");
@@ -223,85 +229,85 @@ function Login() {
                 }).catch(() => setRegisterPressed(false))
             }
         }
-    
-        return(
-            <div style={{flex: 1, width: '100%', justifyContent: 'center', display: "flex"}}>
-            <div style={styles.jumbo}>
-                <div style={styles.header}>
-                    <div style={{width: "100%", justifyContent: 'center', display: 'flex'}}>
-                        <span className='App-title' style={{textAlign: 'center'}}>Sign Up</span>
+
+        return (
+            <div style={{ flex: 1, width: '100%', justifyContent: 'center', display: "flex" }}>
+                <div style={styles.jumbo}>
+                    <div style={styles.header}>
+                        <div style={{ width: "100%", justifyContent: 'center', display: 'flex' }}>
+                            <span className='App-title' style={{ textAlign: 'center' }}>Sign Up</span>
+                        </div>
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' type='' placeholder='Last name' value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' placeholder='Username' value={username} autoCorrect='off' autoCapitalize='off' onChange={(e) => setUsername(e.target.value)} />
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' type='email' placeholder='email@address.com' value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div style={{ paddingBottom: 10, justifyContent: 'flex-start' }}>
+                        <input className='input' type='Password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <PasswordRule />
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' type='Password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                        <ConfirmPasswordRule />
+                    </div>
+                    <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
+                    <div style={{ paddingTop: 10, width: "100%", textAlign: 'center' }}>
+                        Have an account? <a href={"#"} onClick={() => { if (!registerPressed) setLoginPage(true) }}>Sign In</a>
+                    </div>
+                    <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
+                        By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                     </div>
                 </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='' placeholder='Last name' value={lastName} onChange={(e) => setLastName(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' placeholder='Username' value={username} autoCorrect='off' autoCapitalize='off' onChange={(e) => setUsername(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='email' placeholder='email@address.com' value={email} onChange={(e) => setEmail(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10, justifyContent: 'flex-start'}}>
-                    <input className='input' type='Password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
-                    <PasswordRule/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='Password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
-                    <ConfirmPasswordRule/>
-                </div>
-                <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
-                <div style={{paddingTop:10, width: "100%", textAlign: 'center'}}>
-                    Have an account? <a href={"#"} onClick={() => {if(!registerPressed) setLoginPage(true)}}>Sign In</a>
-                </div>
-                <div style={{fontSize: 12, paddingTop: padding, textAlign: 'center'}}>
-                    By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
-                </div>
-            </div>
             </div>
         )
     }
 
-    return(
+    return (
         <>
             {loginPage ?
-            <div style={styles.jumbo}>  
-                {loginPrompt ? <div style={{position: 'fixed', top:0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883'}}>
-                    <div style={{padding: padding/2}}>
-                        Please sign in to continue.
+                <div style={styles.jumbo}>
+                    {loginPrompt ? <div style={{ position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883' }}>
+                        <div style={{ padding: padding / 2 }}>
+                            Please sign in to continue.
+                        </div>
+                    </div> : <></>}
+                    <div style={styles.header}>
+                        <BigLogo></BigLogo>
                     </div>
-                </div> : <></>}          
-                <div style={styles.header}>
-                    <BigLogo></BigLogo>
+                    <div style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <GoogleButton
+                            style={{ width: '100%' }}
+                            onClick={() => googleLogin()} />
+                    </div>
+                    <div style={{ padding: 10, textAlign: 'center' }}>
+                        or
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)} />
+                    </div>
+                    <div style={{ paddingBottom: 10 }}>
+                        <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
+                    <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                        Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
+                    </div>
+                    <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
+                        By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                    </div>
                 </div>
-                <div style={{justifyContent: 'center', alignItems: 'center'}}>
-                    <GoogleButton 
-                    style={{width: '100%'}}
-                    onClick={() => googleLogin()}/>                        
-                </div>
-                <div style={{padding:10, textAlign: 'center'}}>
-                    or
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)}/>
-                </div>
-                <div style={{paddingBottom: 10}}>
-                    <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
-                </div>
-                <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
-                <div style={{paddingTop:10, textAlign: 'center'}}>
-                    Don't have an account? <a href={"#"} onClick={() => {if(!loginPressed) setLoginPage(false)}}>Sign Up</a>
-                </div>
-                <div style={{fontSize: 12, paddingTop: padding, textAlign: 'center'}}>
-                    By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
-                </div>
-            </div>
-            : <Register/>}
-            {(globalDisable || loginPressed) ? 
-                <div className='App-body' style={{position: 'fixed', top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background+"aa"}}>
-                    <Spinner style={{color: Colors.primaryRegular, width: 75, height: 75}}></Spinner>
+                : <Register />}
+            {(globalDisable || loginPressed) ?
+                <div className='App-body' style={{ position: 'fixed', top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
+                    <Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }}></Spinner>
                 </div>
                 : <></>
             }
@@ -309,7 +315,7 @@ function Login() {
     )
 }
 
-const jumbo: CSSProperties = { 
+const jumbo: CSSProperties = {
     backgroundColor: "#0000",
     width: "80%",
     minWidth: 200,
@@ -344,7 +350,7 @@ export const styles = {
         display: 'block',
         width: '100%',
     }
-  }
+}
 
 const rule: CSSProperties = {
     textAlign: 'left',
@@ -352,7 +358,7 @@ const rule: CSSProperties = {
 
 const regstyles = {
     rule: rule
-  }
+}
 
 
 export default Login;

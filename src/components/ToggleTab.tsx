@@ -1,11 +1,11 @@
 import { Colors, padding, radius } from "../lib/Constants";
 import '../App.css'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle as faNoti } from "@fortawesome/free-solid-svg-icons";
+// import { faCircle as faNoti } from "@fortawesome/free-solid-svg-icons";
 
 
 const ToggleTab = (props: {
-    labels: Array<string> | Array<{label: string, noti: boolean}>,
+    labels: Array<string> | Array<{ label: string, noti: number }>,
     value: number, setValue: (value: number) => void
 }) => {
 
@@ -14,8 +14,10 @@ const ToggleTab = (props: {
     const backgroundColor = "#8883";
     const activeColor = Colors.secondaryDark;
 
-    const ToggleComponent = (props: {label: string, value: number, noti?: boolean}) => {
-        return(
+    const ToggleComponent = (props: { label: string, value: number, noti?: number }) => {
+        const noti = props.noti ? (props.noti === 0 ? undefined : props.noti) : undefined;
+
+        return (
             <div style={{
                 boxShadow: props.value === v ? '0px 0px 10px rgba(23, 23, 30, 0.9)' : 'none',
                 flex: 1,
@@ -25,8 +27,8 @@ const ToggleTab = (props: {
             }}>
                 <button style={{
                     flex: 1,
-                    padding: 8, 
-                    backgroundColor: props.value === v ? activeColor : "#0000", 
+                    padding: 8,
+                    backgroundColor: props.value === v ? activeColor : "#0000",
                     zIndex: props.value === v ? 1 : 0,
                     borderRadius: radius,
                     color: 'white',
@@ -36,28 +38,29 @@ const ToggleTab = (props: {
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}
-                onClick={() => sv(props.value)}
+                    onClick={() => sv(props.value)}
                 >
                     <span className="App-toggletitle">{props.label}</span>
-                    <div style={{paddingLeft: padding/2}}></div>
-                    {props.noti ? <FontAwesomeIcon icon={faNoti} color={Colors.primaryRegular}></FontAwesomeIcon> : <></>}
+                    <div style={{ paddingLeft: padding / 2 }}></div>
+                    {noti ? <div style={{}}><div style={{ padding: 2, borderRadius: 100, backgroundColor: Colors.primaryRegular, minWidth: 30, minHeight: 30 }}>{noti}</div></div> : <></>}
                 </button>
             </div>
 
         );
     }
 
-    return(
-        <div style={{width: '100%'}}>
-            <div style={{width: '100%', 
+    return (
+        <div style={{ width: '100%' }}>
+            <div style={{
+                width: '100%',
                 backgroundColor: backgroundColor,
-                borderRadius: radius, 
+                borderRadius: radius,
                 display: "flex",
                 overflow: 'hidden'
-                }}>
+            }}>
                 {props.labels.map((e, i) => {
-                    if(typeof e === 'string') return <ToggleComponent label={e} value={i} key={e+"i"+i}/>
-                    return <ToggleComponent label={e.label} noti={e.noti} value={i} key={e.label+"i"+i}/>
+                    if (typeof e === 'string') return <ToggleComponent label={e} value={i} key={e + "i" + i} />
+                    return <ToggleComponent label={e.label} noti={e.noti} value={i} key={e.label + "i" + i} />
                 })}
             </div>
         </div>

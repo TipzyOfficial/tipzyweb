@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 import Bar from './pages/bar/Bar';
 import EnterCode from './pages/bar/EnterCode';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { Navigate } from 'react-router'
 // import { Cookies, useCookies } from 'react-cookie';
 import Cookies from 'universal-cookie';
@@ -40,108 +40,75 @@ function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
   const session = cookies.get("bar_session");
+  console.log("usercontext", userContext);
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
-  return(
+  return (
     loggedin ? (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>) : <Login></Login>
   )
 }
 
-const Layout = () => {
-  const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
-  const usc = useContext(UserSessionContext);
-
-  useEffect(() => {
-    // Create SetupIntent as soon as the page loads
-    
-    fetchPaymentSheetParams(usc).then(
-      (r) => {
-        setClientSecret(r);
-      }
-    )
-  }, []);
-
-
-  if(clientSecret === null) {
-    Logout(usc, getCookies());
-    return (<Outlet></Outlet>)
-  }
-
-  return (
-    clientSecret ?
-      <Elements
-        stripe={stripePromise}
-        options={{
-          clientSecret: clientSecret,
-          appearance: { theme: "night" }
-        }}
-      >
-        <Outlet />
-      </Elements> :
-      <DisplayOrLoading condition={false}></DisplayOrLoading>
-  );
-}
-
 export const router = createBrowserRouter([{
   // element: <Layout/>,
-  children: 
-  [{
-    path: "/",
-    Component: Redirect
-  },
-  {
-    path: "/login",
-    Component: Login
-  },
-  {
-    path: "/register",
-    Component: Register
-  },
-  {
-    path: "/code",
-    Component: EnterCode
-  },
-  {
-    path: "/bar",
-    Component: Bar
-  },
-  {
-    path: "/bar/search",
-    Component: SongSearch
-  },
-  {
-    path: "/profile",
-    Component: Profile
-  },
-  {
-    path: "/account",
-    Component: Account
-  },
-  {
-    path: "/about",
-    Component: About
-  },
-  {
-    path: "/payments",
-    Component: PaymentSetupScreen
-  },
-  {
-    path: "/invoices",
-    Component: Invoices
-  },
-  {
-    path: "/artist",
-    Component: ArtistInfo
-  },
-  {
-    path: "/album",
-    Component: AlbumPage
-  },
-  {
-    path: "/albums",
-    Component: Albums
-  }
-  ], errorElement: <NotFoundPage title="404" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1}/>}
+  children:
+    [{
+      path: "/",
+      Component: Redirect
+    },
+    {
+      path: "/login",
+      Component: Login
+    },
+    {
+      path: "/register",
+      Component: Register
+    },
+    {
+      path: "/code",
+      Component: EnterCode
+    },
+    {
+      path: "/bar",
+      Component: Bar
+    },
+    {
+      path: "/bar/search",
+      Component: SongSearch
+    },
+    {
+      path: "/profile",
+      Component: Profile
+    },
+    {
+      path: "/account",
+      Component: Account
+    },
+    {
+      path: "/about",
+      Component: About
+    },
+    {
+      path: "/payments",
+      Component: PaymentSetupScreen
+    },
+    {
+      path: "/invoices",
+      Component: Invoices
+    },
+    {
+      path: "/artist",
+      Component: ArtistInfo
+    },
+    {
+      path: "/album",
+      Component: AlbumPage
+    },
+    {
+      path: "/albums",
+      Component: Albums
+    }
+    ], errorElement: <NotFoundPage title="404" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />
+}
 ], {});
 
 function App() {
