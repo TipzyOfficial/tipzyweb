@@ -40,7 +40,6 @@ function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
   const session = cookies.get("bar_session");
-  console.log("usercontext", userContext);
   let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
 
   return (

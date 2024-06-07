@@ -28,8 +28,6 @@ function Login() {
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
 
-    console.log("usc login", usc, cookies);
-
     useEffect(() => {
         if (barID) setLoginPrompt(true);
     })
