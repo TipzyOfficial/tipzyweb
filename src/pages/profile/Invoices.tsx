@@ -12,6 +12,11 @@ import FlatList from "flatlist-react/lib";
 import ExpandHeader from "../../components/ExpandHeader";
 import '../../App.css';
 
+type InvoicesType = {
+    date: Date,
+    invoices: InvoiceType[]
+}
+
 type InvoiceType = {
     id: string,
     description: string,
@@ -20,15 +25,15 @@ type InvoiceType = {
     paid: boolean,
 }
 
-function parseInvoiceJSON (e: any, desc?: string): InvoiceType {
-    return {id: e.id, description: desc ?? e.description, amount: e.amount, currency: e.currency, paid: e.paid};
+function parseInvoiceJSON(e: any, desc?: string): InvoiceType {
+    return { id: e.id, description: desc ?? e.description, amount: e.amount, currency: e.currency, paid: e.paid };
 }
 
-export default function Invoices(){
+export default function Invoices() {
     const [pendingVisible, setPendingVisible] = useState(true);
     const [completedVisible, setCompletedVisible] = useState(true);
-    const [pending, setPending] = useState<InvoiceType[]>([]);
-    const [completed, setCompleted] = useState<InvoiceType[]>([]);
+    const [pending, setPending] = useState<InvoicesType[]>([]);
+    const [completed, setCompleted] = useState<InvoicesType[]>([]);
     const [ready, setReady] = useState(false);
     const usc = useContext(UserSessionContext);
     const headerRef = useRef<HTMLDivElement>(null);
@@ -39,19 +44,30 @@ export default function Invoices(){
         const pending = json["Pending items"];
         const completed = json["Invoices"];
 
-        const p: InvoiceType[] = [];
-        const c: InvoiceType[] = [];
+        console.log(json);
+
+        const pi: InvoicesType[] = [];
+        const ci: InvoicesType[] = [];
+
 
         pending.forEach((e: any) => {
-            p.push(parseInvoiceJSON(e, "This is the amount of money that is yet to be charged to your account–you only get charged if your requested song gets accepted! Currently, invoices are processed every Monday morning."));
+            const p: InvoiceType[] = [];
+            e.invoice_items.forEach((f: any) => {
+                p.push(parseInvoiceJSON(f));
+            })
+            pi.push({ date: new Date(e.paid_date), invoices: p })
         })
 
         completed.forEach((e: any) => {
-            c.push(parseInvoiceJSON(e, "Payment has ben processed"));
+            const c: InvoiceType[] = [];
+            e.invoice_items.forEach((f: any) => {
+                c.push(parseInvoiceJSON(f));
+            })
+            ci.push({ date: new Date(e.paid_date), invoices: c })
         })
 
-        setPending(p);
-        setCompleted(c);
+        setPending(pi);
+        setCompleted(ci);
 
         setReady(true);
     }
@@ -64,16 +80,16 @@ export default function Invoices(){
         getInvoices();
     }, []);
 
-    const RenderItem = (props: {item: InvoiceType}) => {
+    const RenderItem = (props: { item: InvoicesType }) => {
         const item = props.item;
-        return(
-            <div style={{width: "100%", paddingTop: padding}}>
-                <div style={{width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', flexDirection: 'column'}}>
+        return (
+            <div style={{ width: "100%", paddingTop: padding }}>
+                <div style={{ width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', flexDirection: 'column' }}>
                     <span className="App-tertiarytitle">
-                        {item.paid ? "Paid Invoice" : "Pending Invoice"}
+                        {item.invoices.paid ? "Paid Invoice" : "Pending Invoice"}
                     </span>
                     <span className="App-smalltext">
-                        Amount: {item.currency === "usd" ? "$" : ""}{(item.amount/100).toLocaleString('en-US', {
+                        Amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toLocaleString('en-US', {
                             minimumFractionDigits: 2,
                             useGrouping: false
                         })}
@@ -86,49 +102,50 @@ export default function Invoices(){
         )
     }
 
-    return(
+    return (
         <div className="App-body-top">
-            <div ref={headerRef} 
-                style={{position: 'sticky', 
-                top: 0,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexDirection: 'row',
-                width: '100%', 
-            }}
+            <div ref={headerRef}
+                style={{
+                    position: 'sticky',
+                    top: 0,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    width: '100%',
+                }}
             >
-            <TZHeader title={"Invoices"} 
-                leftComponent={<BackButton onClick={() => router.navigate(-1)}/>}
-                rightComponent={<HelpButton 
-                    text="Once your requested song gets accepted, you don't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here."></HelpButton>}
+                <TZHeader title={"Invoices"}
+                    leftComponent={<BackButton onClick={() => router.navigate(-1)} />}
+                    rightComponent={<HelpButton
+                        text="Once your requested song gets accepted, you don't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here."></HelpButton>}
                 />
             </div>
-                <div
-                    style={{flex: 1, display: 'flex', flexDirection: 'column', paddingLeft: padding, paddingRight: padding, width: "100%"}}
-                >
-                    <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}>
-                        <>
+            <div
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingLeft: padding, paddingRight: padding, width: "100%" }}
+            >
+                <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}>
+                    <>
                         <FlatList
                             list={pending}
-                            renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No pending invoices. Go request something!</div>}
+                            renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoices. Go request something!</div>}
                             renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
                         >
                         </FlatList>
-                        <div style={{padding: padding/2}}></div>
-                        </>
-                    </ExpandHeader>
-                    <div style={{padding: padding/2}}></div>
-                    <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Completed" onClick={() => setCompletedVisible(!completedVisible)} expanded={completedVisible}>
-                        <FlatList
-                            list={completed}
-                            renderWhenEmpty={() => <div style={{height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888'}}>No completed invoices–yet!</div>}
-                            renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
-                        >
+                        <div style={{ padding: padding / 2 }}></div>
+                    </>
+                </ExpandHeader>
+                <div style={{ padding: padding / 2 }}></div>
+                <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Completed" onClick={() => setCompletedVisible(!completedVisible)} expanded={completedVisible}>
+                    <FlatList
+                        list={completed}
+                        renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No completed invoices–yet!</div>}
+                        renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
+                    >
 
-                        </FlatList>
-                    </ExpandHeader>
-                </div>
+                    </FlatList>
+                </ExpandHeader>
+            </div>
         </div>
     )
 }
