@@ -14,7 +14,8 @@ import '../../App.css';
 
 type InvoicesType = {
     date: Date,
-    invoices: InvoiceType[]
+    invoices: InvoiceType[],
+    total_amount: number,
 }
 
 type InvoiceType = {
@@ -34,7 +35,7 @@ function parseInvoiceJSON(e: any, desc?: string): InvoiceType {
 export default function Invoices() {
     const [pendingVisible, setPendingVisible] = useState(true);
     const [completedVisible, setCompletedVisible] = useState(true);
-    const [pending, setPending] = useState<InvoicesType[]>([]);
+    const [pending, setPending] = useState<InvoicesType | undefined>();
     const [completed, setCompleted] = useState<InvoicesType[]>([]);
     const [ready, setReady] = useState(false);
     const usc = useContext(UserSessionContext);
@@ -46,36 +47,35 @@ export default function Invoices() {
         const pending = json["Pending items"];
         const completed = json["Invoices"];
 
-        console.log(pending);
-
-        // console.log(json);
-
-        const pi: InvoicesType[] = [];
-        const ci: InvoicesType[] = [];
+        console.log(json);
 
         const p: InvoiceType[] = [];
+        const c: InvoicesType[] = [];
+
+        let pamnt = 0;
 
         pending.forEach((e: any) => {
             p.push(parseInvoiceJSON(e));
-
-            // pi.push({ 
-            //     date: new Date(e.paid_date), 
-            //     invoices: p
-            // })
+            pamnt += e.amount;
         })
 
-        console.log("p", p);
+        setPending({ invoices: p, date: new Date(json.Next_charge_date * 1000), total_amount: pamnt / 100 });
 
-        // completed.forEach((e: any) => {
-        //     const c: InvoiceType[] = [];
-        //     e.forEach((f: any) => {
-        //         c.push(parseInvoiceJSON(f));
-        //     })
-        //     ci.push({ date: new Date(e.paid_date), invoices: c })
-        // })
 
-        setPending(pi);
-        setCompleted(ci);
+        completed.forEach((e: any) => {
+            let camnt = 0;
+            const ci: InvoiceType[] = []
+            e.invoice_items.forEach((ei: any) => {
+                camnt += ei.amount;
+                ci.push(parseInvoiceJSON(ei));
+            })
+
+            c.push({ invoices: ci, date: new Date(Date.parse(e.paid_date)), total_amount: camnt })
+            // ci.push(parseInvoiceJSON(e));
+        })
+
+
+        setCompleted(c);
 
         setReady(true);
     }
@@ -88,23 +88,43 @@ export default function Invoices() {
         getInvoices();
     }, []);
 
-    const RenderItem = (props: { item: InvoicesType }) => {
+    const RenderSongItem = (props: { item: InvoiceType }) => {
         const item = props.item;
         return (
             <div style={{ width: "100%", paddingTop: padding }}>
+                <div style={{ width: "100%", display: 'flex', flexDirection: 'row', alignItems: 'flex-end' }}>
+                    <span className="App-smalltext" style={{ fontStyle: 'oblique', color: "#888" }}>
+                        {item.id}:
+                    </span>
+                    <span className="App-smalltext" style={{ paddingLeft: 2 }}>
+                        {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)}
+                    </span>
+                </div>
+            </div>
+        )
+    }
+
+    const RenderInvoiceItem = (props: { item?: InvoicesType, pending?: boolean }) => {
+        const item = props.item;
+
+        if (!item) return (
+            <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoices–go request something!!</div>
+        )
+
+        return (
+            <div style={{ width: "100%", paddingTop: padding }}>
                 <div style={{ width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', flexDirection: 'column' }}>
-                    {/* <span className="App-tertiarytitle">
-                        {item.invoices.paid ? "Paid Invoice" : "Pending Invoice"}
+                    <span className="App-tertiarytitle">
+                        ${item.total_amount.toFixed(2)}
                     </span>
                     <span className="App-smalltext">
-                        Amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            useGrouping: false
-                        })}
+                        {props.pending ? "Will process on:" : "Date processed:"} {`${item.date.toLocaleDateString()} at ${item.date.toLocaleTimeString()}`}
                     </span>
-                    <span className="App-smalltext">
-                        Description: {item.description}
-                    </span> */}
+                    <FlatList
+                        list={item.invoices}
+                        renderItem={(item, key) => <RenderSongItem item={item} key={key} />}
+                    >
+                    </FlatList>
                 </div>
             </div>
         )
@@ -134,12 +154,7 @@ export default function Invoices() {
             >
                 <ExpandHeader zI={4} height={headerRef.current ? headerRef.current.clientHeight : 0} loading={!ready} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}>
                     <>
-                        <FlatList
-                            list={pending}
-                            renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoices. Go request something!</div>}
-                            renderItem={(item, key) => <RenderItem item={item} key={key}></RenderItem>}
-                        >
-                        </FlatList>
+                        <RenderInvoiceItem item={pending} pending></RenderInvoiceItem>
                         <div style={{ padding: padding / 2 }}></div>
                     </>
                 </ExpandHeader>
@@ -148,9 +163,8 @@ export default function Invoices() {
                     <FlatList
                         list={completed}
                         renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No completed invoices–yet!</div>}
-                        renderItem={(item, key) => <RenderItem item={item} key={key}></RenderItem>}
+                        renderItem={(item, key) => <RenderInvoiceItem item={item} key={key}></RenderInvoiceItem>}
                     >
-
                     </FlatList>
                 </ExpandHeader>
             </div>
