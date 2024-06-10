@@ -85,7 +85,7 @@ export default function Invoices() {
         return (
             <div style={{ width: "100%", paddingTop: padding }}>
                 <div style={{ width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', flexDirection: 'column' }}>
-                    <span className="App-tertiarytitle">
+                    {/* <span className="App-tertiarytitle">
                         {item.invoices.paid ? "Paid Invoice" : "Pending Invoice"}
                     </span>
                     <span className="App-smalltext">
@@ -96,7 +96,7 @@ export default function Invoices() {
                     </span>
                     <span className="App-smalltext">
                         Description: {item.description}
-                    </span>
+                    </span> */}
                 </div>
             </div>
         )
@@ -129,7 +129,7 @@ export default function Invoices() {
                         <FlatList
                             list={pending}
                             renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoices. Go request something!</div>}
-                            renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
+                            renderItem={(item, key) => <RenderItem item={item} key={key}></RenderItem>}
                         >
                         </FlatList>
                         <div style={{ padding: padding / 2 }}></div>
@@ -140,7 +140,7 @@ export default function Invoices() {
                     <FlatList
                         list={completed}
                         renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No completed invoices–yet!</div>}
-                        renderItem={(item, key) => <RenderItem item={item} key={item.id + key}></RenderItem>}
+                        renderItem={(item, key) => <RenderItem item={item} key={key}></RenderItem>}
                     >
 
                     </FlatList>
