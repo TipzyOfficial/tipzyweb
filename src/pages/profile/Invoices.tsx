@@ -23,10 +23,12 @@ type InvoiceType = {
     amount: number,
     currency: string,
     paid: boolean,
+    bar: string,
+    date: Date
 }
 
 function parseInvoiceJSON(e: any, desc?: string): InvoiceType {
-    return { id: e.id, description: desc ?? e.description, amount: e.amount, currency: e.currency, paid: e.paid };
+    return { id: e.id, description: desc ?? e.metadata.song_info, amount: e.amount, currency: e.currency, paid: e.paid, bar: e.metadata.bar_name, date: new Date(parseInt(e.metadata.date)) };
 }
 
 export default function Invoices() {
@@ -44,27 +46,33 @@ export default function Invoices() {
         const pending = json["Pending items"];
         const completed = json["Invoices"];
 
-        console.log(json);
+        console.log(pending);
+
+        // console.log(json);
 
         const pi: InvoicesType[] = [];
         const ci: InvoicesType[] = [];
 
+        const p: InvoiceType[] = [];
 
         pending.forEach((e: any) => {
-            const p: InvoiceType[] = [];
-            e.invoice_items.forEach((f: any) => {
-                p.push(parseInvoiceJSON(f));
-            })
-            pi.push({ date: new Date(e.paid_date), invoices: p })
+            p.push(parseInvoiceJSON(e));
+
+            // pi.push({ 
+            //     date: new Date(e.paid_date), 
+            //     invoices: p
+            // })
         })
 
-        completed.forEach((e: any) => {
-            const c: InvoiceType[] = [];
-            e.invoice_items.forEach((f: any) => {
-                c.push(parseInvoiceJSON(f));
-            })
-            ci.push({ date: new Date(e.paid_date), invoices: c })
-        })
+        console.log("p", p);
+
+        // completed.forEach((e: any) => {
+        //     const c: InvoiceType[] = [];
+        //     e.forEach((f: any) => {
+        //         c.push(parseInvoiceJSON(f));
+        //     })
+        //     ci.push({ date: new Date(e.paid_date), invoices: c })
+        // })
 
         setPending(pi);
         setCompleted(ci);
