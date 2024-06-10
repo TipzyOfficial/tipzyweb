@@ -92,11 +92,11 @@ export default function Invoices() {
         const item = props.item;
         return (
             <div style={{ width: "100%", paddingTop: padding }}>
-                <div style={{ width: "100%", display: 'flex', flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <span className="App-smalltext" style={{ fontStyle: 'oblique', color: "#888" }}>
-                        {item.id}:
+                <div style={{ width: "100%", overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', flexDirection: 'column' }}>
+                    <span className="App-smalltext" style={{ fontStyle: 'oblique', color: "#888", paddingLeft: 2 }}>
+                        ID: {item.id}
                     </span>
-                    <span className="App-smalltext" style={{ paddingLeft: 2 }}>
+                    <span className="App-smalltext">
                         {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)}
                     </span>
                 </div>
