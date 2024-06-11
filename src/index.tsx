@@ -35,10 +35,9 @@ export function Logout(usc: UserSessionContextType, cookies: Cookies) {
   usc.setUser(new Consumer("", 0, ""));
   usc.barState.setBar(undefined);
 
-  clearData().then(() => {
-    googleLogout();
-    goToLogin();
-  });
+  clearData();
+  googleLogout();
+  goToLogin();
 }
 
 export function rootGetRefreshToken(cookies: Cookies): string | null {
@@ -72,7 +71,7 @@ async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturn
 }
 
 export async function getTipper(usc: UserSessionContextType, cookies: Cookies) {
-  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies));
+  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens));
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
@@ -102,7 +101,7 @@ async function handleResponse(response: Response | null) {
 }
 
 export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {
-  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens, cookies), fetchMethod, body, usc.abortController?.signal).then(response => {
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
   }).catch((e: Error) => {
     if (e.name === "AbortError") {
@@ -119,9 +118,10 @@ export async function storeTokens(accessToken: string, refreshToken: string, exp
   // cookies.set("access_token", accessToken, { expires: new Date(expiresAt), secure: true });
   // cookies.set("refresh_token", refreshToken, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true });
   // cookies.set("expires_at", expiresAt, { expires: new Date(expiresAt), secure: true });
+
   setStored("access_token", accessToken);
   setStored("refresh_token", refreshToken);
-  setStored("expiresAt", expiresAt.toString());
+  setStored("expires_at", expiresAt.toString());
 }
 
 export async function storeAll(usc: UserSessionContextType, refreshToken: string) {
