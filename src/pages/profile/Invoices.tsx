@@ -70,7 +70,8 @@ export default function Invoices() {
                 ci.push(parseInvoiceJSON(ei));
             })
 
-            c.push({ invoices: ci, date: new Date(Date.parse(e.paid_date)), total_amount: camnt })
+            if (camnt !== 0)
+                c.push({ invoices: ci, date: new Date(Date.parse(e.paid_date)), total_amount: camnt })
             // ci.push(parseInvoiceJSON(e));
         })
 
@@ -91,7 +92,7 @@ export default function Invoices() {
     const RenderSongItem = (props: { item: InvoiceType }) => {
         const item = props.item;
         return (
-            <div style={{ width: "100%", paddingTop: padding }}>
+            <div style={{ width: "100%", paddingTop: padding / 2 }}>
                 <div style={{ width: "100%", overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', flexDirection: 'column' }}>
                     <span className="App-smalltext" style={{ fontStyle: 'oblique', color: "#888", paddingLeft: 2 }}>
                         ID: {item.id}
