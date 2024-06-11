@@ -6,7 +6,8 @@ import { Colors, padding } from "../lib/Constants";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { fetchPaymentSheetParams } from "../lib/stripe";
 import { Logout } from "..";
-import { getCookies, stripePromise } from "../App";
+import { stripePromise } from "../App";
+import { getCookies } from "../lib/utils";
 
 export default function PaymentSetup(props: { handleSubmit?: () => void }) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);

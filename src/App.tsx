@@ -29,18 +29,18 @@ import Albums from './pages/bar/artist/Albums';
 import PaymentSetupScreen from './pages/profile/PaymentSetupScreen';
 import { NotFoundPage } from './pages/bar/NotFoundPage';
 import Invoices from './pages/profile/Invoices';
+import { getCookies, getStored } from './lib/utils';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
-
-export const getCookies = () => {
-  return new Cookies(null, { path: '/', sameSite: "strict" })
-}
 
 function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
   const session = cookies.get("bar_session");
-  let loggedin = cookies.get("refresh_token") && cookies.get("expires_at") && userContext.user.access_token;
+  let loggedin = getStored("refresh_token") && getStored("expires_at") && userContext.user.access_token;
+
+  //reset refresh expiry time
+  // if (loggedin) cookies.set("refresh_token", cookies.get("refresh_token"), { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
 
   return (
     loggedin ? (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>) : <Login></Login>

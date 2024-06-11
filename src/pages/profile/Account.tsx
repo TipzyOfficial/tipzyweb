@@ -3,7 +3,7 @@ import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
 import { Logout, fetchWithToken } from "../..";
-import { getCookies, router } from "../../App";
+import { router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
 import { Cookie } from "universal-cookie";
@@ -12,6 +12,7 @@ import BackButton from "../../components/BackButton";
 import TZProfileComponent from "../../components/TZProfileComponent";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
+import { getCookies } from "../../lib/utils";
 
 function AccountComponent(props: { title: string, text: string }) {
     const profileButton: React.CSSProperties = {

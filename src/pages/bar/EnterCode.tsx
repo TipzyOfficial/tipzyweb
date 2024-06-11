@@ -4,7 +4,7 @@ import '../../App.css'
 import { Button, Card, Container } from "react-bootstrap";
 import { Colors, padding, radius } from "../../lib/Constants";
 import TZButton from "../../components/TZButton";
-import { getCookies, router } from "../../App";
+import { router } from "../../App";
 import ProfileButton from "../../components/ProfileButton";
 import { BarType } from "../../lib/bar";
 import FlatList from "flatlist-react/lib";

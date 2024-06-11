@@ -6,7 +6,7 @@ import { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } f
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
-import { useInterval } from "../../lib/utils";
+import { getCookies, useInterval } from "../../lib/utils";
 import TZSearchButton from "../../components/TZSearchButton";
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import Song, { SongList } from "../../components/Song";
@@ -14,7 +14,7 @@ import Artist from "../../components/Artist";
 import { ScrollMenu } from 'react-horizontal-scrolling-menu';
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import useWindowDimensions from "../../lib/useWindowDimensions";
-import { getCookies, router } from "../../App";
+import { router } from "../../App";
 import ProfileButton from "../../components/ProfileButton";
 import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";

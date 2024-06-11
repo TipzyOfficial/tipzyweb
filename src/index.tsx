@@ -2,7 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-import App, { getCookies, goToLogin } from './App';
+import App, { goToLogin } from './App';
+import { clearData, getCookies, getStored, setStored } from './lib/utils';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import { TokenReturnType, getUser } from './lib/serverinfo';
@@ -28,28 +29,20 @@ root.render(
   </React.StrictMode>
 );
 
-export async function Logout(usc: UserSessionContextType, cookies: Cookies) {
+export function Logout(usc: UserSessionContextType, cookies: Cookies) {
   // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, ""));
   usc.barState.setBar(undefined);
-  const clearCookies = async () => {
-    await cookies.remove("access_token");
-    await cookies.remove("refresh_token");
-    await cookies.remove("expires_at");
-    await cookies.remove("name");
-    await cookies.remove("notifs");
-    await cookies.remove("notis");
-    await cookies.remove("email");
+
+  clearData().then(() => {
+    googleLogout();
     goToLogin();
-  }
-  googleLogout();
-  clearCookies();
+  });
 }
 
-export function rootGetRefreshToken(cookies: Cookies): Promise<string | null> {
-  const rt = cookies.get("refresh_token");
-  if (typeof rt !== "string") cookies.remove("refresh_token")
+export function rootGetRefreshToken(cookies: Cookies): string | null {
+  const rt = getStored("refresh_token");
   return rt;
 }
 
@@ -61,11 +54,11 @@ export function rootGetRefreshToken(cookies: Cookies): Promise<string | null> {
  * @param cookies the cookies that are storing the token data
  * @param setUser (optional) update the user if using useState()
  */
-async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType, cookies: Cookies) {
+async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturnType) {
   // console.log("resetting tokens to!", tokens)
-  const access = cookies.get("access_token");
-  const refresh = cookies.get("refresh_token");
-  const expa = cookies.get("expires_at");
+  const access = getStored("access_token");
+  const refresh = getStored("refresh_token");
+  const expa = getStored("expires_at");
   if (!refresh || !access || !expa) return;
 
   await storeTokens(tokens.access_token, tokens.refresh_token, tokens.expires_at)
@@ -122,9 +115,13 @@ export async function fetchWithToken(usc: UserSessionContextType, urlEnding: str
 
 export async function storeTokens(accessToken: string, refreshToken: string, expiresAt: number) {
   console.log("storing tokens");
-  cookies.set("access_token", accessToken);
-  cookies.set("refresh_token", refreshToken);
-  cookies.set("expires_at", expiresAt);
+
+  // cookies.set("access_token", accessToken, { expires: new Date(expiresAt), secure: true });
+  // cookies.set("refresh_token", refreshToken, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true });
+  // cookies.set("expires_at", expiresAt, { expires: new Date(expiresAt), secure: true });
+  setStored("access_token", accessToken);
+  setStored("refresh_token", refreshToken);
+  setStored("expiresAt", expiresAt.toString());
 }
 
 export async function storeAll(usc: UserSessionContextType, refreshToken: string) {

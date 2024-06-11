@@ -3,11 +3,12 @@ import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
 import { Logout } from "../..";
-import { getCookies, router } from "../../App";
+import { router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
 import BackButton from "../../components/BackButton";
 import ProfileButton from "../../components/TZProfileComponent";
+import { getCookies } from "../../lib/utils";
 
 /**
  * user: appreview, pw: appreview
@@ -76,13 +77,13 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
     return (
         <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                    <div style={{ borderRadius: "50%" }}>
-                        {props.profilePic ? (
-                            <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
-                            :
-                            (<div style={defaultProfile}>{getInitials(props.value)}</div>)
-                        }
-                    </div>
+                <div style={{ borderRadius: "50%" }}>
+                    {props.profilePic ? (
+                        <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
+                        :
+                        (<div style={defaultProfile}>{getInitials(props.value)}</div>)
+                    }
+                </div>
                 <div style={{ padding: padding, display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center', }}>
                     <span className="App-subtitle" style={{ padding: padding, paddingBottom: '0', display: 'flex' }}>
                         {props.value}
@@ -98,7 +99,6 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
 export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
-    const cookies = getCookies();
     // user.name
     // user.email
 
@@ -112,7 +112,7 @@ export default function Profile() {
         <div className={"App-body-top"}>
             <TZHeader title="Your Profile" leftComponent={
                 <BackButton onClick={handleBackClick}></BackButton>
-            }/>
+            } />
 
             <div style={styles}>
                 <ProfileItem title="Name" value={user.name} profilePic={user.image} email={user.email}></ProfileItem>

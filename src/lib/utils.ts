@@ -1,6 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import Cookies from "universal-cookie";
 
-export function useInterval(callback: () => any, delay: number, firstDelay?: number) {
+export const getCookies = () => {
+    return new Cookies(null, { path: '/', sameSite: "strict" })
+}
+
+const cookies = getCookies();
+
+export const clearData = () => {
+    cookies.remove("access_token");
+    cookies.remove("refresh_token");
+    cookies.remove("expires_at");
+    cookies.remove("name");
+    cookies.remove("notifs");
+    cookies.remove("notis");
+    cookies.remove("email");
+    localStorage.clear();
+}
+
+export const getStored = (key: string): string | null => {
+    return localStorage.getItem(key);
+}
+
+export const setStored = (key: string, value: string): void => {
+    return localStorage.setItem(key, value);
+}
+
+export function useInterval(callback: () => any, delay: number, firstDelay?: number): void {
 
     const [enabled, setEnabled] = useState(true);
     const [d, setdi] = useState(firstDelay ?? delay);

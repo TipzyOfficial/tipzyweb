@@ -5,16 +5,16 @@ import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipp
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
-import { getCookies } from '../App';
 import { useLocation } from 'react-router-dom';
+import { getCookies, getStored } from './utils';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
-    return new Consumer(cookies.get("access_token") ?? "", parseInt(cookies.get("expires_at")) ?? 0, "")
+    return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "")
 }
 
 export type BarStateType = {
-    bar?: BarType, 
+    bar?: BarType,
     setBar: (bar: BarType | undefined) => void
 }
 
@@ -27,8 +27,8 @@ export type UserSessionContextType = {
 
 export const DefaultUserSessionContext: UserSessionContextType = {
     user: new Consumer("", 0, ""),
-    setUser: () => {},
-    barState: {bar: undefined, setBar: () => {}},
+    setUser: () => { },
+    barState: { bar: undefined, setBar: () => { } },
 }
 
 // export const getStartingUser = async (): Promise<Consumer> => {
@@ -48,26 +48,26 @@ export const DefaultUserSessionContext: UserSessionContextType = {
 // }
 
 
-export const UserSessionContext = createContext<UserSessionContextType>({user: new Consumer("",0,""), setUser: () => {}, barState: {bar: undefined, setBar: () => {}}});
+export const UserSessionContext = createContext<UserSessionContextType>({ user: new Consumer("", 0, ""), setUser: () => { }, barState: { bar: undefined, setBar: () => { } } });
 
-export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boolean) : Promise<[SongRequestType[], number]> => {
+export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boolean): Promise<[SongRequestType[], number]> => {
     const p: SongRequestType[] = [];
     let ptc: number = 0;
     await fetchWithToken(usc, `tipper/requests/pending/`, 'GET').then(r => {
         return r.json();
     })
-    .then(json => {
-        const reqs = json.data;
-        reqs.forEach((e: any) => {
-            const sj = e.song_json;
-            const bi = e.business_info;
-            const s: SongType = {id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: false};
-            const b: BarType = {id: bi.id, name: bi.business_name, type: bi.business_type, image_url: bi.image_url, description: bi.description, active: bi.active}
-            ptc += e.token_count ?? 0;
-            p.push({id: e.id, song: s, status: e.status, bar: b, date: new Date(e.request_time)})
+        .then(json => {
+            const reqs = json.data;
+            reqs.forEach((e: any) => {
+                const sj = e.song_json;
+                const bi = e.business_info;
+                const s: SongType = { id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: false };
+                const b: BarType = { id: bi.id, name: bi.business_name, type: bi.business_type, image_url: bi.image_url, description: bi.description, active: bi.active }
+                ptc += e.token_count ?? 0;
+                p.push({ id: e.id, song: s, status: e.status, bar: b, date: new Date(e.request_time) })
+            })
         })
-    })
-    .catch((e: Error) => {console.log("problem getting pending: ", e)});
+        .catch((e: Error) => { console.log("problem getting pending: ", e) });
 
     return [p, ptc];
 }
@@ -76,13 +76,13 @@ export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boole
 //     let pr: SongRequestType[] = [];
 //     let tokens = 0;
 //     let ptokens = 0;
-  
+
 //     await fetchWithToken(user, `get_tipper_account_tokens/`, 'GET').then((r: Response) => r.json()).then(json => {
 //       tokens += json.token_amount;
 //     }).catch((e: Error) => {console.log("problem getting tipzy tokens.", e);});
 
 //     // console.log("fetch acc tokens");
-  
+
 //     //get the pending tokens
 //     await getPending(user).then(r => {
 //         ptokens = r[1];
@@ -99,7 +99,7 @@ export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boole
 //     //get the real tokens
 
 //     console.log("fetching data...");
-  
+
 //     const r = await fetchTokenPendingData(context.user);
 
 //     const user = context.user;
@@ -138,8 +138,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         setUser(user);
     }
 
-    const editBar = (bar: BarType | undefined) => { 
-        if(bar) cookies.set("bar_session", bar.id);
+    const editBar = (bar: BarType | undefined) => {
+        if (bar) cookies.set("bar_session", bar.id);
         // console.log("bar sesh cookie", cookies.get("bar_session"))
         setBar(bar);
     }
@@ -159,42 +159,41 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         editUser(c);
     }
 
-    const usc = { user: user, setUser: editUser, barState: {bar: bar, setBar: editBar}, abortController: abortController};
-    
-    useEffect(() => 
-        {
-            // if(location.pathname === "/login" || location.pathname === "/register") return;
-            const queryParameters = new URLSearchParams(window.location.search)
-            const barid = queryParameters.get("id");
+    const usc = { user: user, setUser: editUser, barState: { bar: bar, setBar: editBar }, abortController: abortController };
 
-            if(barid) cookies.set("bar_session", barid);
+    useEffect(() => {
+        // if(location.pathname === "/login" || location.pathname === "/register") return;
+        const queryParameters = new URLSearchParams(window.location.search)
+        const barid = queryParameters.get("id");
 
-            if(!cookies.get("refresh_token") || !cookies.get("access_token")){
-                checkIfAccountExists(usc).then((r) => {
-                    console.log("rdata", r.data)
-                    refreshUserData(r.data)
-                    setReady(true);
-                })
+        if (barid) cookies.set("bar_session", barid);
+
+        if (!getStored("refresh_token") || !getStored("access_token")) {
+            checkIfAccountExists(usc).then((r) => {
+                console.log("rdata", r.data)
+                refreshUserData(r.data)
+                setReady(true);
+            })
                 .catch((e) => {
                     console.log("no session detected." + e)
                     setReady(true)
                 })
-            } else {
-                refreshUserData(user);
-                checkIfAccountExists(usc).then((r) => {
-                    if(!r.result) {
-                        Logout(usc, cookies);
-                        setReady(true);
-                        return;
-                    }
-                    refreshUserData(r.data)
+        } else {
+            refreshUserData(user);
+            checkIfAccountExists(usc).then((r) => {
+                if (!r.result) {
+                    Logout(usc, cookies);
                     setReady(true);
-                })
+                    return;
+                }
+                refreshUserData(r.data)
+                setReady(true);
+            })
                 .catch((e) => {
                     console.log("problem init user." + e)
                     setReady(true)
                 });
-            }
+        }
     }, []);
 
     // useInterval(() => setTokenPendingData({user, setUser, barState}), refreshRate);

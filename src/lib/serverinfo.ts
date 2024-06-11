@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { consumerFromJSON } from "..";
-import { getCookies } from "../App";
 import { Consumer } from "./user";
 
 export const ServerInfo = {
@@ -27,12 +26,12 @@ export type TokenReturnType = {
     expires_at: number;
 }
 
-export const expiresInToAt = (expires_in: number) : number => {
-    return Date.now() + expires_in*1000;
-}  
+export const expiresInToAt = (expires_in: number): number => {
+    return Date.now() + expires_in * 1000;
+}
 
 const convertToTokenReturnType = (at: string, rt: string, expires_in: number): TokenReturnType => {
-    return {access_token: at, refresh_token: rt, expires_at: expiresInToAt(expires_in)}
+    return { access_token: at, refresh_token: rt, expires_at: expiresInToAt(expires_in) }
 }
 
 
@@ -46,37 +45,37 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
  * @param fetchMethod the method field in fetch. by default it is POST, but usually they will be GET, POST, PATCH, or DELETE
  * @returns returns whatever the response is.
  */
-export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response | null>{
+export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => string | null), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response | null> {
     // const c = getCookies();
 
     // console.log("fwt at url:", urlEnding, "at and ea", accessToken, expiresAt)
 
     let myAccessToken = accessToken;//c.get("access_token");
-        
+
     const newTokens = async () => {
         const refreshToken = await getRefreshToken();
-        if(refreshToken === null) { console.log("no refresh token stored!"); return 0; }
+        if (refreshToken === null) { console.log("no refresh token stored!"); return 0; }
         const tokens: TokenReturnType | null = await getAccessToken(refreshToken)
-            .catch((e) => {console.log("error access: ", e.message); return null});
-        if(tokens === null) {
+            .catch((e) => { console.log("error access: ", e.message); return null });
+        if (tokens === null) {
             // console.log("problem getting access tokens!");
-            return 0; 
+            return 0;
         }
         resetTokenValues(tokens);
         myAccessToken = tokens.access_token;
         return 1;
     }
 
-    if(isNaN(expiresAt) || expiresAt <= Date.now()) {
+    if (isNaN(expiresAt) || expiresAt <= Date.now()) {
         const res = await newTokens();
-        if(res === 0) {
+        if (res === 0) {
             logout();
             return null;
         }
     }
-        
+
     const theFetch = async () => {
-        return body ? 
+        return body ?
             fetch(`${ServerInfo.baseurl}${urlEnding}`, {
                 method: fetchMethod ?? 'POST',
                 headers: {
@@ -86,7 +85,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
                 body: body ?? "",
                 signal: signal,
             })
-        :
+            :
             fetch(`${ServerInfo.baseurl}${urlEnding}`, {
                 method: fetchMethod ?? 'GET',
                 headers: {
@@ -99,7 +98,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
 
     const response = await theFetch();
 
-    if(response.status === 401){
+    if (response.status === 401) {
         console.log("401 error. Trying again.");
         const newt = await newTokens().catch(() => {
             //throw new Error("problem with your refresh token.");
@@ -108,7 +107,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
             return;
         });
 
-        if(newt === 0) {
+        if (newt === 0) {
             console.log("problem with your refresh token.");
             logout();
             return null;
@@ -118,16 +117,16 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
         // console.log("trying again with new tokens now!")
         const response2 = await theFetch();
 
-        if(response.status === 401) {
+        if (response.status === 401) {
             console.log("for some reason, your access token failed again. signing out.")
             logout();
             return null;
         }
-        
+
         return response2;
-        
-        
-        
+
+
+
         // .then((res) => {
 
         // }).catch((e: Error) => {
@@ -138,7 +137,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     }
     return response;
 
-    
+
 
 
     // return theFetch().then(response => 
@@ -153,9 +152,9 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
  * @param access_token the access token
  * @returns the json data of the user
  */
-export async function getUser(userType: "tipper" | "business", accessToken: string, expiresAt: number, getRefreshToken: (() => Promise<string | null>), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>)): Promise<any>{
-    return fetchWithToken(accessToken, userType+"/", expiresAt, getRefreshToken, logout, resetTokenValues, 'GET').then(response => {
-        if(response === null || !response.ok){
+export async function getUser(userType: "tipper" | "business", accessToken: string, expiresAt: number, getRefreshToken: (() => string | null), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>)): Promise<any> {
+    return fetchWithToken(accessToken, userType + "/", expiresAt, getRefreshToken, logout, resetTokenValues, 'GET').then(response => {
+        if (response === null || !response.ok) {
             throw new Error(`Bad response. Response: ${response ? response.status + ".." : "null response"}`)
         }
         return response.json();
@@ -171,7 +170,7 @@ export async function getAccessToken(refresh_token: string): Promise<TokenReturn
     // console.log("id", process.env.REACT_APP_CLIENT_ID, "Secret", process.env.REACT_APP_CLIENT_SECRET);
     return fetch(`${ServerInfo.baseurl}auth/token`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             client_id: process.env.REACT_APP_CLIENT_ID,
             grant_type: "refresh_token",
@@ -179,23 +178,23 @@ export async function getAccessToken(refresh_token: string): Promise<TokenReturn
             refresh_token: refresh_token
         })
     }).then(response => {
-        if(response.status === 401) {
+        if (response.status === 401) {
             console.log("bad response getting access token.", response.status, response.statusText)
             return response.text();
         }
-        else if(!response.ok){
+        else if (!response.ok) {
             // throw new Error(`Bad response. Response: ${response.status}`);
             console.log("bad response.", response.status, response.statusText)
             return response.text();
         }
         return response.json();
     }).then(json => {
-        if((typeof json) === "string") {
+        if ((typeof json) === "string") {
             console.log("text", json)
             return null;
         }
         return convertToTokenReturnType(json.access_token, json.refresh_token, json.expires_in);
-    }).catch((error: Error) => {throw error})
+    }).catch((error: Error) => { throw error })
 }
 
 export async function loginWithGoogleAccessToken(access_token: string): Promise<TokenReturnType> {
@@ -212,13 +211,13 @@ export async function loginWithGoogleAccessToken(access_token: string): Promise<
             token: access_token
         })
     }).then(response => {
-        if(!response.ok){
+        if (!response.ok) {
             throw new Error(`Bad response. Response: ${response.status}`);
         }
         return response.json();
     }).then(json => {
         return convertToTokenReturnType(json.access_token, json.refresh_token, json.expires_in);
-    }).catch((error: Error) => {throw error})
+    }).catch((error: Error) => { throw error })
 }
 
 /**
@@ -229,11 +228,11 @@ export async function loginWithGoogleAccessToken(access_token: string): Promise<
  * @param username user's username. this should be unique
  * @param password user's password. assume its 8 or more chars
  */
-export async function registerUsernamePassword(first: string, last: string, email:string, username: string, password: string) : Promise<Response> {
+export async function registerUsernamePassword(first: string, last: string, email: string, username: string, password: string): Promise<Response> {
     return fetch(`${ServerInfo.baseurl}auth/register/`, {
         method: "POST",
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             client_id: process.env.REACT_APP_CLIENT_ID,
             username: username,
             password: password,
@@ -246,7 +245,7 @@ export async function registerUsernamePassword(first: string, last: string, emai
     })
 }
 
-export async function loginWithUsernamePassword(username: string, password: string) : Promise<any> {
+export async function loginWithUsernamePassword(username: string, password: string): Promise<any> {
     const encoded = btoa(`${process.env.REACT_APP_CLIENT_ID}:${process.env.REACT_APP_CLIENT_SECRET}`);
 
     return fetch(`${ServerInfo.baseurl}auth/token`, {
@@ -256,7 +255,7 @@ export async function loginWithUsernamePassword(username: string, password: stri
             // Authorization: `${encoded}`
         },
 
-        body:`client_id=${process.env.REACT_APP_CLIENT_ID}&client_secret=${process.env.REACT_APP_CLIENT_SECRET}&grant_type=password&username=${username}&password=${password}`
+        body: `client_id=${process.env.REACT_APP_CLIENT_ID}&client_secret=${process.env.REACT_APP_CLIENT_SECRET}&grant_type=password&username=${username}&password=${password}`
 
         // body: JSON.stringify({ 
         //     
@@ -266,17 +265,17 @@ export async function loginWithUsernamePassword(username: string, password: stri
         //     password: password,
         // })
     })
-    .then(r => {
-        if(r.ok) return(r.json());
-        if(r.status === 400)
-            alert("Problem logging in. Invalid credentials.");
-        else
-            alert(`Problem logging in. Status: ${r.status}`);
-        return null;
-    })
-    .catch((error: Error) => {
-        throw error;
-    })
+        .then(r => {
+            if (r.ok) return (r.json());
+            if (r.status === 400)
+                alert("Problem logging in. Invalid credentials.");
+            else
+                alert(`Problem logging in. Status: ${r.status}`);
+            return null;
+        })
+        .catch((error: Error) => {
+            throw error;
+        })
 }
 
 export const useAbortSignal = () => {

@@ -7,11 +7,12 @@ import GoogleButton from 'react-google-button';
 import { ServerInfo, expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
 import { checkIfAccountExists, consumerFromJSON, getTipper, storeAll } from '../index';
-import { getCookies, router } from '../App';
+import { router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
 import { Colors, padding } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
+import { getCookies } from '../lib/utils';
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
