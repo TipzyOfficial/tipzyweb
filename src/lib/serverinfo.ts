@@ -69,6 +69,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     if (isNaN(expiresAt) || expiresAt <= Date.now()) {
         const res = await newTokens();
         if (res === 0) {
+            console.log("tokens expired. logging out.")
             logout();
             return null;
         }

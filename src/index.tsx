@@ -30,6 +30,7 @@ root.render(
 );
 
 export function Logout(usc: UserSessionContextType, cookies: Cookies) {
+  console.log("logging out", console.trace());
   // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, ""));

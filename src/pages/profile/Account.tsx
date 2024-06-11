@@ -50,38 +50,36 @@ export default function Account() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     const cookies = getCookies();
+    const [details, setDetails] = useState<CardDetailsType | undefined>();
+    const [cdReady, setCdReady] = useState(false);
 
+    async function getCardDetails() {
+        const deets = await fetchWithToken(usc, `get_saved_card_details/`, 'GET').then((r) => r.json()).then((json) => {
+            const d = json.card_details;
 
-    // const loc = useLocation();
+            if (d === 'N/A') return undefined;
+
+            console.log(json)
+
+            return { brand: d.brand, last4: d.last4, expMonth: d.exp_month, expYear: d.exp_year }
+        }).catch(() => { console.log("can't find payment details"); return undefined })
+
+        setDetails(deets);
+        setCdReady(true);
+    }
+
+    useEffect(() => {
+        getCardDetails();
+    }, [])
 
     function CardDetails() {
-        const [details, setDetails] = useState<CardDetailsType | undefined>();
-        const [ready, setReady] = useState(false);
-
-        async function getCardDetails() {
-            const deets = await fetchWithToken(usc, `get_saved_card_details/`, 'GET').then((r) => r.json()).then((json) => {
-                const d = json.card_details;
-
-                console.log(json)
-
-                return { brand: d.brand, last4: d.last4, expMonth: d.exp_month, expYear: d.exp_year }
-            }).catch(() => { console.log("can't find payment details"); return undefined })
-
-            setDetails(deets);
-            setReady(true);
-        }
-
-        useEffect(() => {
-            getCardDetails();
-        }, [])
-
         return (
             <>
                 <div style={{ width: "100%", padding: padding, borderColor: "#8888", borderStyle: 'solid', borderWidth: 1, borderRadius: radius }}>
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span>Your card details:</span>
                     </div>
-                    <DisplayOrLoading condition={ready} loadingScreen={<div style={{ display: "flex", justifyContent: 'center', alignContent: 'center', padding: padding }}><Spinner></Spinner></div>}>
+                    <DisplayOrLoading condition={cdReady} loadingScreen={<div style={{ display: "flex", justifyContent: 'center', alignContent: 'center', padding: padding }}><Spinner></Spinner></div>}>
                         <div style={{ width: "100%", padding: padding, backgroundColor: "#8883" }}>
                             {details ?
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -107,6 +105,7 @@ export default function Account() {
         )
         if (s === r) {
             fetchWithToken(usc, `tipper/`, 'DELETE').then(r => {
+                console.log("deleting acc...");
                 Logout(usc, cookies);
             }).catch((e) => { alert(`Error: Problem deleting account: ${e}. Please try again later.`) })
         } else {
@@ -146,7 +145,10 @@ export default function Account() {
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                 </div>
                 <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
-                    <TZButton title={"Log out"} onClick={() => Logout(usc, cookies)}></TZButton>
+                    <TZButton title={"Log out"} onClick={() => {
+                        console.log("logging out...");
+                        Logout(usc, cookies)
+                    }}></TZButton>
                     <div style={{ paddingBottom: padding }}></div>
                     <TZButton title={"Delete account"} backgroundColor="#800" onClick={DeleteAccount}></TZButton>
                 </div>

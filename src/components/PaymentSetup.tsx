@@ -9,13 +9,13 @@ import { Logout } from "..";
 import { stripePromise } from "../App";
 import { getCookies } from "../lib/utils";
 
-export default function PaymentSetup(props: { handleSubmit?: () => void }) {
+export default function PaymentSetup(props: { handleSubmit?: () => void, update?: boolean }) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
     const usc = useContext(UserSessionContext);
 
     useEffect(() => {
         // Create SetupIntent as soon as the page loads
-        fetchPaymentSheetParams(usc).then(
+        fetchPaymentSheetParams(usc, props.update).then(
             (r) => {
                 setClientSecret(r);
             }
@@ -23,7 +23,7 @@ export default function PaymentSetup(props: { handleSubmit?: () => void }) {
     }, []);
 
     if (clientSecret === null) {
-        Logout(usc, getCookies());
+        //Logout(usc, getCookies());
         return (<></>)
     }
 

@@ -58,8 +58,8 @@ export default function Invoices() {
             p.push(parseInvoiceJSON(e));
             pamnt += e.amount;
         })
-
-        setPending({ invoices: p, date: new Date(json.Next_charge_date * 1000), total_amount: pamnt / 100 });
+        if (pamnt !== 0)
+            setPending({ invoices: p, date: new Date(json.Next_charge_date * 1000), total_amount: pamnt / 100 });
 
 
         completed.forEach((e: any) => {
@@ -109,7 +109,7 @@ export default function Invoices() {
         const item = props.item;
 
         if (!item) return (
-            <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoices–go request something!!</div>
+            <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoice. Go request something!</div>
         )
 
         return (
@@ -147,7 +147,7 @@ export default function Invoices() {
                 <TZHeader title={"Invoices"}
                     leftComponent={<BackButton onClick={() => router.navigate(-1)} />}
                     rightComponent={<HelpButton
-                        text="Once your requested song gets accepted, you don't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here."></HelpButton>}
+                        text="Once your requested song gets accepted, you won't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here, as well as their processing date."></HelpButton>}
                 />
             </div>
             <div
