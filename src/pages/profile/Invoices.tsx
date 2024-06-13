@@ -81,10 +81,6 @@ export default function Invoices() {
         setReady(true);
     }
 
-    useLayoutEffect(() => {
-
-    })
-
     useEffect(() => {
         getInvoices();
     }, []);
