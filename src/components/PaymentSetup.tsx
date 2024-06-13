@@ -125,12 +125,6 @@ function PaymentSetupInner(props: { handleSubmit?: () => void }) {
         }
     }, [stripe])
 
-    // const applePay: ApplePayOption = {
-    //     recurringPaymentRequest: {
-
-    //     }
-    // }
-
     return (
         <form onSubmit={handleSubmit}>
             <PaymentElement options={{

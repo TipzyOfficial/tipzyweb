@@ -1,7 +1,5 @@
 import { fetchWithToken } from "..";
 import { UserSessionContextType } from "./UserSessionContext";
-import { Consumer } from "./user";
-
 
 export async function fetchPaymentSheetParams(usc: UserSessionContextType, update?: boolean) {
     console.log("sending!");
