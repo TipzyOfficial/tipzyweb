@@ -1,13 +1,31 @@
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Elements, PaymentElement, PaymentRequestButtonElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 import TZButton from "./TZButton";
 import { Colors, padding } from "../lib/Constants";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { fetchPaymentSheetParams } from "../lib/stripe";
-import { Logout } from "..";
 import { stripePromise } from "../App";
-import { getCookies } from "../lib/utils";
+import { PaymentRequest } from "@stripe/stripe-js";
+import { ApplePayOption } from "@stripe/stripe-js/dist/stripe-js/elements/apple-pay";
+
+// async function getPaymentRequest() {
+//     if (!stripe) return;
+
+//     const paymentRequest = stripe.paymentRequest({
+//         country: 'US',
+//         currency: 'usd',
+//         total: {
+//             label: 'Demo total',
+//             amount: 1099,
+//         },
+//         requestPayerName: true,
+//         requestPayerEmail: true,
+//     })
+
+//     return paymentRequest;
+// }
+
 
 export default function PaymentSetup(props: { handleSubmit?: () => void, update?: boolean }) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
@@ -47,6 +65,7 @@ export default function PaymentSetup(props: { handleSubmit?: () => void, update?
 
 function PaymentSetupInner(props: { handleSubmit?: () => void }) {
     const [disabled, setDisabled] = useState(false);
+    const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
 
     const stripe = useStripe();
     const elements = useElements();
@@ -82,23 +101,46 @@ function PaymentSetupInner(props: { handleSubmit?: () => void }) {
         }
     };
 
-    // return(
-    //     clientSecret ? 
-    //     <Elements 
-    //     stripe={stripePromise} 
-    //     options={{
-    //         clientSecret: clientSecret,
-    //         appearance: {theme: "night"}
-    //     }}
-    //     >
-    //         <Outlet/>
-    //     </Elements> : 
-    //     <DisplayOrLoading condition={false}></DisplayOrLoading>
-    // );
+    useEffect(() => {
+        if (stripe) {
+            const pr = stripe.paymentRequest({
+                country: 'US',
+                currency: 'usd',
+                total: {
+                    label: 'Demo total',
+                    amount: 1099,
+                },
+                requestPayerName: true,
+                requestPayerEmail: true,
+            });
+
+            pr.canMakePayment().then(result => {
+                if (result) {
+                    console.log("can make payment")
+                    setPaymentRequest(pr);
+                } else {
+                    console.log("cannot make payment")
+                }
+            });
+        }
+    }, [stripe])
+
+    // const applePay: ApplePayOption = {
+    //     recurringPaymentRequest: {
+
+    //     }
+    // }
 
     return (
         <form onSubmit={handleSubmit}>
-            <PaymentElement />
+            <PaymentElement options={{
+                wallets: {
+                    applePay: 'auto'
+                }
+            }} />
+            {/* {paymentRequest ?
+                <PaymentRequestButtonElement options={{ paymentRequest: paymentRequest }} />
+                : <></>} */}
             <div style={{ paddingTop: padding }}>
                 <TZButton title={"Submit"} loading={disabled} />
             </div>
