@@ -18,7 +18,7 @@ const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
 }
 
-function Login() {
+function Login(props: { back?: boolean }) {
     const [loginPage, setLoginPage] = useState(true);
     const [globalDisable, setGlobalDisable] = useState(false);
     const [username, setUsername] = useState("");
@@ -128,7 +128,8 @@ function Login() {
                 }, refreshToken).then((user) => {
                     // console.log("resulting user", user);
                     usc.setUser(user);
-                    nextPage();
+                    if (props.back) router.navigate(-1);
+                    else nextPage();
                 });
 
             } else {
