@@ -33,6 +33,7 @@ function Login(props: { back?: boolean }) {
 
     const handleAppleLoginSuccess = async (event: any) => {
         setGlobalDisable(true);
+        console.log(event);
 
         const accessToken = event.detail.authorization.id_token;
 
