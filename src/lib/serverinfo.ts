@@ -221,6 +221,29 @@ export async function loginWithGoogleAccessToken(access_token: string): Promise<
     }).catch((error: Error) => { throw error })
 }
 
+export async function loginWithAppleAccessToken(access_token: string): Promise<TokenReturnType> {
+    return fetch(`${ServerInfo.baseurl}auth/convert-token`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            client_id: process.env.REACT_APP_APPLE_CLIENT_ID,
+            grant_type: "convert_token",
+            client_secret: process.env.REACT_APP_APPLE_CLIENT_SECRET,
+            backend: "apple-id",
+            token: access_token
+        })
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`Bad response. Response: ${response.status}`);
+        }
+        return response.json();
+    }).then(json => {
+        return convertToTokenReturnType(json.access_token, json.refresh_token, json.expires_in);
+    }).catch((error: Error) => { throw error })
+}
+
 /**
  * registers a new user into the database
  * @param first user's first name
@@ -247,24 +270,13 @@ export async function registerUsernamePassword(first: string, last: string, emai
 }
 
 export async function loginWithUsernamePassword(username: string, password: string): Promise<any> {
-    const encoded = btoa(`${process.env.REACT_APP_CLIENT_ID}:${process.env.REACT_APP_CLIENT_SECRET}`);
-
     return fetch(`${ServerInfo.baseurl}auth/token`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            // Authorization: `${encoded}`
         },
 
         body: `client_id=${process.env.REACT_APP_CLIENT_ID}&client_secret=${process.env.REACT_APP_CLIENT_SECRET}&grant_type=password&username=${username}&password=${password}`
-
-        // body: JSON.stringify({ 
-        //     
-        //     client_secret: ServerInfo.clientSecret,
-        //     grant_type: "password",
-        //     username: username,
-        //     password: password,
-        // })
     })
         .then(r => {
             if (r.ok) return (r.json());

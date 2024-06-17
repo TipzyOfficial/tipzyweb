@@ -4,9 +4,9 @@ import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
 import { CredentialResponse, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import GoogleButton from 'react-google-button';
-import { ServerInfo, expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
+import { ServerInfo, expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
-import { checkIfAccountExists, consumerFromJSON, getTipper, storeAll } from '../index';
+import { checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, storeAll } from '../index';
 import { router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
@@ -17,14 +17,6 @@ import AppleLogin from 'react-apple-login'
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
-}
-
-const handleAppleLoginSuccess = (event: any) => {
-    console.log("apple success!", event)
-}
-
-const handleAppleLoginFailure = (event: any) => {
-    console.log("apple failure...", event)
 }
 
 function Login(props: { back?: boolean }) {
@@ -38,6 +30,35 @@ function Login(props: { back?: boolean }) {
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
     const appleLoginRef = useRef<HTMLDivElement>(null);
+
+    const handleAppleLoginSuccess = async (event: any) => {
+        setGlobalDisable(true);
+
+        const accessToken = event.detail.authorization.id_token;
+
+        if (!accessToken) {
+            console.log("Malformed response from Apple login servers.");
+            return;
+        }
+
+        loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at)).catch(
+            (e: Error) => {
+                console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
+                setGlobalDisable(false);
+            })
+
+        // const response = await fetchWithToken(usc, `/auth/convert-token`, 'POST', JSON.stringify({
+        //     client_id: process.env.REACT_APP_APPLE_CLIENT_ID,
+        //     grant_type: "convert_token",
+        //     client_secret: process.env.REACT_APP_APPLE_CLIENT_SECRET,
+        //     backend: "apple-id",
+        //     token: event.detail.authorization.id_token,
+        // }))
+    }
+
+    const handleAppleLoginFailure = (event: any) => {
+        console.log("apple failure...", event)
+    }
 
     useEffect(() => {
         if (barID) setLoginPrompt(true);
