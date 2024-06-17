@@ -37,7 +37,9 @@ function Login(props: { back?: boolean }) {
 
         const accessToken = event.detail.authorization.id_token;
 
-        const name = event.detail.user.name;
+        const user = event.detail.user;
+
+        const name = user ? event.detail.user.name : undefined;
 
         if (!accessToken) {
             console.log("Malformed response from Apple login servers.");
