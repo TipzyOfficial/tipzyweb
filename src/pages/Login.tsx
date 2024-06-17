@@ -371,7 +371,7 @@ function Login(props: { back?: boolean }) {
                                     id="appleid-signin"
                                     data-mode="center-align"
                                     data-type="sign-in"
-                                    data-color="black"
+                                    data-color="white"
                                     data-border="false"
                                     data-border-radius="15"
                                     data-width="100%"
