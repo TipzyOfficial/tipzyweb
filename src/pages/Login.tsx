@@ -290,11 +290,12 @@ function Login(props: { back?: boolean }) {
                         <div style={{ padding: padding }}></div>
                         <AppleLogin
                             clientId="app.tipzy.TipzyAppleSignIn"
-                            redirectURI="https://app.tipzy.app/"
+                            redirectURI="https://tipzyapi.com/auth/token/"
                             usePopup={true}
                             callback={(response) => {
                                 console.log("response from apple: ", response);
                             }} // Catch the response
+
                             scope="email name"
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
