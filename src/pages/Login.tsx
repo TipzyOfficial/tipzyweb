@@ -126,7 +126,7 @@ function Login(props: { back?: boolean }) {
 
         return customName ?
 
-            fetch(`${ServerInfo.baseurl}tipper?first_name=${customName.firstName}&last_name=${customName.lastName}`, {
+            fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.firstName}&last_name=${customName.lastName}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${user.access_token}`,
