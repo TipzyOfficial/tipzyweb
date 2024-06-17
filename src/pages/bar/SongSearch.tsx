@@ -83,20 +83,20 @@ export default function SongSearch() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<SongType[]>(userContext.barState.bar ? userContext.barState.bar.topSongs ?? [] : []);
     const window = useWindowDimensions();
-    const fdim = window.height && window.width ? Math.min(window.height*0.9, window.width) : 1000;
-    const songDims = fdim ? Math.max(Math.min(fdim/10, 75), 50) : 50;
+    const fdim = window.height && window.width ? Math.min(window.height * 0.9, window.width) : 1000;
+    const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const limit = 50;
-    const timeoutInterval = 1000;
+    const timeoutInterval = 3000;
     const androidTimeout = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const defaultResults = () => {
-        if(!userContext.barState.bar) {
+        if (!userContext.barState.bar) {
             router.navigate("/code");
             throw new Error("no bar")
         }
-        return(userContext.barState.bar.topSongs ?? []);
+        return (userContext.barState.bar.topSongs ?? []);
     }
 
     /**
@@ -105,22 +105,22 @@ export default function SongSearch() {
      * @param limit the max amount of results to return
      * @returns the array of songs matching the query. since it's an async function, it returns a promise.
      */
-    async function searchForSongs(query: string, limit: number): Promise<SongType[]>{
+    async function searchForSongs(query: string, limit: number): Promise<SongType[]> {
         //this function calls the backend to get the search results for a query.        
-        if(query.length === 0) {
+        if (query.length === 0) {
             return defaultResults();
         }
         const json = await fetchWithToken(userContext, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
-            songs.push({title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit});
+            songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit });
         });
         return songs;
     }
 
-    async function getSearchResults(query: string, limit: number){
+    async function getSearchResults(query: string, limit: number) {
         const response = await searchForSongs(query, limit).catch((e) => {
-            if(e.message === "no bar") return [];
+            if (e.message === "no bar") return [];
             console.log("can't get response,", e);
             return [];
         });
@@ -148,23 +148,31 @@ export default function SongSearch() {
         }
     }, [searchQuery])
 
-    return(
+    return (
         <div className="App-body-top">
-            {isAndroid ? (!androidStupid ? <div></div> : <div style={{width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex"}}></div>) : <></>}
-            <div style={{padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top:0, backgroundColor: Colors.background}}>
-                <input 
+            {isAndroid ? (!androidStupid ? <div></div> : <div style={{ width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex" }}></div>) : <></>}
+            <form style={{ padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top: 0, backgroundColor: Colors.background }}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    getSearchResults(searchQuery, limit);
+                }}
+            >
+                <input type="submit"
+                    style={{ display: 'none' }}
+                ></input>
+                <input
                     ref={inputRef}
-                    className='input' 
-                    placeholder="Request any song..." 
-                    value={searchQuery} 
-                    onChange={(e) => setSearchQuery(e.target.value)} 
-                    onSubmit={() => searchForSongs(searchQuery, limit)}
-                    />
-                <div style={{display: 'flex', paddingLeft: padding, alignItems:'center', cursor: 'pointer'}} onClick={() => {if(!isAndroid || (isAndroid && !androidStupid)) router.navigate(-1);}}>
+                    className='input'
+                    placeholder="Request any song..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                // onSubmit={() => searchForSongs(searchQuery, limit)}
+                />
+                <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => { if (!isAndroid || (isAndroid && !androidStupid)) router.navigate(-1); }}>
                     <span className="text">Cancel</span>
                 </div>
-            </div>
-            <div style={{display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%'}}>
+            </form>
+            <div style={{ display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%' }}>
                 <SongResultListMemo songs={searchResults} dims={songDims}></SongResultListMemo>
             </div>
         </div>
