@@ -120,15 +120,15 @@ function Login(props: { back?: boolean }) {
     }
 
     const createAccount = async (user: Consumer, customName?: any) => {
+        console.log(customName);
+
         return customName ?
 
-            fetch(`${ServerInfo.baseurl}tipper/`, {
+            fetch(`${ServerInfo.baseurl}tipper?first_name=${customName.firstName}&last_name=${customName.lastName}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${user.access_token}`,
                     'Content-Type': 'application/json',
-                    first_name: customName.firstName,
-                    last_name: customName.lastName,
                 },
                 body: JSON.stringify({
                     birthday: formatBirthday(new Date()),
