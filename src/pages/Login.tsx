@@ -284,35 +284,32 @@ function Login(props: { back?: boolean }) {
                         <BigLogo></BigLogo>
                     </div>
                     <div style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <GoogleButton
+                            style={{ width: '100%' }}
+                            onClick={() => googleLogin()} />
+                        <div style={{ padding: padding }}></div>
                         <AppleLogin
                             clientId="app.tipzy.TipzyAppleSignIn"
-                            redirectURI="https://app.tipzy.app"
+                            redirectURI="https://app.tipzy.app/"
                             usePopup={true}
                             callback={(response) => {
                                 console.log("response from apple: ", response);
                             }} // Catch the response
                             scope="email name"
                             responseMode="query"
-                        // render={renderProps => (  //Custom Apple Sign in Button
-                        //     <button
-                        //         onClick={renderProps.onClick}
-                        //         style={{
-                        //             backgroundColor: "white",
-                        //             padding: 10,
-                        //             border: "1px solid black",
-                        //             fontFamily: "none",
-                        //             lineHeight: "25px",
-                        //             fontSize: "25px"
-                        //         }}
-                        //     >
-                        //         <i className="fa-brands fa-apple px-2 "></i>
-                        //         Continue with Apple
-                        //     </button>
-                        // )}
+                            render={renderProps => (  //Custom Apple Sign in Button
+                                <div
+                                    id="appleid-signin"
+                                    data-mode="center-align"
+                                    data-type="sign-in"
+                                    data-color="black"
+                                    data-border="false"
+                                    data-border-radius="15"
+                                    data-width="100%"
+                                    data-height="50"
+                                ></div>
+                            )}
                         />
-                        <GoogleButton
-                            style={{ width: '100%' }}
-                            onClick={() => googleLogin()} />
                     </div>
                     <div style={{ padding: 10, textAlign: 'center' }}>
                         or
