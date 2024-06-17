@@ -293,7 +293,8 @@ function Login(props: { back?: boolean }) {
                             redirectURI="https://app.tipzy.app/"
                             // redirectURI="https://tipzyapi.com/auth/token"
                             usePopup={true}
-                            responseType="code id_token"
+                            // responseType="code id_token"
+                            responseType="code"
                             callback={() => {
                                 console.log("response from apple: ");
                             }} // Catch the response
