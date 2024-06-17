@@ -295,9 +295,9 @@ function Login(props: { back?: boolean }) {
                             callback={() => {
                                 console.log("response from apple: ");
                             }} // Catch the response
-                            scope="email name"
-                            responseType='id_token'
-                            responseMode="form_post"
+                            // scope="email name"
+                            // responseType='id_token'
+                            responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
                                 <div
                                     id="appleid-signin"
