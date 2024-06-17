@@ -20,7 +20,11 @@ const formatBirthday = (birthday: Date) => {
 }
 
 const handleAppleLoginSuccess = (event: any) => {
-    console.log("success!", event)
+    console.log("apple success!", event)
+}
+
+const handleAppleLoginFailure = (event: any) => {
+    console.log("apple failure...", event)
 }
 
 function Login(props: { back?: boolean }) {
@@ -40,10 +44,13 @@ function Login(props: { back?: boolean }) {
     })
 
     useLayoutEffect(() => {
-        appleLoginRef.current?.addEventListener('AppleIDSignInOnSuccess', (event) => handleAppleLoginSuccess(event));
-        appleLoginRef.current?.addEventListener('AppleIDSignInOnFailure', (event) => {
-            console.log(event);
-        });
+        window.document.addEventListener('AppleIDSignInOnSuccess', (event) => handleAppleLoginSuccess(event));
+        window.document.addEventListener('AppleIDSignInOnFailure', (event) => handleAppleLoginFailure(event));
+
+        return () => {
+            window.document.removeEventListener('AppleIDSignInOnSuccess', (event) => handleAppleLoginSuccess(event));
+            window.document.removeEventListener('AppleIDSignInOnFailure', (event) => handleAppleLoginFailure(event));
+        }
     }, [])
 
     const login = (at: string, rt: string, ea: number) => {
