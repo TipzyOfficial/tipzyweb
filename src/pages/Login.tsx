@@ -43,7 +43,8 @@ function Login(props: { back?: boolean }) {
 
         loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at)).catch(
             (e: Error) => {
-                console.log("cid", process.env.REACT_APP_APPLE_CLIENT_ID)
+                console.log("token", accessToken);
+                console.log("cid", process.env.REACT_APP_APPLE_CLIENT_ID, process.env.REACT_APP_APPLE_CLIENT_SECRET);
                 console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
                 setGlobalDisable(false);
             })
