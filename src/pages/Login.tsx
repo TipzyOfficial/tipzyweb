@@ -1,4 +1,4 @@
-import { CSSProperties, useContext, useEffect, useState } from 'react';
+import { CSSProperties, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import './Login.css';
 import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
@@ -19,6 +19,10 @@ const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
 }
 
+const handleAppleLoginSuccess = (event: any) => {
+    console.log("success!", event)
+}
+
 function Login(props: { back?: boolean }) {
     const [loginPage, setLoginPage] = useState(true);
     const [globalDisable, setGlobalDisable] = useState(false);
@@ -29,10 +33,18 @@ function Login(props: { back?: boolean }) {
     const usc = useContext(UserSessionContext);
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
+    const appleLoginRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (barID) setLoginPrompt(true);
     })
+
+    useLayoutEffect(() => {
+        appleLoginRef.current?.addEventListener('AppleIDSignInOnSuccess', (event) => handleAppleLoginSuccess(event));
+        appleLoginRef.current?.addEventListener('AppleIDSignInOnFailure', (event) => {
+            console.log(event);
+        });
+    }, [])
 
     const login = (at: string, rt: string, ea: number) => {
         loginWithTipzyToken(at, rt, ea)
@@ -274,7 +286,7 @@ function Login(props: { back?: boolean }) {
     return (
         <>
             {loginPage ?
-                <div style={styles.jumbo}>
+                <div style={styles.jumbo} ref={appleLoginRef}>
                     {loginPrompt ? <div style={{ position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883' }}>
                         <div style={{ padding: padding / 2 }}>
                             Please sign in to continue.
