@@ -37,16 +37,19 @@ function Login(props: { back?: boolean }) {
 
         const accessToken = event.detail.authorization.id_token;
 
+        const name = event.detail.user.name;
+
         if (!accessToken) {
             console.log("Malformed response from Apple login servers.");
             return;
         }
 
-        loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at)).catch(
+        await loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at, name)).catch(
             (e: Error) => {
                 console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
                 setGlobalDisable(false);
             })
+        //const wholeName = event.detail.user.name.firstName + " " + event.detail.user.name.lastName;
 
         // const response = await fetchWithToken(usc, `/auth/convert-token`, 'POST', JSON.stringify({
         //     client_id: process.env.REACT_APP_APPLE_CLIENT_ID,
@@ -75,8 +78,8 @@ function Login(props: { back?: boolean }) {
         }
     }, [])
 
-    const login = (at: string, rt: string, ea: number) => {
-        loginWithTipzyToken(at, rt, ea)
+    const login = (at: string, rt: string, ea: number, name?: any) => {
+        loginWithTipzyToken(at, rt, ea, name)
             .catch(() => {
                 setGlobalDisable(false);
                 setLoginPressed(false);
@@ -116,32 +119,51 @@ function Login(props: { back?: boolean }) {
         }
     }
 
-    const createAccount = async (user: Consumer) => {
-        const response = await fetch(`${ServerInfo.baseurl}tipper/`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${user.access_token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                birthday: formatBirthday(new Date()),
-            })
-        }).catch((e: Error) => {
-            alert(`Error creating new account. Please try again later: ${e.message}`);
-            return null;
-        })
+    const createAccount = async (user: Consumer, customName?: any) => {
+        return customName ?
 
-        return response;
+            fetch(`${ServerInfo.baseurl}tipper/`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${user.access_token}`,
+                    'Content-Type': 'application/json',
+                    first_name: customName.firstName,
+                    last_name: customName.lastName,
+                },
+                body: JSON.stringify({
+                    birthday: formatBirthday(new Date()),
+                })
+            }).catch((e: Error) => {
+                alert(`Error creating new account. Please try again later: ${e.message}`);
+                return null;
+            })
+
+            :
+
+            fetch(`${ServerInfo.baseurl}tipper/`, {
+                method: 'POST',
+                headers:
+                {
+                    Authorization: `Bearer ${user.access_token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    birthday: formatBirthday(new Date()),
+                })
+            }).catch((e: Error) => {
+                alert(`Error creating new account. Please try again later: ${e.message}`);
+                return null;
+            })
+
     }
 
 
-    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number) {
+    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number, customName?: any) {
         if (accessToken == null || refreshToken == null) {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
             return;
         }
         const name = "Guest";
-        const email = undefined;
         const img = undefined;
         const expires_at = expiresAt;
 
@@ -175,7 +197,7 @@ function Login(props: { back?: boolean }) {
                 });
 
             } else {
-                createAccount(user).then((r) => {
+                createAccount(user, customName).then((r) => {
                     console.log("creating account.", usc);
                     checkIfAccountExists({
                         user: user,
@@ -339,7 +361,7 @@ function Login(props: { back?: boolean }) {
                             callback={() => {
                                 console.log("response from apple: ");
                             }} // Catch the response
-                            scope="email name"
+                            scope="name"
                             // responseType='id_token'
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
