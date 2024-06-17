@@ -13,10 +13,50 @@ import Register from './Register';
 import { Colors, padding } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
-import AppleLogin from 'react-apple-login'
+import AppleSignin from 'react-apple-signin-auth';
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
+}
+
+const MyAppleSignInButton = () => {
+    return (
+        <AppleSignin
+            authOptions={{
+                /** Client ID - eg: 'com.example.com' */
+                clientId: 'app.tipzy.TipzyAppleSignIn',
+                /** Requested scopes, seperated by spaces - eg: 'email name' */
+                scope: 'email name',
+                /** Apple's redirectURI - must be one of the URIs you added to the serviceID - the undocumented trick in apple docs is that you should call auth from a page that is listed as a redirectURI, localhost fails */
+                redirectURI: 'https://app.tipzy.app/',
+                /** State string that is returned with the apple response */
+                state: 'state',
+                /** Nonce */
+                nonce: 'nonce',
+                /** Uses popup auth instead of redirection */
+                usePopup: true,
+            }}
+            /** General props */
+            uiType="dark"
+            /** className */
+            className="apple-auth-btn"
+            /** Removes default style tag */
+            noDefaultStyle={false}
+            /** Allows to change the button's children, eg: for changing the button text */
+            buttonExtraChildren="Continue with Apple"
+            /** Extra controlling props */
+            /** Called upon signin success in case authOptions.usePopup = true -- which means auth is handled client side */
+            onSuccess={(response: any) => console.log(response)} // default = undefined
+            /** Called upon signin error */
+            onError={(error: any) => console.error(error)} // default = undefined
+            /** Skips loading the apple script if true */
+            skipScript={false} // default = undefined
+            /** Apple image props */
+            iconProps={{ style: { marginTop: '10px' } }} // default = undefined
+            /** render function - called with all props - can be used to fully customize the UI by rendering your own component  */
+            render={(props: any) => <button {...props}>My Custom Button</button>}
+        />
+    );
 }
 
 function Login(props: { back?: boolean }) {
@@ -288,28 +328,7 @@ function Login(props: { back?: boolean }) {
                             style={{ width: '100%' }}
                             onClick={() => googleLogin()} />
                         <div style={{ padding: padding }}></div>
-                        <AppleLogin
-                            clientId="app.tipzy.TipzyAppleSignIn"
-                            redirectURI="https://app.tipzy.app/"
-                            usePopup={true}
-                            callback={(response) => {
-                                console.log("response from apple: ", response);
-                            }} // Catch the response
-                            scope="email name"
-                            responseMode="query"
-                            render={renderProps => (  //Custom Apple Sign in Button
-                                <div
-                                    id="appleid-signin"
-                                    data-mode="center-align"
-                                    data-type="sign-in"
-                                    data-color="black"
-                                    data-border="false"
-                                    data-border-radius="15"
-                                    data-width="100%"
-                                    data-height="50"
-                                ></div>
-                            )}
-                        />
+                        <MyAppleSignInButton></MyAppleSignInButton>
                     </div>
                     <div style={{ padding: 10, textAlign: 'center' }}>
                         or
