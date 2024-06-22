@@ -37,6 +37,8 @@ function Login(props: { back?: boolean }) {
 
         const accessToken = event.detail.authorization.id_token;
 
+        console.log("apat", accessToken);
+
         const user = event.detail.user;
 
         const name = user ? event.detail.user.name : undefined;
