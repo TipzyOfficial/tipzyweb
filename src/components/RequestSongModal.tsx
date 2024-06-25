@@ -17,6 +17,19 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState(false);
     const userContext = useContext(UserSessionContext);
+    const [price, setPrice] = useState<number | undefined>(undefined);
+
+    const getPrice = async () => {
+        setPrice(undefined);
+
+        const response = await fetchWithToken(userContext, `calc_dynamic_price/`, 'POST', JSON.stringify({
+            business_id: userContext.barState.bar?.id
+        })).catch(e => { throw e });
+
+        const json = await response.json();
+
+        setPrice(json.Dynamic_price);
+    }
 
     const sendRequest = async (): Promise<number> => {
         if (!userContext.barState.bar) return 0;
@@ -26,6 +39,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             track_name: song?.title ?? "No title",
             artist: song ? artistsStringListToString(song.artists) : "No artist",
             image_url: song?.albumart ?? "",
+            price: price,
             token_count: 0,
             explicit: song.explicit,
         })).then(response => {
@@ -137,9 +151,9 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
                             <div>
                                 <TZButton
                                     fontSize={Math.min(30, dims / 7)}
-                                    loading={disabled}
+                                    loading={disabled || price === undefined}
                                     completed={success}
-                                    title={"$2.00"}
+                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
                                     backgroundColor={success ? Colors.green : undefined}
                                     onClick={() => onRequestClick()} />
                             </div>
@@ -157,7 +171,11 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 
 
     return (
-        <Modal show={props.show} onShow={() => { setPaymentScreenVisible(false); setSuccess(false) }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
+        <Modal show={props.show} onShow={() => {
+            getPrice();
+            setPaymentScreenVisible(false);
+            setSuccess(false);
+        }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );
