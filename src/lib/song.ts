@@ -28,10 +28,10 @@ export function songIsEqual(s1: SongType, s2: SongType): boolean {
     return s1.id === s2.id;
 }
 
-export function songListIsEqual(s1: SongType[], s2: SongType[]): boolean { 
-    if(s1.length !== s2.length) return false;
-    for(let i = 0; i < s1.length; i++) {
-        if(!songIsEqual(s1[i], s2[i])){
+export function songListIsEqual(s1: SongType[], s2: SongType[]): boolean {
+    if (s1.length !== s2.length) return false;
+    for (let i = 0; i < s1.length; i++) {
+        if (!songIsEqual(s1[i], s2[i])) {
             return false;
         }
     }
@@ -44,10 +44,10 @@ export type SongRequestType = {
     bar: BarType,
     cost?: number,
     date: Date,
-    status: "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELED"
+    status: "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELLED" | "EXPIRED"
 }
 
 export function songRequestCompare(r1: SongRequestType, r2: SongRequestType): number {
-    if(r1.date === r2.date) return 0;
+    if (r1.date === r2.date) return 0;
     return r1.date > r2.date ? -1 : 1;
 }

@@ -96,7 +96,7 @@ export default function Bar() {
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
     const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
     const [cload, setCloadUn] = useState(false);
-    const timeout = 4000;
+    const timeout = 10000;
     const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
@@ -136,6 +136,7 @@ export default function Bar() {
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchWithToken(usc, `tipper/business/queue/?business_id=${id}`, "GET").then(response => {
+            console.log("fetching the queue")
             if (response === null) throw new Error("null response");
             if (!response.ok) throw new Error("Bad response:" + response.status);
             return response.json();
@@ -164,6 +165,7 @@ export default function Bar() {
 
     const refreshAllReqs = async (indicator: boolean) => {
         if (indicator) setCload(true);
+        console.log('refreshing reqs');
         const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             // console.log("got back this: ", json)
             const reqs = new Array<SongRequestType>();
@@ -353,7 +355,7 @@ export default function Bar() {
                             view === 0 ?
                                 <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} />
                                 :
-                                <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload} />
+                                <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload} refresh={() => refreshAllReqs(false)} />
                         }
                         <div style={{
                             position: "fixed",
