@@ -50,15 +50,16 @@ function EnterCode() {
         const json = await fetchWithToken(userContext, `tipper/businesses`, 'GET').then((r) => r.json());
         const o: BarType[] = []
         json.forEach((e: any) => {
-            o.push({
-                id: e.id,
-                name: e.business_name,
-                type: e.business_type,
-                description: e.description,
-                image_url: e.image_url,
-                vibe: e.vibe,
-                active: e.active,
-            })
+            if (e.active)
+                o.push({
+                    id: e.id,
+                    name: e.business_name,
+                    type: e.business_type,
+                    description: e.description,
+                    image_url: e.image_url,
+                    vibe: e.vibe,
+                    active: e.active,
+                })
         })
 
         setBars(o);
