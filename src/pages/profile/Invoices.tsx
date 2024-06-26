@@ -59,7 +59,7 @@ export default function Invoices() {
             pamnt += e.amount;
         })
         if (pamnt !== 0)
-            setPending({ invoices: p, date: new Date(json.Next_charge_date * 1000), total_amount: pamnt / 100 });
+            setPending({ invoices: p, date: new Date(json.Next_charge_date * 1000), total_amount: pamnt });
 
 
         completed.forEach((e: any) => {
@@ -94,7 +94,7 @@ export default function Invoices() {
                         ID: {item.id}
                     </span>
                     <span className="App-smalltext">
-                        {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)}
+                        {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)} @ {item.bar}
                     </span>
                 </div>
             </div>
@@ -112,7 +112,7 @@ export default function Invoices() {
             <div style={{ width: "100%", paddingTop: padding }}>
                 <div style={{ width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', flexDirection: 'column' }}>
                     <span className="App-tertiarytitle">
-                        ${item.total_amount.toFixed(2)}
+                        ${(item.total_amount / 100).toFixed(2)}
                     </span>
                     <span className="App-smalltext">
                         {props.pending ? "Will process on:" : "Date processed:"} {`${item.date.toLocaleDateString()} at ${item.date.toLocaleTimeString()}`}
@@ -164,6 +164,7 @@ export default function Invoices() {
                     >
                     </FlatList>
                 </ExpandHeader>
+                <div style={{ padding: padding }}></div>
             </div>
         </div>
     )

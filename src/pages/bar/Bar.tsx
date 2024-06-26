@@ -318,8 +318,7 @@ export default function Bar() {
                         <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
                             <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{bar.name}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                            <span className='App-typetitle' style={{ paddingLeft: padding, textAlign: 'left', flex: 1, color: Colors.primaryRegular }}>$2.00/song</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', flexDirection: 'row-reverse' }}>
                             <span className='App-typetitle' style={{
                                 flex: 1,
                                 color: Colors.tertiaryLight,
