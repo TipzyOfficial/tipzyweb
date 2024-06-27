@@ -19,6 +19,11 @@ const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
 }
 
+type AppleReturnType = {
+    name: any,
+    email: string,
+}
+
 function Login(props: { back?: boolean }) {
     const [loginPage, setLoginPage] = useState(true);
     const [globalDisable, setGlobalDisable] = useState(false);
@@ -33,13 +38,15 @@ function Login(props: { back?: boolean }) {
 
     const handleAppleLoginSuccess = async (event: any) => {
         setGlobalDisable(true);
-        console.log(event);
+        // console.log(event);
 
         const accessToken = event.detail.authorization.id_token;
 
         const user = event.detail.user;
 
-        const name = user ? event.detail.user.name : undefined;
+        const email = event.detail.email;
+
+        const name: AppleReturnType | undefined = user ? { name: user.name, email: email } : undefined;
 
         if (!accessToken) {
             console.log("Malformed response from Apple login servers.");
@@ -121,12 +128,12 @@ function Login(props: { back?: boolean }) {
         }
     }
 
-    const createAccount = async (user: Consumer, customName?: any) => {
+    const createAccount = async (user: Consumer, customName?: AppleReturnType) => {
         console.log(customName);
 
         return customName ?
 
-            fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.firstName}&last_name=${customName.lastName}`, {
+            fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.name.firstName}&last_name=${customName.name.lastName}&email=${customName.email}`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${user.access_token}`,
@@ -160,7 +167,7 @@ function Login(props: { back?: boolean }) {
     }
 
 
-    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number, customName?: any) {
+    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number, customName?: AppleReturnType) {
         if (accessToken == null || refreshToken == null) {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
             return;
@@ -363,7 +370,7 @@ function Login(props: { back?: boolean }) {
                             callback={() => {
                                 console.log("response from apple: ");
                             }} // Catch the response
-                            scope="name"
+                            scope="name email"
                             // responseType='id_token'
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
