@@ -6,12 +6,11 @@
  * As always, if you have any questions message me. Good luck!
  */
 
-import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { memo, useContext, useEffect, useRef, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
 import { SongType } from "../../lib/song";
-import { fetchWithToken } from "../..";
 import { isAndroid } from 'react-device-detect';
 
 
@@ -42,6 +41,7 @@ import FlatList from "flatlist-react/lib";
  */
 import Song, { SongList, SongRenderItem } from "../../components/Song";
 import { Colors, padding } from "../../lib/Constants";
+import { fetchNoToken } from "../../lib/serverinfo";
 
 export default function SongSearch() {
     /**
@@ -110,7 +110,7 @@ export default function SongSearch() {
         if (query.length === 0) {
             return defaultResults();
         }
-        const json = await fetchWithToken(userContext, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
+        const json = await fetchNoToken(userContext, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
             songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit });
