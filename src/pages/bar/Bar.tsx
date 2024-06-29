@@ -56,17 +56,17 @@ const LoadingScreen = () =>
         <span>Loading bar information...</span>
     </div>;
 
-export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
-    const newUser = structuredClone(userContext.user);
-    // console.log('getting pending')
-    newUser.requests = await fetchWithToken(userContext, `tipper/requests/pending/`, 'GET').then(r => r.json())
-        .then(json => {
-            // console.log('got pending')
-            return parseRequests(json);
-        }).catch((e) => { console.log("error: ", e); return [] })
+// export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
+//     const newUser = structuredClone(userContext.user);
+//     // console.log('getting pending')
+//     newUser.requests = await fetchWithToken(userContext, `tipper/requests/pending/`, 'GET').then(r => r.json())
+//         .then(json => {
+//             // console.log('got pending')
+//             return parseRequests(json);
+//         }).catch((e) => { console.log("error: ", e); return [] })
 
-    return newUser;
-}
+//     return newUser;
+// }
 
 let currentPCache: SongType | undefined = undefined;
 let pendingReqsCache: SongRequestType[] = [];
@@ -166,7 +166,7 @@ export default function Bar() {
 
     const refreshAllReqs = async (indicator: boolean) => {
         if (usc.user.access_token === "") return;
-
+        // if (!bar) return;
         if (indicator) setCload(true);
         console.log('refreshing reqs');
         const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
@@ -175,8 +175,10 @@ export default function Bar() {
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
                 const req = parseRequest(r);
-                if (req.status === "PENDING") preqs.push(req);
-                else reqs.push(req);
+                if (req.bar.id === parseInt(id)) {
+                    if (req.status === "PENDING") preqs.push(req);
+                    else reqs.push(req);
+                }
             })
             return [preqs, reqs];
         }).catch(() => { setCload(false); return [new Array<SongRequestType>(), new Array<SongRequestType>()] });
@@ -284,8 +286,6 @@ export default function Bar() {
                 setReady(true);
             });
         allRefresh(true);
-
-        // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
     }, [])
 
     if (ready === false)

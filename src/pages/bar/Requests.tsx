@@ -6,7 +6,7 @@ import { SongRequestType, songRequestCompare } from "../../lib/song";
 import { RefObject, memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { fetchWithToken } from "../..";
 import { UserSessionContext } from "../../lib/UserSessionContext";
-import { fetchPendingRequests, parseRequest, parseRequests } from "./Bar";
+import { parseRequest, parseRequests } from "./Bar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Spinner } from "react-bootstrap";
 import ExpandHeader from "../../components/ExpandHeader";
