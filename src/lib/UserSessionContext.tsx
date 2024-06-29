@@ -1,7 +1,7 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import { Consumer, Users } from './user'
 import { SongRequestType, SongType } from './song';
-import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, rootGetRefreshToken, storeAll, storeTokens } from '../index'
+import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, rootGetRefreshToken, storeTokens } from '../index'
 import { BarType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
@@ -169,21 +169,25 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         if (barid) cookies.set("bar_session", barid);
 
         if (!getStored("refresh_token") || !getStored("access_token")) {
-            checkIfAccountExists(usc).then((r) => {
-                console.log("rdata", r.data)
-                refreshUserData(r.data)
-                setReady(true);
-            })
-                .catch((e) => {
-                    console.log("no session detected." + e)
-                    setReady(true)
+            if (usc.user.access_token) {
+                checkIfAccountExists(usc).then((r) => {
+                    console.log("rdata", r.data)
+                    refreshUserData(r.data)
+                    setReady(true);
                 })
+                    .catch((e) => {
+                        console.log("no session detected." + e)
+                        setReady(true)
+                    });
+            } else {
+                setReady(true)
+            }
         } else {
             refreshUserData(user);
             checkIfAccountExists(usc).then((r) => {
                 if (!r.result) {
                     console.log("account doesn't exist, logging out.")
-                    Logout(usc, cookies);
+                    Logout(usc);
                     setReady(true);
                     return;
                 }

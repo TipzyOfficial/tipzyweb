@@ -49,7 +49,6 @@ type CardDetailsType = {
 export default function Account() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
-    const cookies = getCookies();
     const [details, setDetails] = useState<CardDetailsType | undefined>();
     const [cdReady, setCdReady] = useState(false);
 
@@ -106,7 +105,7 @@ export default function Account() {
         if (s === r) {
             fetchWithToken(usc, `tipper/`, 'DELETE').then(r => {
                 console.log("deleting acc...");
-                Logout(usc, cookies);
+                Logout(usc);
             }).catch((e) => { alert(`Error: Problem deleting account: ${e}. Please try again later.`) })
         } else {
             alert("Account not deleted. You didn't enter in the right code.")
@@ -147,7 +146,7 @@ export default function Account() {
                 <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
                     <TZButton title={"Log out"} onClick={() => {
                         console.log("logging out...");
-                        Logout(usc, cookies)
+                        Logout(usc)
                     }}></TZButton>
                     <div style={{ paddingBottom: padding }}></div>
                     <TZButton title={"Delete account"} backgroundColor="#800" onClick={DeleteAccount}></TZButton>

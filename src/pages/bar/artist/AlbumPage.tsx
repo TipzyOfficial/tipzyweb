@@ -2,7 +2,6 @@ import { memo, useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../../lib/UserSessionContext";
 import { router } from "../../../App";
 import { AlbumType, ArtistType, SongType } from "../../../lib/song";
-import { fetchWithToken } from "../../..";
 import { SongList } from "../../../components/Song";
 import { Colors, padding, useFdim } from "../../../lib/Constants";
 import TZHeader from "../../../components/TZHeader";
@@ -12,6 +11,7 @@ import { DisplayOrLoading } from "../../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
 import BackButton from "../../../components/BackButton";
 import { getCookies } from "../../../lib/utils";
+import { fetchNoToken } from "../../../lib/serverinfo";
 
 const LoadingScreen = () =>
   <div className="App-header">
@@ -40,7 +40,7 @@ export default function AlbumPage() {
     if (!barID) return;
     if (!album) return;
 
-    await fetchWithToken(usc, `tipper/spotify/album/?business_id=${barID}&album_id=${id}`, "GET")
+    await fetchNoToken(`tipper/spotify/album/?business_id=${barID}&album_id=${id}`, "GET")
       .then(r => r.json())
       .then(json => {
         const data = json.data;

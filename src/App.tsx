@@ -17,7 +17,6 @@ import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessio
 import SongSearch from './pages/bar/SongSearch';
 import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Logout } from '.';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
 import Profile from './pages/profile/Profile';
@@ -43,7 +42,7 @@ function Redirect() {
   // if (loggedin) cookies.set("refresh_token", cookies.get("refresh_token"), { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
 
   return (
-    loggedin ? (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>) : <Login></Login>
+    (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>)
   )
 }
 
@@ -123,10 +122,26 @@ function App() {
   )
 }
 
-export function goToLogin() {
-  router.navigate('/').then(() => {
+export function goToBar(id?: number) {
+  router.navigate(`/bar${id ? `?id=${id}` : ""}`).then(() => {
     // window.location.replace("/");
   });
+}
+
+export function goToLogin() {
+  // const urlbtoa = btoa(window.location.href);
+
+  // window.location.replace(
+  //   `${window.location.origin}/login?prev=${urlbtoa}`
+  // )
+
+  window.location.replace(
+    `${window.location.origin}/login`//?prev=true`
+  )
+
+  // router.navigate(`/login?prev=${urlbtoa}`).then(() => {
+  //   window.location.reload
+  // });
 }
 
 export default App;

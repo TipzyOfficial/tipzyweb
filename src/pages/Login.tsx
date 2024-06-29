@@ -4,9 +4,9 @@ import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
 import { CredentialResponse, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import GoogleButton from 'react-google-button';
-import { ServerInfo, expiresInToAt, getUser, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
+import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
-import { checkIfAccountExists, consumerFromJSON, fetchWithToken, getTipper, storeAll } from '../index';
+import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from '../index';
 import { router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
@@ -14,6 +14,9 @@ import { Colors, padding } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
 import AppleLogin from 'react-apple-login'
+import { useSearchParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark as faCancel } from '@fortawesome/free-solid-svg-icons';
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
@@ -35,6 +38,9 @@ function Login(props: { back?: boolean }) {
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
     const appleLoginRef = useRef<HTMLDivElement>(null);
+    const [searchParams] = useSearchParams();
+
+    // console.log(searchParams.get("prev"));
 
     const handleAppleLoginSuccess = async (event: any) => {
         setGlobalDisable(true);
@@ -182,8 +188,14 @@ function Login(props: { back?: boolean }) {
         // console.log("login", user);
 
         const nextPage = () => {
-            if (barID) router.navigate(`/bar?id=${barID}`);
-            else router.navigate("/code")
+            // if (searchParams.get("prev")) {
+            //     console.log("going -1")
+            //     window.history.go(-1);
+            // }
+            // else {
+            console.log("going barid")
+            router.navigate(barID ? `/bar?id=${barID}` : '/code');
+            // }
         }
 
         // console.log(user.name);
@@ -347,9 +359,21 @@ function Login(props: { back?: boolean }) {
         <>
             {loginPage ?
                 <div style={styles.jumbo} ref={appleLoginRef}>
-                    {loginPrompt ? <div style={{ position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883' }}>
-                        <div style={{ padding: padding / 2 }}>
+                    {loginPrompt ? <div style={{ position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883', justifyContent: 'space-between', flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ flex: 1, height: '50' }}></div>
+                        <div style={{ padding: padding / 2, flex: 5 }}>
                             Please sign in to continue.
+                        </div>
+                        <div style={{
+                            flex: 1,
+                            display: 'flex', alignItems: 'center',
+                            padding: padding,
+                            cursor: 'pointer',
+                            opacity: 0.8,
+                            flexDirection: 'row-reverse',
+                        }} onClick={() => router.navigate(`/bar?id=${barID}`)}>
+                            <FontAwesomeIcon className="App-backarrow" icon={faCancel} ></FontAwesomeIcon>
+                            {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
                         </div>
                     </div> : <></>}
                     <div style={styles.header}>

@@ -9,6 +9,7 @@ import ProfileButton from "../../components/ProfileButton";
 import { BarType } from "../../lib/bar";
 import FlatList from "flatlist-react/lib";
 import { fetchWithToken } from "../..";
+import { fetchNoToken } from "../../lib/serverinfo";
 
 function BarRenderItem(props: { bar: BarType }) {
     const bar = props.bar;
@@ -47,7 +48,7 @@ function EnterCode() {
     }
 
     const getBars = async () => {
-        const json = await fetchWithToken(userContext, `tipper/businesses`, 'GET').then((r) => r.json());
+        const json = await fetchNoToken(`tipper/businesses/`, 'GET').then((r) => r.json());
         const o: BarType[] = []
         json.forEach((e: any) => {
             if (e.active)

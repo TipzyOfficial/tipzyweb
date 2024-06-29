@@ -34,6 +34,50 @@ const convertToTokenReturnType = (at: string, rt: string, expires_in: number): T
     return { access_token: at, refresh_token: rt, expires_at: expiresInToAt(expires_in) }
 }
 
+/**
+ * runs a fetch request with a certain access token. if the access token is expired, it will run reloadToken.
+ * @param accessToken the current access token
+ * @param urlEnding the ending of the url. so the total url will be baseUrl + urlEnding. No forward slash included -- add yourself if needed!
+ * @param getRefreshToken the function to get your refresh token, the token itself isn't a parameter because pulling it from storage for each call is hugely unnecessary.
+ * @param logout if there is no refresh token, this method logs the user out.
+ * @param resetTokenValues reset access, refresh, and expiresAt values.
+ * @param fetchMethod the method field in fetch. by default it is POST, but usually they will be GET, POST, PATCH, or DELETE
+ * @returns returns whatever the response is.
+ */
+export async function fetchNoToken(urlEnding: string, fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response> {
+    // const c = getCookies();
+
+    // console.log("fwt at url:", urlEnding, "at and ea", accessToken, expiresAt)
+
+    const theFetch = async () => {
+        return body ?
+            fetch(`${ServerInfo.baseurl}${urlEnding}`, {
+                method: fetchMethod ?? 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body ?? "",
+                signal: signal,
+            })
+            :
+            fetch(`${ServerInfo.baseurl}${urlEnding}`, {
+                method: fetchMethod ?? 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                signal: signal,
+            })
+    }
+
+    const response = await theFetch();
+    if (response === null) throw new Error("Null response.");
+    if (!response.ok) {
+        const t = await response.text()
+        throw new Error(`Bad response. Code: ${response.status}. ${t}`);
+    }
+    return response;
+}
+
 
 /**
  * runs a fetch request with a certain access token. if the access token is expired, it will run reloadToken.
@@ -69,7 +113,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     if (isNaN(expiresAt) || expiresAt <= Date.now()) {
         const res = await newTokens();
         if (res === 0) {
-            console.log("tokens expired. logging out.")
+            console.log("tokens expired. logging out. " + urlEnding)
             logout();
             return null;
         }

@@ -28,6 +28,7 @@ import AnimateHeight from 'react-animate-height';
 import '../../App.css'
 import React from "react";
 import FlatList from "flatlist-react/lib";
+import { fetchNoToken } from "../../lib/serverinfo";
 
 function parseSongIHateMeku(s: any): SongType {
     return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false }
@@ -82,7 +83,7 @@ export default function Bar() {
     const bar = userContext.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    const id = searchParams.get("id") ?? (userContext.barState.bar ? null : cookies.get("bar_session"));
+    const id = searchParams.get("id") ?? (userContext.barState.bar ? userContext.barState.bar.id : cookies.get("bar_session"));
     const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
@@ -135,7 +136,7 @@ export default function Bar() {
     }
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
-        return fetchWithToken(usc, `tipper/business/queue/?business_id=${id}`, "GET").then(response => {
+        return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
             console.log("fetching the queue")
             if (response === null) throw new Error("null response");
             if (!response.ok) throw new Error("Bad response:" + response.status);
@@ -164,6 +165,8 @@ export default function Bar() {
     }
 
     const refreshAllReqs = async (indicator: boolean) => {
+        if (usc.user.access_token === "") return;
+
         if (indicator) setCload(true);
         console.log('refreshing reqs');
         const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
@@ -210,9 +213,8 @@ export default function Bar() {
     // useEffect(() => console.log("rerendered everything"), [])
     useInterval(() => allRefresh(false), timeout, 500);
 
-
     const fetchBarInfo = async () => {
-        const bar: BarType | undefined = await fetchWithToken(userContext, `tipper/business/${id}`, 'GET').then(r => r.json())
+        const bar: BarType | undefined = await fetchNoToken(`tipper/business/${id}`, 'GET').then(r => r.json())
             .then(json => {
                 return {
                     id: json.id,
@@ -233,7 +235,7 @@ export default function Bar() {
             return undefined;
         }
 
-        bar.topSongs = await fetchWithToken(userContext, `tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topSongs = await fetchNoToken(`tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
             .then(json => {
                 const songs = new Array<SongType>();
                 json.data.forEach((s: any) => {
@@ -244,7 +246,7 @@ export default function Bar() {
                 return songs;
             }).catch(() => undefined)
 
-        bar.topArtists = await fetchWithToken(userContext, `tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
+        bar.topArtists = await fetchNoToken(`tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
             .then(json => {
                 const artists = new Array<ArtistType>();
                 json.data.forEach((s: any) => {
@@ -259,10 +261,14 @@ export default function Bar() {
 
         userContext.barState.setBar(bar)
 
+        console.log("begin")
+
         return bar;
     }
 
     useEffect(() => {
+        console.log("id", id)
+
         if (!id) {
             router.navigate("/code");
             return;
@@ -273,10 +279,12 @@ export default function Bar() {
         }
         fetchBarInfo().then(() => setReady(true))
             .catch(e => {
+                console.log(e);
                 userContext.barState.setBar(undefined)
                 setReady(true);
             });
         allRefresh(true);
+
         // fetchPendingRequests(userContext).then(u => userContext.setUser(u));
     }, [])
 
@@ -308,11 +316,11 @@ export default function Bar() {
                             <div style={{
                                 flex: 1,
                                 display: 'flex', alignItems: 'center',
-                                padding: padding / 2,
+                                padding: padding,
                                 cursor: 'pointer',
                                 opacity: 0.8,
                             }} onClick={() => router.navigate('/code')}>
-                                <FontAwesomeIcon className="App-tertiarytitle" icon={faArrowLeft} ></FontAwesomeIcon>
+                                <FontAwesomeIcon className="App-backarrow" icon={faArrowLeft} ></FontAwesomeIcon>
                                 {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
                             </div>
                             <div style={{ flex: 2 }}></div>

@@ -3,9 +3,6 @@ import { UserSessionContext } from "../../../lib/UserSessionContext";
 import useWindowDimensions from "../../../lib/useWindowDimensions";
 import { router } from "../../../App";
 import { AlbumType, ArtistType, SongType } from "../../../lib/song";
-import { fetchWithToken } from "../../..";
-import TZButton from "../../../components/TZButton";
-import FlatList from "flatlist-react/lib";
 import Song, { SongList, SongRenderItem } from "../../../components/Song";
 import { Colors, padding, useFdim } from "../../../lib/Constants";
 import TZHeader from "../../../components/TZHeader";
@@ -17,6 +14,7 @@ import { ScrollMenu } from 'react-horizontal-scrolling-menu';
 import Album from "../../../components/Album";
 import BackButton from "../../../components/BackButton";
 import { getCookies } from "../../../lib/utils";
+import { fetchNoToken } from "../../../lib/serverinfo";
 
 const LoadingScreen = () =>
   <div className="App-header">
@@ -34,6 +32,7 @@ export default function ArtistInfo() {
   const [topSongs, setTopSongs] = useState<SongType[] | undefined>([]);
 
   const loc = useLocation();
+
   const artist: ArtistType = loc.state ? (loc.state.artist ?? { id: "", name: "", image: "" }) : { id: "", name: "", image: "" };
 
   const artistID = artist.id;
@@ -49,7 +48,7 @@ export default function ArtistInfo() {
   async function fetchArtist(id: string): Promise<ArtistType | undefined> {
     if (!barID) return;
     if (!artistName) return;
-    const albums = await fetchWithToken(usc, `tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    const albums = await fetchNoToken(`tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
       .then(r => r.json())
       .then(json => {
         const data = json.data;
@@ -62,7 +61,7 @@ export default function ArtistInfo() {
       })
       .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
 
-    const topSongs = await fetchWithToken(usc, `tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    const topSongs = await fetchNoToken(`tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
       .then(r => r.json())
       .then(json => {
         const data = json.data;

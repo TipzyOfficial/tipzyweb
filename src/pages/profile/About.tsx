@@ -9,8 +9,6 @@ import "../../App.css"
 import BackButton from "../../components/BackButton";
 
 export default function About() {
-    const usc = useContext(UserSessionContext)
-
     // const loc = useLocation();
 
     const handleBackClick = () => {

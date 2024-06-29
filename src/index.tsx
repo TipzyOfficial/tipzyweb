@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-import App, { goToLogin } from './App';
+import App, { goToBar, goToLogin } from './App';
 import { clearData, getCookies, getStored, setStored } from './lib/utils';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
@@ -29,15 +29,16 @@ root.render(
   </React.StrictMode>
 );
 
-export function Logout(usc: UserSessionContextType, cookies: Cookies) {
-  console.log("logging out", console.trace());
+export function Logout(usc: UserSessionContextType) {
+  console.log("logging out", usc.barState.bar);
   // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, ""));
-  usc.barState.setBar(undefined);
+  // usc.barState.setBar(undefined);
 
   clearData();
   googleLogout();
+  console.log("going to login")
   goToLogin();
 }
 
@@ -72,7 +73,7 @@ async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturn
 }
 
 export async function getTipper(usc: UserSessionContextType, cookies: Cookies) {
-  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens));
+  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc), (tokens: TokenReturnType) => resetTokenValues(usc, tokens));
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
@@ -102,13 +103,13 @@ async function handleResponse(response: Response | null) {
 }
 
 export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {
-  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, cookies), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
   }).catch((e: Error) => {
     if (e.name === "AbortError") {
       console.log("fetch aborted" + e);
     }
-    throw new Error(e.message);
+    throw new Error("error at " + urlEnding + " " + e.message);
   });
   return response;
 }

@@ -37,7 +37,7 @@
   background-color: white;
   color: black;
   box-sizing: border-box;
-  -webkit-box-sizing:border-box;
+  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
 }
 
@@ -146,8 +146,12 @@
   justify-content: flex-start;
 }
 
+.App-backarrow {
+  font-size: calc(12px + 1vmin);
+}
+
 .App-tertiarytitle {
-  font-size: calc(15x + 1vmin);
+  font-size: calc(12px + 1vmin);
   font-weight: bold;
 }
 
@@ -179,23 +183,23 @@
 /* unvisited link */
 a:link {
   color: #FA9D17;
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 /* visited link */
 a:visited {
   color: #FA9D17;
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 /* mouse over link */
 a:hover {
   color: #df8605;
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 /* selected link */
 a:active {
   color: #df8605;
-  text-decoration: none; 
+  text-decoration: none;
 }

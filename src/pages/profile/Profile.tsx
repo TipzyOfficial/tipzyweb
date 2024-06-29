@@ -1,4 +1,4 @@
-import { useContext, useState, memo } from "react";
+import { useContext, useState, memo, useEffect } from "react";
 import { padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
@@ -99,6 +99,9 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
 export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
+    useEffect(() => {
+        if (user.access_token === "") Logout(usc);
+    }, [])
     // user.name
     // user.email
 
