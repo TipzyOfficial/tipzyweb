@@ -13,26 +13,6 @@ import { router } from "../../App";
 import { SongType } from "../../lib/song";
 import { isAndroid } from 'react-device-detect';
 
-
-/**
- * Custom button I made. Good for if you want a quick button without worrying about
- * formatting. Here's an example implementation:
- * <TZButton title={"TITLE_STRING"} onClick={SOME_FUNCTION}/>
- * there are other optional parameters you can check out in components/TZButton.tsx
- */
-import TZButton from "../../components/TZButton";
-
-/**
- * This is the library I use to display lists. You don't have to use this if you
- * don't want to; I use it because it mimics React Native's FlatList component.
- * I would highly reccomend using it as opposed to manually appending items
- * since it only renders items that are visible on the screen, saving time. There
- * are other libraries out there that also do this though. I have an
- * implementation of this specifically with Songs in pages/bar/bar.tsx if you 
- * want an example. Here's the docs: https://github.com/beforesemicolon/flatlist-react
- */
-import FlatList from "flatlist-react/lib";
-
 /**
  * The Song component displays a SongType object. Here's how it's implemented:
  * <Song song={SONG_VARIABLE_HERE} dims={DIMENSIONS}/>
@@ -110,7 +90,7 @@ export default function SongSearch() {
         if (query.length === 0) {
             return defaultResults();
         }
-        const json = await fetchNoToken(userContext, `tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
+        const json = await fetchNoToken(`tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
             songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit });
