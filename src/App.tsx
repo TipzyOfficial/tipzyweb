@@ -128,8 +128,26 @@ export function goToBar(id?: number) {
   });
 }
 
-export function goToLogin() {
-  // const urlbtoa = btoa(window.location.href);
+export type ReturnLinkType = {
+  url: string,
+  data: any
+}
+
+export function goToLogin(data?: any, defaultToBar?: boolean) {
+
+  if (defaultToBar) {
+    localStorage.removeItem("ret")
+  }
+
+  else {
+    const url = window.location.pathname;
+    const returnLink: ReturnLinkType = {
+      url: url,
+      data: data,
+    }
+
+    localStorage.setItem("ret", btoa(JSON.stringify(returnLink)))
+  }
 
   // window.location.replace(
   //   `${window.location.origin}/login?prev=${urlbtoa}`

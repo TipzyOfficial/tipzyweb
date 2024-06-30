@@ -94,7 +94,7 @@ export default function ArtistInfo() {
   const TSMemo = memo(SongList)
 
   function handleBackClick() {
-    router.navigate(-1);
+    router.navigate("/bar");
   }
 
   return (
@@ -112,7 +112,7 @@ export default function ArtistInfo() {
                 <span className='App-artistsubtitle'>Popular</span>
               </div>
               <div style={{ width: '100%' }}>
-                <TSMemo songs={topSongs} dims={songDims}></TSMemo>
+                <TSMemo songs={topSongs} dims={songDims} logoutData={{ artist: artist }}></TSMemo>
               </div>
               <div style={{ paddingBottom: 0, paddingTop: padding, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <span className='App-artistsubtitle'>Albums</span>

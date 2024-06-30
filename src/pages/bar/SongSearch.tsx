@@ -12,6 +12,7 @@ import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
 import { SongType } from "../../lib/song";
 import { isAndroid } from 'react-device-detect';
+import { useLocation } from "react-router-dom";
 
 /**
  * The Song component displays a SongType object. Here's how it's implemented:
@@ -22,6 +23,9 @@ import { isAndroid } from 'react-device-detect';
 import Song, { SongList, SongRenderItem } from "../../components/Song";
 import { Colors, padding } from "../../lib/Constants";
 import { fetchNoToken } from "../../lib/serverinfo";
+import { getCookies } from "../../lib/utils";
+import { DisplayOrLoading } from "../../components/DisplayOrLoading";
+import { Spinner } from "react-bootstrap";
 
 export default function SongSearch() {
     /**
@@ -60,7 +64,6 @@ export default function SongSearch() {
      * searchResults is the current results of your search. initialized to nothing.
      * setSearchResults sets the results of your search and rerenders the page.
      */
-    const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<SongType[]>(userContext.barState.bar ? userContext.barState.bar.topSongs ?? [] : []);
     const window = useWindowDimensions();
     const fdim = window.height && window.width ? Math.min(window.height * 0.9, window.width) : 1000;
@@ -70,6 +73,10 @@ export default function SongSearch() {
     const androidTimeout = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
+    const loc = useLocation();
+    const [searchQuery, setSearchQuery] = useState(loc.state?.query ?? "");
+    const [searching, setSearching] = useState(false);
+    let recentQuery = "";
 
     const defaultResults = () => {
         if (!userContext.barState.bar) {
@@ -85,16 +92,25 @@ export default function SongSearch() {
      * @param limit the max amount of results to return
      * @returns the array of songs matching the query. since it's an async function, it returns a promise.
      */
-    async function searchForSongs(query: string, limit: number): Promise<SongType[]> {
-        //this function calls the backend to get the search results for a query.        
+    async function searchForSongs(query: string, limit: number, searching?: boolean): Promise<SongType[]> {
+        //this function calls the backend to get the search results for a query.   
+        if (!bar) return [];
+
+        setSearching(true);
+
         if (query.length === 0) {
             return defaultResults();
         }
-        const json = await fetchNoToken(`tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar?.id}`, 'GET').then(r => r.json());
+        const json = await fetchNoToken(`tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
             songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit });
         });
+
+        setSearching(false);
+
+        recentQuery = query;
+
         return songs;
     }
 
@@ -110,21 +126,34 @@ export default function SongSearch() {
     const SongResultListMemo = memo(SongList);
 
     useEffect(() => {
-        // if(searchQuery === "") setSearchResults(defaultResults());
-        // setSearchResults(defaultResults());
-
         const androidIsDumb = setTimeout(() => {
             setAndroidStupid(false);
             inputRef.current?.focus();
         }, androidTimeout)
 
+        const query = loc.state?.query;
+
+        if (query) {
+            console.log(userContext);
+            getSearchResults(query, limit);
+        }
+
+        return () => {
+            clearTimeout(androidIsDumb)
+        }
+    }, [])
+
+    useEffect(() => {
+        // if(searchQuery === "") setSearchResults(defaultResults());
+        // setSearchResults(defaultResults());
+
         const delayDebounceFn = setTimeout(() => {
-            getSearchResults(searchQuery, limit);
+            if (recentQuery !== searchQuery)
+                getSearchResults(searchQuery, limit);
         }, timeoutInterval)
 
         return () => {
             clearTimeout(delayDebounceFn);
-            clearTimeout(androidIsDumb)
         }
     }, [searchQuery])
 
@@ -148,12 +177,21 @@ export default function SongSearch() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 // onSubmit={() => searchForSongs(searchQuery, limit)}
                 />
-                <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => { if (!isAndroid || (isAndroid && !androidStupid)) router.navigate(-1); }}>
+                <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => {
+                    if (!isAndroid || (isAndroid && !androidStupid)) router.navigate("/bar");
+                }}>
                     <span className="text">Cancel</span>
                 </div>
             </form>
             <div style={{ display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%' }}>
-                <SongResultListMemo songs={searchResults} dims={songDims}></SongResultListMemo>
+                <DisplayOrLoading condition={!searching} loadingScreen={
+                    <div className="App-header">
+                        <Spinner style={{ color: Colors.primaryRegular, width: 50, height: 50 }} />
+                        <div style={{ padding: padding }} className="App-smalltext">Loading results...</div>
+                    </div>
+                }>
+                    <SongResultListMemo songs={searchResults} dims={songDims} logoutData={{ query: searchQuery }}></SongResultListMemo>
+                </DisplayOrLoading>
             </div>
         </div>
     )

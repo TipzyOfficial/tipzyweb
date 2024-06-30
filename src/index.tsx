@@ -29,9 +29,8 @@ root.render(
   </React.StrictMode>
 );
 
-export function Logout(usc: UserSessionContextType) {
+export function Logout(usc: UserSessionContextType, data?: any, defaultToBar?: boolean) {
   console.log("logging out", usc.barState.bar);
-  // console.log("abortcontroller", usc.abortController)
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, ""));
   // usc.barState.setBar(undefined);
@@ -39,7 +38,7 @@ export function Logout(usc: UserSessionContextType) {
   clearData();
   googleLogout();
   console.log("going to login")
-  goToLogin();
+  goToLogin(data, defaultToBar ?? false);
 }
 
 export function rootGetRefreshToken(cookies: Cookies): string | null {
@@ -102,8 +101,8 @@ async function handleResponse(response: Response | null) {
   return response;
 }
 
-export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string) {
-  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
+export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string, data?: any) {
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, data), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
   }).catch((e: Error) => {
     if (e.name === "AbortError") {

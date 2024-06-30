@@ -68,7 +68,10 @@ export default function AlbumPage() {
   const TSMemo = memo(SongList)
 
   function handleBackClick() {
-    router.navigate(-1);
+    if (loc.state.fromLogin) {
+      router.navigate("/bar");
+    }
+    else router.navigate(-1);
   }
 
   return (
@@ -90,7 +93,7 @@ export default function AlbumPage() {
               }}>{album.title}</span>
               <div style={{ padding: padding }}></div>
               <div style={{ width: '100%', maxWidth: albumDims * 3, alignSelf: 'center' }}>
-                <TSMemo noImage songs={songs} dims={songDims}></TSMemo>
+                <TSMemo noImage songs={songs} dims={songDims} logoutData={{ album: album }}></TSMemo>
               </div>
             </div>
           </div>

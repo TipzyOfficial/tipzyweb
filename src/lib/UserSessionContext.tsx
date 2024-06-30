@@ -7,6 +7,7 @@ import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
 import { useLocation } from 'react-router-dom';
 import { getCookies, getStored } from './utils';
+import { fetchBarInfo } from '../pages/bar/Bar';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
@@ -25,10 +26,16 @@ export type UserSessionContextType = {
     abortController?: AbortController;
 }
 
+const initBar = async (id?: number) => {
+    return id ? fetchBarInfo(DefaultUserSessionContext, id, true) : undefined;
+}
+
 export const DefaultUserSessionContext: UserSessionContextType = {
     user: new Consumer("", 0, ""),
     setUser: () => { },
-    barState: { bar: undefined, setBar: () => { } },
+    barState: {
+        bar: undefined, setBar: () => { }
+    },
 }
 
 // export const getStartingUser = async (): Promise<Consumer> => {
@@ -48,7 +55,7 @@ export const DefaultUserSessionContext: UserSessionContextType = {
 // }
 
 
-export const UserSessionContext = createContext<UserSessionContextType>({ user: new Consumer("", 0, ""), setUser: () => { }, barState: { bar: undefined, setBar: () => { } } });
+export const UserSessionContext = createContext<UserSessionContextType>(DefaultUserSessionContext);
 
 export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boolean): Promise<[SongRequestType[], number]> => {
     const p: SongRequestType[] = [];
@@ -161,12 +168,15 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
     const usc = { user: user, setUser: editUser, barState: { bar: bar, setBar: editBar }, abortController: abortController };
 
-    useEffect(() => {
-        // if(location.pathname === "/login" || location.pathname === "/register") return;
+    const setup = async () => {
         const queryParameters = new URLSearchParams(window.location.search)
-        const barid = queryParameters.get("id");
+        const barid = queryParameters.get("id") ?? cookies.get("bar_session");
 
         if (barid) cookies.set("bar_session", barid);
+
+        const bar = await initBar(barid);
+
+        if (bar) setBar(bar);
 
         if (!getStored("refresh_token") || !getStored("access_token")) {
             if (usc.user.access_token) {
@@ -199,6 +209,12 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
                     setReady(true)
                 });
         }
+
+    }
+
+    useEffect(() => {
+        setup();
+        // if(location.pathname === "/login" || location.pathname === "/register") return;
     }, []);
 
     // useInterval(() => setTokenPendingData({user, setUser, barState}), refreshRate);

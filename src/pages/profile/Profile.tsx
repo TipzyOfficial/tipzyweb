@@ -108,7 +108,7 @@ export default function Profile() {
     // const loc = useLocation();
 
     const handleBackClick = () => {
-        router.navigate(-1);
+        router.navigate(`/bar`);
     };
 
     return (

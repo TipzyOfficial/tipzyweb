@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 
 export const getCookies = () => {
+    // console.log("getting cookies");
+    // console.log(new Cookies(null, { path: '/', sameSite: "strict" }).get("bar_session"));
     return new Cookies(null, { path: '/', sameSite: "strict" })
 }
 

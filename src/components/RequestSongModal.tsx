@@ -12,7 +12,7 @@ import { UserSessionContext } from "../lib/UserSessionContext";
 import { useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 
-export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void }) {
+export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
     const dims = useFdim() / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
@@ -107,7 +107,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         const [disabled, setDisabled] = useState(false);
 
         const checkStripe = async (): Promise<boolean | null> => {
-            return fetchWithToken(userContext, `get_saved_payment3`, 'GET')
+            return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, props.data)
                 .then(r => r.json())
                 .then(json => {
                     console.log("json gsp", json)
@@ -119,7 +119,6 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         async function onRequestClick() {
             setDisabled(true);
             const hasStripe = await checkStripe();
-
             if (hasStripe === null) {
                 console.log("Error getting Stripe. Are you sure you're logged in?")
             }

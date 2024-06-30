@@ -72,6 +72,60 @@ let currentPCache: SongType | undefined = undefined;
 let pendingReqsCache: SongRequestType[] = [];
 let allReqsCache: SongRequestType[] = [];
 
+export const fetchBarInfo = async (userContext: UserSessionContextType, id: number, noSetBar?: boolean) => {
+    const bar: BarType | undefined = await fetchNoToken(`tipper/business/${id}`, 'GET').then(r => r.json())
+        .then(json => {
+            return {
+                id: json.id,
+                name: json.business_name,
+                type: json.business_type,
+                image_url: json.image_url,
+                description: json.description,
+                active: json.active,
+            }
+            // setBar(bar);
+        }).catch((e: Error) => {
+            // alert("Error loading your bar: " + e.message);
+            return undefined;
+        })
+
+    if (!bar) {
+        userContext.barState.setBar(bar)
+        return undefined;
+    }
+
+    bar.topSongs = await fetchNoToken(`tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
+        .then(json => {
+            const songs = new Array<SongType>();
+            json.data.forEach((s: any) => {
+                const song: SongType = parseSong(s);
+                songs.push(song);
+            })
+            //setTopSongs(songs)
+            return songs;
+        }).catch(() => undefined)
+
+    bar.topArtists = await fetchNoToken(`tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
+        .then(json => {
+            const artists = new Array<ArtistType>();
+            json.data.forEach((s: any) => {
+                const artist: ArtistType = { id: s.id, name: s.name, image: s.images[0] ? s.images[0].url : "" }
+                artists.push(artist);
+            })
+            //setTopArtists(artists)
+            return artists;
+        }).catch((e) => {
+            return undefined;
+        })
+
+    if (!noSetBar)
+        userContext.barState.setBar(bar)
+
+    console.log("begin")
+
+    return bar;
+}
+
 export default function Bar() {
     const [searchParams] = useSearchParams();
     const userContext = useContext(UserSessionContext);
@@ -215,59 +269,6 @@ export default function Bar() {
     // useEffect(() => console.log("rerendered everything"), [])
     useInterval(() => allRefresh(false), timeout, 500);
 
-    const fetchBarInfo = async () => {
-        const bar: BarType | undefined = await fetchNoToken(`tipper/business/${id}`, 'GET').then(r => r.json())
-            .then(json => {
-                return {
-                    id: json.id,
-                    name: json.business_name,
-                    type: json.business_type,
-                    image_url: json.image_url,
-                    description: json.description,
-                    active: json.active,
-                }
-                // setBar(bar);
-            }).catch((e: Error) => {
-                // alert("Error loading your bar: " + e.message);
-                return undefined;
-            })
-
-        if (!bar) {
-            userContext.barState.setBar(bar)
-            return undefined;
-        }
-
-        bar.topSongs = await fetchNoToken(`tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
-            .then(json => {
-                const songs = new Array<SongType>();
-                json.data.forEach((s: any) => {
-                    const song: SongType = parseSong(s);
-                    songs.push(song);
-                })
-                //setTopSongs(songs)
-                return songs;
-            }).catch(() => undefined)
-
-        bar.topArtists = await fetchNoToken(`tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
-            .then(json => {
-                const artists = new Array<ArtistType>();
-                json.data.forEach((s: any) => {
-                    const artist: ArtistType = { id: s.id, name: s.name, image: s.images[0] ? s.images[0].url : "" }
-                    artists.push(artist);
-                })
-                //setTopArtists(artists)
-                return artists;
-            }).catch((e) => {
-                return undefined;
-            })
-
-        userContext.barState.setBar(bar)
-
-        console.log("begin")
-
-        return bar;
-    }
-
     useEffect(() => {
         console.log("id", id)
 
@@ -279,7 +280,7 @@ export default function Bar() {
             setReady(true);
             return;
         }
-        fetchBarInfo().then(() => setReady(true))
+        fetchBarInfo(usc, id).then(() => setReady(true))
             .catch(e => {
                 console.log(e);
                 userContext.barState.setBar(undefined)

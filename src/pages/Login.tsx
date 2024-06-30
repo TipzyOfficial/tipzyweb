@@ -7,7 +7,7 @@ import GoogleButton from 'react-google-button';
 import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
 import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from '../index';
-import { router } from '../App';
+import { ReturnLinkType, router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
 import { Colors, padding } from '../lib/Constants';
@@ -39,6 +39,18 @@ function Login(props: { back?: boolean }) {
     const barID = cookies.get("bar_session");
     const appleLoginRef = useRef<HTMLDivElement>(null);
     const [searchParams] = useSearchParams();
+
+    const nextPage = () => {
+        const ret = localStorage.getItem("ret");
+
+        if (ret) {
+            const retDecoded: ReturnLinkType = JSON.parse(atob(ret));
+            router.navigate(retDecoded.url, { state: { fromLogin: true, ...retDecoded.data } })
+        } else {
+            console.log("going barid")
+            router.navigate(barID ? `/bar?id=${barID}` : '/code');
+        }
+    }
 
     // console.log(searchParams.get("prev"));
 
@@ -186,18 +198,6 @@ function Login(props: { back?: boolean }) {
         usc.setUser(user);
 
         // console.log("login", user);
-
-        const nextPage = () => {
-            // if (searchParams.get("prev")) {
-            //     console.log("going -1")
-            //     window.history.go(-1);
-            // }
-            // else {
-            console.log("going barid")
-            router.navigate(barID ? `/bar?id=${barID}` : '/code');
-            // }
-        }
-
         // console.log(user.name);
         // console.log("usc user", usc.user);
         await checkIfAccountExists({
@@ -371,7 +371,7 @@ function Login(props: { back?: boolean }) {
                             cursor: 'pointer',
                             opacity: 0.8,
                             flexDirection: 'row-reverse',
-                        }} onClick={() => router.navigate(`/bar?id=${barID}`)}>
+                        }} onClick={() => nextPage()}>
                             <FontAwesomeIcon className="App-backarrow" icon={faCancel} ></FontAwesomeIcon>
                             {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
                         </div>
