@@ -1,4 +1,4 @@
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap";
 import { Colors, padding, useFdim } from "../lib/Constants";
 import { SongType } from "../lib/song";
 import './Song.css'
@@ -10,6 +10,7 @@ import TZButton from "./TZButton";
 import { fetchWithToken } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { useInterval } from "../lib/utils";
+import { fetchNoToken } from "../lib/serverinfo";
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void }) {
     const dims = useFdim() / 2;
@@ -22,7 +23,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const getPrice = async () => {
         setPrice(undefined);
 
-        const response = await fetchWithToken(userContext, `calc_dynamic_price/`, 'POST', JSON.stringify({
+        const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
             business_id: userContext.barState.bar?.id
         })).catch(e => { throw e });
 
@@ -105,21 +106,24 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     function RequestScreen() {
         const [disabled, setDisabled] = useState(false);
 
-        const checkStripe = async (): Promise<boolean> => {
+        const checkStripe = async (): Promise<boolean | null> => {
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET')
                 .then(r => r.json())
                 .then(json => {
                     console.log("json gsp", json)
                     if (!json.has_method) throw new Error("malformed json: no has_method.")
                     return (json.has_method === "True")
-                }).catch(e => { console.log(e); return false });
+                }).catch((e: Error) => { console.log(e); return null });
         }
 
         async function onRequestClick() {
             setDisabled(true);
             const hasStripe = await checkStripe();
 
-            if (!hasStripe) setPaymentScreenVisible(true);
+            if (hasStripe === null) {
+                console.log("Error getting Stripe. Are you sure you're logged in?")
+            }
+            else if (!hasStripe) setPaymentScreenVisible(true);
             else {
                 sendRequestClose();
             }

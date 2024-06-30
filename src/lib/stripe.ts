@@ -1,7 +1,11 @@
-import { fetchWithToken } from "..";
+import { Logout, fetchWithToken } from "..";
 import { UserSessionContextType } from "./UserSessionContext";
 
 export async function fetchPaymentSheetParams(usc: UserSessionContextType, update?: boolean) {
+    if (usc.user.access_token === "") {
+        Logout(usc);
+        return;
+    }
     console.log("sending!");
 
     if (update) {
