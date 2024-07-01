@@ -93,6 +93,15 @@
   font-style: normal;
 }
 
+.App-logintitle {
+  font-size: calc(25px + 4vmin);
+  line-height: calc(25px + 4vmin);
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
 .App-subtitle {
   font-size: calc(20px + 2vmin);
   font-size: calc(20px + 2vmin);

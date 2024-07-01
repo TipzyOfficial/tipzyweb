@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 
+function isMobile() {
+    const o = typeof window.screen.orientation !== 'undefined';
+    return o;
+}
+
 export const getCookies = () => {
-    // console.log("getting cookies");
-    // console.log(new Cookies(null, { path: '/', sameSite: "strict" }).get("bar_session"));
     return new Cookies(null, { path: '/', sameSite: "strict" })
 }
 

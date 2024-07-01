@@ -100,7 +100,7 @@ export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
     useEffect(() => {
-        if (user.access_token === "") Logout(usc);
+        if (user.access_token === "") Logout(usc, undefined, true);
     }, [])
     // user.name
     // user.email

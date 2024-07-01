@@ -4,7 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle as faSuccess } from '@fortawesome/free-solid-svg-icons';
 
-function TZButton(props: { onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean, fontSize?: number, loading?: boolean, completed?: boolean }) {
+function TZButton(props: { onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean, fontSize?: number, color?: string, loading?: boolean, completed?: boolean, leftComponent?: JSX.Element }) {
     const [opacity, setOpacity] = useState(1);
 
     return (
@@ -33,10 +33,11 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
             {props.completed ?
                 <FontAwesomeIcon icon={faSuccess} fontSize={props.fontSize} color="white"></FontAwesomeIcon>
                 :
-                <>
-                    <span className="App-tertiarytitle" style={{ color: "white", fontWeight: "bold", fontSize: props.fontSize }}>{props.title ?? ""}</span>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {props.leftComponent ?? <></>}
+                    <span className="App-tertiarytitle" style={{ color: props.color ?? "white", fontWeight: 500, fontSize: props.fontSize }}>{props.title ?? ""}</span>
                     {props.loading ? <div style={{ paddingLeft: 5 }}><Spinner style={{ color: "white", paddingTop: 3 }} size='sm'></Spinner></div> : <></>}
-                </>
+                </div>
             }
 
         </button>

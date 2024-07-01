@@ -10,13 +10,19 @@ import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from
 import { ReturnLinkType, router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
 import Register from './Register';
-import { Colors, padding } from '../lib/Constants';
+import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
 import AppleLogin from 'react-apple-login'
 import { useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark as faCancel } from '@fortawesome/free-solid-svg-icons';
+import { faAppleAlt, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faApple } from '@fortawesome/free-brands-svg-icons';
+import GoogleLogo from '../assets/google_logo_clear.svg';
+import raveVideo from "../assets/TipzyHomePageVideo.mp4";
+import FullLogo from '../assets/Tipzy_Full_Orange.png'
+
+
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
@@ -28,17 +34,16 @@ type AppleReturnType = {
 }
 
 function Login(props: { back?: boolean }) {
-    const [loginPage, setLoginPage] = useState(true);
     const [globalDisable, setGlobalDisable] = useState(false);
+    const [loginPage, setLoginPage] = useState(true);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [loginPrompt, setLoginPrompt] = useState(false);
     const [loginPressed, setLoginPressed] = useState(false);
+    const [loginPrompt, setLoginPrompt] = useState(false);
     const usc = useContext(UserSessionContext);
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
-    const appleLoginRef = useRef<HTMLDivElement>(null);
-    const [searchParams] = useSearchParams();
+    const [usernameShowing, setUsernameShowing] = useState(false);
 
     const nextPage = () => {
         const ret = localStorage.getItem("ret");
@@ -76,15 +81,6 @@ function Login(props: { back?: boolean }) {
                 console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
                 setGlobalDisable(false);
             })
-        //const wholeName = event.detail.user.name.firstName + " " + event.detail.user.name.lastName;
-
-        // const response = await fetchWithToken(usc, `/auth/convert-token`, 'POST', JSON.stringify({
-        //     client_id: process.env.REACT_APP_APPLE_CLIENT_ID,
-        //     grant_type: "convert_token",
-        //     client_secret: process.env.REACT_APP_APPLE_CLIENT_SECRET,
-        //     backend: "apple-id",
-        //     token: event.detail.authorization.id_token,
-        // }))
     }
 
     const handleAppleLoginFailure = (event: any) => {
@@ -316,30 +312,39 @@ function Login(props: { back?: boolean }) {
         }
 
         return (
-            <div style={{ flex: 1, width: '100%', justifyContent: 'center', display: "flex" }}>
-                <div style={styles.jumbo}>
+            <div className="App-body" style={{ width: "100%", justifyContent: 'flex-end' }}>
+                <div style={{
+                    zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
+                    width: "100%",
+                    maxWidth: 500,
+                    padding: padding,
+                    borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
+                }}>
                     <div style={styles.header}>
+                        <div style={{ width: "100%", display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: 0 }}>
+                            <div style={{ cursor: 'pointer' }} onClick={() => setLoginPage(true)}><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
+                        </div>
                         <div style={{ width: "100%", justifyContent: 'center', display: 'flex' }}>
-                            <span className='App-title' style={{ textAlign: 'center' }}>Sign Up</span>
+                            <span className='App-subtitle' style={{ textAlign: 'center' }}>Sign Up</span>
                         </div>
                     </div>
-                    <div style={{ paddingBottom: 10 }}>
+                    <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                     </div>
-                    <div style={{ paddingBottom: 10 }}>
+                    <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' type='' placeholder='Last name' value={lastName} onChange={(e) => setLastName(e.target.value)} />
                     </div>
-                    <div style={{ paddingBottom: 10 }}>
+                    <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' placeholder='Username' value={username} autoCorrect='off' autoCapitalize='off' onChange={(e) => setUsername(e.target.value)} />
                     </div>
-                    <div style={{ paddingBottom: 10 }}>
+                    <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' type='email' placeholder='email@address.com' value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
-                    <div style={{ paddingBottom: 10, justifyContent: 'flex-start' }}>
+                    <div style={{ paddingBottom: 10, justifyContent: 'flex-start', width: "100%" }}>
                         <input className='input' type='Password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
                         <PasswordRule />
                     </div>
-                    <div style={{ paddingBottom: 10 }}>
+                    <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' type='Password' placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                         <ConfirmPasswordRule />
                     </div>
@@ -355,19 +360,46 @@ function Login(props: { back?: boolean }) {
         )
     }
 
+    // const LoginPageMobile = () => {
+    //     return (
+
+    //     )
+    // }
+
     return (
-        <>
+        <div className="App-body" style={{ width: "100%" }}>
+            {/* <img src={require('../assets/rave.gif')} style={{ objectFit: 'fill' }}></img> */}
+            <div
+                style={{
+                    zIndex: 0,
+                    position: 'fixed',
+                    right: 0,
+                    top: 0,
+                    minWidth: "100%",
+                    minHeight: "100%",
+                    backgroundColor: "black"
+                }}
+            >
+                <video autoPlay loop muted style={{ objectFit: 'fill', minWidth: "100%", minHeight: "100%", opacity: 0.3 }}>
+                    <source src={raveVideo} type='video/mp4' />
+                </video>
+            </div>
+
             {loginPage ?
-                <div style={styles.jumbo} ref={appleLoginRef}>
-                    {loginPrompt ? <div style={{ position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883', justifyContent: 'space-between', flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
-                        <div style={{ flex: 1, height: '50' }}></div>
+                <div style={{
+                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', flex: 1, width: "100%"
+                }}>
+                    {loginPrompt ? <div style={{ flex: 0, zIndex: 2, position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883', justifyContent: 'space-between', flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
+                        <div style={{
+                            flex: 1, height: 50
+                        }}></div>
                         <div style={{ padding: padding / 2, flex: 5 }}>
                             Please sign in to continue.
                         </div>
                         <div style={{
                             flex: 1,
                             display: 'flex', alignItems: 'center',
-                            padding: padding,
+                            paddingRight: padding,
                             cursor: 'pointer',
                             opacity: 0.8,
                             flexDirection: 'row-reverse',
@@ -376,14 +408,27 @@ function Login(props: { back?: boolean }) {
                             {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
                         </div>
                     </div> : <></>}
-                    <div style={styles.header}>
-                        <BigLogo></BigLogo>
+                    <div style={{
+                        zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', width: "100%", padding: padding,
+                        maxWidth: 500,
+                    }}>
+                        <div>
+                            <img src={FullLogo} style={{ width: "30%", minWidth: 120, maxWidth: 200, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
+                            <br></br>
+                            <span className='App-logintitle' style={{ whiteSpace: 'pre-line' }}>
+                                YOUR TUNES,{"\n"}
+                                YOUR CALL,{"\n"}
+                                YOUR VIBE.
+                            </span>
+                            {/* <img src={FullLogo} style={{ minWidth: 100, maxWidth: 200, objectFit: 'contain' }} alt={"tipzy full logo"}></img> */}
+                        </div>
                     </div>
-                    <div style={{ justifyContent: 'center', alignItems: 'center' }}>
-                        <GoogleButton
-                            style={{ width: '100%' }}
-                            onClick={() => googleLogin()} />
-                        <div style={{ padding: padding }}></div>
+                    <div style={{
+                        zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
+                        width: "100%",
+                        maxWidth: 500,
+                        padding: padding, borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
+                    }}>
                         <AppleLogin
                             clientId="app.tipzy.TipzyAppleSignIn"
                             redirectURI="https://app.tipzy.app/"
@@ -398,36 +443,48 @@ function Login(props: { back?: boolean }) {
                             // responseType='id_token'
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
-                                <div
-                                    id="appleid-signin"
-                                    data-mode="center-align"
-                                    data-type="sign-in"
-                                    data-color="white"
-                                    data-border="false"
-                                    data-border-radius="15"
-                                    data-width="100%"
-                                    data-height="50"
-                                ></div>
+                                <TZButton leftComponent={
+                                    <><FontAwesomeIcon fontSize={18} icon={faApple} /> <div style={{ paddingRight: 5 }} /></>
+                                } onClick={renderProps.onClick} backgroundColor="white" fontSize={20} color="black" title="Continue With Apple" />
                             )}
                         />
+                        <div style={{ paddingBottom: padding }}></div>
+                        <TZButton leftComponent={
+                            <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
+                        } onClick={googleLogin} backgroundColor="#8885" fontSize={20} color="white" title="Continue With Google" />
+                        <div style={{ paddingBottom: padding }}></div>
+                        {
+                            usernameShowing ?
+                                <div style={{
+                                    backgroundColor: "#8885", width: "100%",
+                                    paddingTop: padding / 2, paddingBottom: padding, paddingLeft: padding, paddingRight: padding,
+                                    borderRadius: radius
+                                }}>
+                                    <div style={{ width: "100%", display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: padding / 2 }}>
+                                        <div style={{ cursor: 'pointer' }} onClick={() => setUsernameShowing(false)}><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
+                                    </div>
+                                    <div style={{ paddingBottom: 10, width: "100%" }}>
+                                        <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)} />
+                                    </div>
+                                    <div style={{ paddingBottom: 10, width: "100%" }}>
+                                        <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    </div>
+                                    <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
+                                    {/* <TZButton onClick={() => setUsernameShowing(false)} title={"back"} disabled={loginPressed}></TZButton> */}
+                                </div>
+                                :
+                                <TZButton onClick={() => setUsernameShowing(true)} backgroundColor="#8885" fontSize={20} color="white" title="Sign in with Username" />
+                        }
+                        <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                            Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
+                        </div>
+                        <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
+                            By using this service you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                            <br></br>
+                            Questions? <a href="mailto:help@tipzy.app" target='_blank' rel="noreferrer">Contact us.</a>
+                        </div>
                     </div>
-                    <div style={{ padding: 10, textAlign: 'center' }}>
-                        or
-                    </div>
-                    <div style={{ paddingBottom: 10 }}>
-                        <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)} />
-                    </div>
-                    <div style={{ paddingBottom: 10 }}>
-                        <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
-                    </div>
-                    <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
-                    <div style={{ paddingTop: 10, textAlign: 'center' }}>
-                        Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
-                    </div>
-                    <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
-                        By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
-                    </div>
-                </div>
+                </div >
                 : <Register />}
             {(globalDisable || loginPressed) ?
                 <div className='App-body' style={{ position: 'fixed', top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
@@ -435,7 +492,7 @@ function Login(props: { back?: boolean }) {
                 </div>
                 : <></>
             }
-        </>
+        </div>
     )
 }
 
