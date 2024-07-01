@@ -412,11 +412,11 @@ function Login(props: { back?: boolean }) {
                         </div>
                     </div> : <></>}
                     <div style={{
-                        zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', width: "100%", padding: padding,
+                        zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: "100%", padding: padding,
                         maxWidth: 500,
                     }}>
                         <div>
-                            <img src={FullLogo} style={{ width: "30%", minWidth: 120, maxWidth: 200, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
+                            <img src={FullLogo} style={{ width: "30%", minWidth: 100, maxWidth: 180, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
                             <br></br>
                             <span className='App-logintitle' style={{ whiteSpace: 'pre-line' }}>
                                 YOUR TUNES,{"\n"}
