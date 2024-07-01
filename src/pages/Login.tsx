@@ -19,8 +19,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAppleAlt, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faApple } from '@fortawesome/free-brands-svg-icons';
 import GoogleLogo from '../assets/google_logo_clear.svg';
-import raveVideo from "../assets/TipzyHomePageVideo.mp4";
-import FullLogo from '../assets/Tipzy_Full_Orange.png'
+// import raveVideo from "../assets/TipzyHomePageVideo.mp4";
+import FullLogo from '../assets/Tipzy_Full_Orange.png';
+import rave from '../assets/rave.png';
 
 
 
@@ -377,12 +378,14 @@ function Login(props: { back?: boolean }) {
                     top: 0,
                     minWidth: "100%",
                     minHeight: "100%",
-                    backgroundColor: "black"
+                    // backgroundColor: "black",
+                    backgroundImage: `url("${rave}")`,
+                    backgroundSize: 'cover',
                 }}
             >
-                <video autoPlay loop muted style={{ objectFit: 'fill', minWidth: "100%", minHeight: "100%", opacity: 0.3 }}>
+                {/* <video autoPlay loop muted style={{ objectFit: 'fill', minWidth: "100%", minHeight: "100%", opacity: 0.3 }}>
                     <source src={raveVideo} type='video/mp4' />
-                </video>
+                </video> */}
             </div>
 
             {loginPage ?
