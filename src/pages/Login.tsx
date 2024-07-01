@@ -447,7 +447,7 @@ function Login(props: { back?: boolean }) {
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
                                 <TZButton leftComponent={
-                                    <><FontAwesomeIcon fontSize={18} icon={faApple} /> <div style={{ paddingRight: 5 }} /></>
+                                    <><FontAwesomeIcon fontSize={18} icon={faApple} color={"black"} /> <div style={{ paddingRight: 5 }} /></>
                                 } onClick={renderProps.onClick} backgroundColor="white" fontSize={20} color="black" title="Continue With Apple" />
                             )}
                         />
@@ -481,10 +481,10 @@ function Login(props: { back?: boolean }) {
                         <div style={{ paddingTop: 10, textAlign: 'center' }}>
                             Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
                         </div>
-                        <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
-                            By using this service you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                        <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
+                            By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                             <br></br>
-                            Questions? <a href="mailto:help@tipzy.app" target='_blank' rel="noreferrer">Contact us.</a>
+                            Questions? <a style={{ textDecoration: 'underline', color: "#AAA" }} href="mailto:help@tipzy.app" target='_blank' rel="noreferrer">Contact us.</a>
                         </div>
                     </div>
                 </div >
