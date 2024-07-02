@@ -72,12 +72,19 @@ function Login(props: { back?: boolean }) {
 
         const name: AppleReturnType | undefined = user ? { name: user.name, email: email } : undefined;
 
+        if (name) {
+            //store apple name stuff bc we are never getting this again
+            localStorage.setItem("firstName", name.name.firstName);
+            localStorage.setItem("lastName", name.name.lastName);
+            localStorage.setItem("email", name.email);
+        }
+
         if (!accessToken) {
             console.log("Malformed response from Apple login servers.");
             return;
         }
 
-        await loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at, name)).catch(
+        await loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at, true, name)).catch(
             (e: Error) => {
                 console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
                 setGlobalDisable(false);
@@ -102,8 +109,8 @@ function Login(props: { back?: boolean }) {
         }
     }, [])
 
-    const login = (at: string, rt: string, ea: number, name?: any) => {
-        loginWithTipzyToken(at, rt, ea, name)
+    const login = (at: string, rt: string, ea: number, isApple?: boolean, name?: any) => {
+        loginWithTipzyToken(at, rt, ea, isApple, name)
             .catch(() => {
                 setGlobalDisable(false);
                 setLoginPressed(false);
@@ -143,27 +150,10 @@ function Login(props: { back?: boolean }) {
         }
     }
 
-    const createAccount = async (user: Consumer, customName?: AppleReturnType) => {
+    const createAccount = async (user: Consumer, isApple?: boolean, customName?: AppleReturnType) => {
         console.log(customName);
 
-        return customName ?
-
-            fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.name.firstName}&last_name=${customName.name.lastName}&email=${customName.email}`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${user.access_token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    birthday: formatBirthday(new Date()),
-                })
-            }).catch((e: Error) => {
-                alert(`Error creating new account. Please try again later: ${e.message}`);
-                return null;
-            })
-
-            :
-
+        if (!isApple)
             fetch(`${ServerInfo.baseurl}tipper/`, {
                 method: 'POST',
                 headers:
@@ -178,11 +168,40 @@ function Login(props: { back?: boolean }) {
                 alert(`Error creating new account. Please try again later: ${e.message}`);
                 return null;
             })
+        else
+            return customName ?
+                fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.name.firstName}&last_name=${customName.name.lastName}&email=${customName.email}`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        birthday: formatBirthday(new Date()),
+                    })
+                }).catch((e: Error) => {
+                    alert(`Error creating new account. Please try again later: ${e.message}`);
+                    return null;
+                })
+                :
+                fetch(`${ServerInfo.baseurl}tipper/?first_name=${localStorage.getItem("firstName") ?? "Guest"}&last_name=${localStorage.getItem("lastName") ?? "Guest"}&email=${localStorage.getItem("email") ?? "guest@guest.com"}`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        birthday: formatBirthday(new Date()),
+                    })
+                }).catch((e: Error) => {
+                    alert(`Error creating new account. Please try again later: ${e.message}`);
+                    return null;
+                })
 
     }
 
 
-    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number, customName?: AppleReturnType) {
+    async function loginWithTipzyToken(accessToken: string | null, refreshToken: string | null, expiresAt: number, isApple?: boolean, customName?: AppleReturnType) {
         if (accessToken == null || refreshToken == null) {
             alert("Null token when logging into Tipzy. Contact an admin for more information.");
             return;
@@ -215,7 +234,7 @@ function Login(props: { back?: boolean }) {
                 });
 
             } else {
-                createAccount(user, customName).then((r) => {
+                createAccount(user, isApple, customName).then((r) => {
                     console.log("creating account.", usc);
                     checkIfAccountExists({
                         user: user,
@@ -454,7 +473,7 @@ function Login(props: { back?: boolean }) {
                         <div style={{ paddingBottom: padding }}></div>
                         <TZButton leftComponent={
                             <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
-                        } onClick={googleLogin} backgroundColor="#8885" fontSize={20} color="white" title="Continue With Google" />
+                        } onClick={googleLogin} backgroundColor="#white" fontSize={20} color="black" title="Continue With Google" />
                         <div style={{ paddingBottom: padding }}></div>
                         {
                             usernameShowing ?
