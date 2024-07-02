@@ -11,7 +11,7 @@ const ToggleTab = (props: {
 
     const v = props.value;
     const sv = props.setValue;
-    const backgroundColor = "#8883";
+    const backgroundColor = "#2D2D32";
     const activeColor = Colors.secondaryDark;
 
     const ToggleComponent = (props: { label: string, value: number, noti?: number }) => {

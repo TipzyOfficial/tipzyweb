@@ -147,6 +147,7 @@ export default function Bar() {
     const searchDims = fdim ? Math.max(Math.min(fdim / 20, 30), 15) : 15;
     const minHeaderHeight = wdim.height && wdim.width ? Math.min(wdim.width / 5, wdim.height / 4) : 200;
     const toggleRef = useRef<HTMLDivElement>(null);
+    const topBarRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState<number | undefined>();
 
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
@@ -156,6 +157,7 @@ export default function Bar() {
     const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
+    const topBarColor = Colors.background + "aa";
 
     const notisCookie = cookies.get("notis")
 
@@ -182,7 +184,7 @@ export default function Bar() {
             //     left: 0,
             //     behavior: "instant",
             // })
-            setHeight(toggleRef.current?.offsetHeight ?? 0 + padding);
+            setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBarRef.current?.offsetHeight ?? 0));
             setViewInner(v);
             if (v === 1) {
                 setRequestNoti(0);
@@ -298,6 +300,23 @@ export default function Bar() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top">
+                <div ref={topBarRef} style={{
+                    flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%"
+                }}>
+                    <div style={{
+                        flex: 1,
+                        display: 'flex', alignItems: 'center',
+                        padding: padding,
+                        cursor: 'pointer',
+                        // opacity: 0.8,
+                    }} onClick={() => router.navigate('/code')}>
+                        <FontAwesomeIcon className="App-backarrow" icon={faArrowLeft} ></FontAwesomeIcon>
+                        {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
+                    </div>
+                    <div style={{ flex: 2, justifyContent: 'flex-end', display: 'flex' }}>
+                        <ProfileButton style={{ position: 'relative', top: undefined, right: undefined, padding: padding / 2 }} />
+                    </div>
+                </div>
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                     <div style={{
                         width: '100%', minHeight: minHeaderHeight,
@@ -312,21 +331,7 @@ export default function Bar() {
                         boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)'
                     }}
                     >
-                        <div style={{
-                            flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: "#0003", position: 'sticky', top: 0
-                        }}>
-                            <div style={{
-                                flex: 1,
-                                display: 'flex', alignItems: 'center',
-                                padding: padding,
-                                cursor: 'pointer',
-                                opacity: 0.8,
-                            }} onClick={() => router.navigate('/code')}>
-                                <FontAwesomeIcon className="App-backarrow" icon={faArrowLeft} ></FontAwesomeIcon>
-                                {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
-                            </div>
-                            <div style={{ flex: 2 }}></div>
-                        </div>
+                        <div style={{ height: topBarRef.current ? topBarRef.current.clientHeight : 0 }}></div>
                         <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
                             <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{bar.name}</span>
                         </div>
@@ -342,14 +347,14 @@ export default function Bar() {
                             <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} />
                         </div>
                     </div>
-                    {/* <div style={{paddingBottom: padding/2}}></div> */}
+                    <div style={{ paddingBottom: padding / 2 }}></div>
                     <div ref={toggleRef} style={{
-                        position: 'sticky', top: 0, zIndex: 2,
+                        position: 'sticky', top: topBarRef.current ? topBarRef.current.clientHeight - 0.5 : 0, zIndex: 2,
                         paddingRight: padding,
                         paddingLeft: padding,
-                        paddingTop: padding / 2,
+                        // paddingTop: padding / 2,
                         paddingBottom: padding / 2,
-                        backgroundColor: Colors.background,
+                        backgroundColor: topBarColor,
                         display: 'flex',
                         justifyContent: 'center',
                     }}
@@ -382,9 +387,6 @@ export default function Bar() {
                             }}>
                                 <CurrentlyPlaying current={current} queue={queue} songDims={songDims} />
                             </div> : <></>}
-                            <div style={{ flexShrink: 1, justifyContent: 'flex-end', display: 'flex', paddingRight: padding, paddingBottom: padding }}>
-                                <ProfileButton position="relative" />
-                            </div>
                         </div>
                     </>
 

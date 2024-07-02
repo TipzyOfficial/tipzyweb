@@ -509,7 +509,7 @@ function Login(props: { back?: boolean }) {
                 </div >
                 : <Register />}
             {(globalDisable || loginPressed) ?
-                <div className='App-body' style={{ position: 'fixed', top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
+                <div className='App-body' style={{ position: 'fixed', zIndex: 10, top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
                     <Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }}></Spinner>
                 </div>
                 : <></>
