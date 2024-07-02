@@ -2,7 +2,7 @@ import { Modal, Spinner, ToggleButton } from "react-bootstrap";
 import { useSearchParams } from "react-router-dom";
 import { Colors, padding as basePadding, padding, radius, useFdim } from "../../lib/Constants";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
-import { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
@@ -191,6 +191,11 @@ export default function Bar() {
             }
         }
     }
+
+    useLayoutEffect(() => {
+        setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBarRef.current?.offsetHeight ?? 0));
+
+    }, [])
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
