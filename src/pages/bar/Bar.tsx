@@ -29,6 +29,7 @@ import '../../App.css'
 import React from "react";
 import FlatList from "flatlist-react/lib";
 import { fetchNoToken } from "../../lib/serverinfo";
+import defaultBackground from "../../assets/default_background.png"
 
 function parseSongIHateMeku(s: any): SongType {
     return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false }
@@ -300,7 +301,7 @@ export default function Bar() {
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                     <div style={{
                         width: '100%', minHeight: minHeaderHeight,
-                        objectFit: 'cover', backgroundImage: `url(${bar.image_url})`,
+                        objectFit: 'cover', backgroundImage: (bar.image_url && bar.image_url.length > 0) ? `url(${bar.image_url})` : `url(${defaultBackground})`,
                         backgroundRepeat: "no-repeat",
                         backgroundSize: "cover",
                         display: "flex",
@@ -308,7 +309,7 @@ export default function Bar() {
                         alignItems: 'flex-start',
                         justifyContent: 'flex-end',
                         backgroundColor: "#000",
-                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.9)'
+                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)'
                     }}
                     >
                         <div style={{
