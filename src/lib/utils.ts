@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 
 function isMobile() {
@@ -87,4 +87,14 @@ export function useInterval(callback: () => any, delay: number, firstDelay?: num
             return () => { clearInterval(id); }
         }
     }, [d, enabled]);
+}
+
+export function useCallbackRef<T>(): [T | null, (node: T | null) => void] {
+    const [o, so] = useState<T | null>(null);
+    const ref = useCallback((node: T | null) => {
+        if (node !== null) {
+            so(node);
+        }
+    }, []);
+    return [o, ref];
 }

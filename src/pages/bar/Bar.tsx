@@ -6,7 +6,7 @@ import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, use
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
-import { getCookies, useInterval } from "../../lib/utils";
+import { getCookies, useCallbackRef, useInterval } from "../../lib/utils";
 import TZSearchButton from "../../components/TZSearchButton";
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import Song, { SongList } from "../../components/Song";
@@ -147,8 +147,11 @@ export default function Bar() {
     const searchDims = fdim ? Math.max(Math.min(fdim / 20, 30), 15) : 15;
     const minHeaderHeight = wdim.height && wdim.width ? Math.min(wdim.width / 5, wdim.height / 4) : 200;
     const toggleRef = useRef<HTMLDivElement>(null);
-    const topBarRef = useRef<HTMLDivElement>(null);
+    // const [topBarRef] = useHookWithRefCallback(); //useRef<HTMLDivElement>(null);
+
     const [height, setHeight] = useState<number | undefined>();
+    const [tbheight, setTBHeight] = useState<number | undefined>();
+    const [topBar, topBarRef] = useCallbackRef<HTMLDivElement>();
 
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
     const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
@@ -184,7 +187,7 @@ export default function Bar() {
             //     left: 0,
             //     behavior: "instant",
             // })
-            setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBarRef.current?.offsetHeight ?? 0));
+            setHeight((toggleRef.current?.offsetHeight ?? 0) + (tbheight ?? 0));
             setViewInner(v);
             if (v === 1) {
                 setRequestNoti(0);
@@ -193,9 +196,9 @@ export default function Bar() {
     }
 
     useLayoutEffect(() => {
-        setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBarRef.current?.offsetHeight ?? 0));
+        setHeight((toggleRef.current?.offsetHeight ?? 0) + (tbheight ?? 0));
 
-    }, [])
+    }, [tbheight])
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
@@ -305,7 +308,7 @@ export default function Bar() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top">
-                <div ref={topBarRef} style={{
+                <div ref={(r) => topBarRef(r)} style={{
                     flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%"
                 }}>
                     <div style={{
@@ -336,7 +339,7 @@ export default function Bar() {
                         boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)'
                     }}
                     >
-                        <div style={{ height: topBarRef.current ? topBarRef.current.clientHeight : 0 }}></div>
+                        <div style={{ height: topBar?.clientHeight ? topBar.clientHeight : 0 }}></div>
                         <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
                             <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{bar.name}</span>
                         </div>
@@ -354,7 +357,7 @@ export default function Bar() {
                     </div>
                     <div style={{ paddingBottom: padding / 2 }}></div>
                     <div ref={toggleRef} style={{
-                        position: 'sticky', top: topBarRef.current ? topBarRef.current.clientHeight - 0.5 : 0, zIndex: 2,
+                        position: 'sticky', top: topBar?.clientHeight ? topBar.clientHeight - 0.5 : 0, zIndex: 2,
                         paddingRight: padding,
                         paddingLeft: padding,
                         // paddingTop: padding / 2,
