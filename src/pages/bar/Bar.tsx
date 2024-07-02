@@ -308,7 +308,7 @@ export default function Bar() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top">
-                <div ref={(r) => topBarRef(r)} style={{
+                <div ref={topBarRef} style={{
                     flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%"
                 }}>
                     <div style={{
