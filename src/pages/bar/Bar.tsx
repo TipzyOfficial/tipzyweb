@@ -157,7 +157,7 @@ export default function Bar() {
     const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
-    const topBarColor = Colors.background + "aa";
+    const topBarColor = Colors.background + "bc";
 
     const notisCookie = cookies.get("notis")
 
