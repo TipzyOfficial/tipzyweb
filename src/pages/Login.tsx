@@ -84,7 +84,7 @@ function Login(props: { back?: boolean }) {
             return;
         }
 
-        await loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at, true, name)).catch(
+        await loginWithAppleAccessToken(accessToken).then((value) => login(value.access_token, value.refresh_token, value.expires_at, true, undefined)).catch(
             (e: Error) => {
                 console.log(`Error logging into Tipzy servers via Apple:`, `${e}`);
                 setGlobalDisable(false);
