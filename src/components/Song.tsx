@@ -92,7 +92,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
         <>
             <FlatList
                 list={props.songs}
-                renderWhenEmpty={() => <></>}
+                renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No songs.</div>}
                 renderItem={(item, index) =>
                     <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id + "_index" + index} noImage={props.noImage} onClick={() => {
                         setRequestedSong(item);
