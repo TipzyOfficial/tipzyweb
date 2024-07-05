@@ -48,35 +48,58 @@ export default function ArtistInfo() {
   async function fetchArtist(id: string): Promise<ArtistType | undefined> {
     if (!barID) return;
     if (!artistName) return;
-    const albums = await fetchNoToken(`tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+
+    await fetchNoToken(`tipper/artist/?business_id=${barID}&artist_id=${artistID}`, "GET")
       .then(r => r.json())
       .then(json => {
         const data = json.data;
+        const albumdata = data.albums;
+        const topsongs = data.top_songs;
         const albums: AlbumType[] = [];
-        console.log("album json", data);
-        data.forEach((e: any) =>
-          albums.push({ title: e.name, artists: [artistName], albumart: e.images[0].url, id: e.album_id, year: e.release_date.split("-")[0] ?? "No year" })
-        );
-        return albums;//.sort();
-      })
-      .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
 
-    const topSongs = await fetchNoToken(`tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
-      .then(r => r.json())
-      .then(json => {
-        const data = json.data;
+        console.log("data", data);
+
         const songs: SongType[] = [];
-        data.forEach((e: any) => {
-          songs.push({ title: e.name, artists: [artistName], albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, explicit: e.explicit })
-        }
+        topsongs.forEach((e: any) =>
+          songs.push({ title: e.name, artists: e.artists, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit })
         );
-        return songs;
+        albumdata.forEach((e: any) => {
+          const d = new Date(e.release_date);
+          albums.push({ title: e.name, artists: [artist.name], albumart: e.images?.teaser ?? "", id: e.album_id, year: d.getFullYear().toString() ?? "No year" })
+        });
+        setTopSongs(songs.splice(0, 5));
+        setAlbums(albums);
       })
-      .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
+      .catch((e: Error) => console.log(`Error: ${e.message}`));
+    // const albums = await fetchNoToken(`tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    //   .then(r => r.json())
+    //   .then(json => {
+    //     const data = json.data;
+    //     const albums: AlbumType[] = [];
+    //     console.log("album json", data);
+    //     data.forEach((e: any) =>
+    //       albums.push({ title: e.name, artists: [artistName], albumart: e.images[0].url, id: e.album_id, year: e.release_date.split("-")[0] ?? "No year" })
+    //     );
+    //     return albums;//.sort();
+    //   })
+    //   .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
 
-    // if(!albums || !topSongs) return undefined;
-    setAlbums(albums);
-    setTopSongs(topSongs ? topSongs.splice(0, 5) : undefined);
+    // const topSongs = await fetchNoToken(`tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
+    //   .then(r => r.json())
+    //   .then(json => {
+    //     const data = json.data;
+    //     const songs: SongType[] = [];
+    //     data.forEach((e: any) => {
+    //       songs.push({ title: e.name, artists: [artistName], albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, explicit: e.explicit })
+    //     }
+    //     );
+    //     return songs;
+    //   })
+    //   .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
+
+    // // if(!albums || !topSongs) return undefined;
+    // setAlbums(albums);
+    // setTopSongs(topSongs ? topSongs.splice(0, 5) : undefined);
   }
 
   useEffect(() => {

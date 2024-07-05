@@ -6,7 +6,7 @@ import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, use
 import { BarType } from "../../lib/bar";
 import { fetchWithToken } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
-import { getCookies, useCallbackRef, useInterval } from "../../lib/utils";
+import { getCookies, shuffle, shuffleWithUserID, useCallbackRef, useInterval } from "../../lib/utils";
 import TZSearchButton from "../../components/TZSearchButton";
 import { ArtistType, SongRequestType, SongType, songRequestCompare } from "../../lib/song";
 import Song, { SongList } from "../../components/Song";
@@ -30,6 +30,8 @@ import React from "react";
 import FlatList from "flatlist-react/lib";
 import { fetchNoToken } from "../../lib/serverinfo";
 import defaultBackground from "../../assets/default_background.png"
+
+const utf8Encode = new TextEncoder();
 
 function parseSongIHateMeku(s: any): SongType {
     return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false }
@@ -95,29 +97,39 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
         return undefined;
     }
 
-    bar.topSongs = await fetchNoToken(`tipper/business/spotify/songs/?business_id=${id}`, 'GET').then(r => r.json())
-        .then(json => {
-            const songs = new Array<SongType>();
-            json.data.forEach((s: any) => {
-                const song: SongType = parseSong(s);
-                songs.push(song);
-            })
-            //setTopSongs(songs)
-            return songs;
-        }).catch(() => undefined)
+    await fetchNoToken(`tipper/business/top/?business_id=${id}`, 'GET').then(r => r.json()).then(json => {
+        console.log(json.data.artists);
 
-    bar.topArtists = await fetchNoToken(`tipper/business/spotify/artists/?business_id=${id}`, 'GET').then(r => r.json())
-        .then(json => {
-            const artists = new Array<ArtistType>();
-            json.data.forEach((s: any) => {
-                const artist: ArtistType = { id: s.id, name: s.name, image: s.images[0] ? s.images[0].url : "" }
-                artists.push(artist);
-            })
-            //setTopArtists(artists)
-            return artists;
-        }).catch((e) => {
-            return undefined;
+        const data = json.data;
+        const artistData = data.artists;
+        const songData = data.songs;
+
+        const artists: ArtistType[] = [];
+
+        artistData.forEach((e: any) => {
+            const artist: ArtistType = { name: e.name, image: e.images.teaser, id: e.id }
+            artists.push(artist);
         })
+
+        bar.topArtists = artists;
+
+        const songs: SongType[] = [];
+
+        let j = 0;
+
+        songData.forEach((e: any) => {
+            j++;
+            const song: SongType = { title: e.name, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit, artists: e.artists }
+            songs.push(song);
+        })
+
+        const top = shuffleWithUserID(songs.splice(0, 12), userContext.user);
+
+        bar.topSongs = top.concat(songs);
+
+        console.log("bar ts", bar.topSongs.length)
+
+    }).catch(e => console.log("cant get top artists", e));
 
     if (!noSetBar)
         userContext.barState.setBar(bar)
@@ -161,6 +173,7 @@ export default function Bar() {
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
     const topBarColor = Colors.background + "bc";
+
 
     const notisCookie = cookies.get("notis")
 
@@ -209,10 +222,11 @@ export default function Bar() {
         }).then(json => {
             if (json.data === undefined) return undefined;
             const np = json.data.now_playing;
-            const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.image_url[2].url, albumartbig: np.image_url[0].url, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
+            const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images.thumbnail, albumartbig: np.images.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
             const q: SongType[] = [];
             json.data.queue.forEach((e: any) => {
-                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, duration: e.duration_ms, explicit: e.explicit };
+                // console.log(e);
+                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit };
                 q.push(song);
             });
             return [nowplaying, q];
@@ -532,6 +546,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
 const RequestsContentMemo = memo(RequestsContent);
 
 const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number }) => {
+
     const SongListMemo = memo(SongList, (prev, curr) => { return true });
     const topArtists = props.topArtists;
     const topSongs = props.topSongs;
@@ -556,7 +571,7 @@ const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: Son
             </div>
             <div style={{ padding: padding, width: '100%' }}>
                 <div style={{ paddingBottom: padding, paddingTop: padding }}>
-                    <span className='App-subtitle'>Top Songs</span>
+                    <span className='App-subtitle'>Popular</span>
                 </div>
                 <SongListMemo songs={topSongs} dims={props.songDims} />
             </div>

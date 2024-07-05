@@ -101,10 +101,14 @@ export default function SongSearch() {
         if (query.length === 0) {
             return defaultResults();
         }
-        const json = await fetchNoToken(`tipper/spotify/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
+        const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
+
+        console.log("data", json.data)
+
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
-            songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images[2].url ?? "", albumartbig: item.images[0].url, id: item.id ?? -1, explicit: item.explicit });
+            console.log(item)
+            songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images.thumbnail ?? "", albumartbig: item.images.teaser, id: item.id ?? -1, explicit: item.explicit });
         });
 
         setSearching(false);

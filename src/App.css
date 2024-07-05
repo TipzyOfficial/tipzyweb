@@ -155,6 +155,16 @@
   justify-content: flex-start;
 }
 
+.App-modal {
+  min-width: 80vw;
+}
+
+.App-modaltitle {
+  width: "100%";
+  background-color: 'red';
+  text-align: center;
+}
+
 .App-backarrow {
   font-size: calc(12px + 1vmin);
 }

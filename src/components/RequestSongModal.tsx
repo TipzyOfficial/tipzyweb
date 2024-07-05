@@ -22,6 +22,8 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const userContext = useContext(UserSessionContext);
     const [price, setPrice] = useState<number | undefined>(undefined);
 
+    const data = { selectedSong: song, ...props.data }
+
     const getPrice = async () => {
         setPrice(undefined);
 
@@ -109,7 +111,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         const [disabled, setDisabled] = useState(false);
 
         const checkStripe = async (): Promise<boolean | null> => {
-            return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, props.data)
+            return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
                 .then(r => r.json())
                 .then(json => {
                     console.log("json gsp", json)
@@ -131,14 +133,14 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         }
 
         return (<>
-            <Modal.Header closeButton>
-                <Modal.Title style={{ color: 'white' }}>Request a song</Modal.Title>
+            <Modal.Header className="m-auto" style={{ width: "100%" }}>
+                <Modal.Title style={{ color: 'white', width: "100%", textAlign: 'center' }} className="m-auto">Request a song</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container fluid>
                     <Row className="justify-content-md-center">
                         <Col style={{ display: 'flex', justifyContent: 'center' }}>
-                            {song.albumart ? <img src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
+                            {song.albumart ? <img style={{ objectFit: 'contain' }} src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
                         </Col>
                     </Row>
                     <Row className="justify-content-md-center">
@@ -176,11 +178,13 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 
 
     return (
-        <Modal show={props.show} onShow={() => {
-            getPrice();
-            setPaymentScreenVisible(false);
-            setSuccess(false);
-        }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
+        <Modal
+            dialogClassName="App-modal"
+            show={props.show} onShow={() => {
+                getPrice();
+                setPaymentScreenVisible(false);
+                setSuccess(false);
+            }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );

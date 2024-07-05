@@ -4,7 +4,7 @@ import { SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import FlatList from "flatlist-react/lib";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RequestSongModal from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
@@ -85,8 +85,23 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
 
 export function SongList(props: { songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean, logoutData?: any }) {
     const songDims = props.dims;
-    const [requestedSong, setRequestedSong] = useState<SongType | undefined>();
-    const [requestVisible, setRequestVisible] = useState(false);
+
+    const ret = localStorage.getItem("ret");
+    const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+
+    //TODO: FIX
+
+    const initRQS = undefined// parsed ? parsed.data.selectedSong : undefined;
+
+    // useEffect(() => {
+    //     console.log("hi")
+    // }, [])
+    // if (ret) {
+    //     localStorage.removeItem("ret");
+    // }
+
+    const [requestedSong, setRequestedSong] = useState<SongType | undefined>(initRQS);
+    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
 
     return (
         <>

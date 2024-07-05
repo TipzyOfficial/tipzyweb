@@ -40,15 +40,15 @@ export default function AlbumPage() {
     if (!barID) return;
     if (!album) return;
 
-    await fetchNoToken(`tipper/spotify/album/?business_id=${barID}&album_id=${id}`, "GET")
+    await fetchNoToken(`tipper/album/?business_id=${barID}&album_id=${id}`, "GET")
       .then(r => r.json())
       .then(json => {
         const data = json.data;
         console.log("album data", data);
-        // console.log(album);
+        console.log(album);
         const s: SongType[] = [];
         data.forEach((e: any) =>
-          s.push({ title: e.name, artists: album.artists, albumart: album.albumart, id: e.id, explicit: e.explicit })
+          s.push({ title: e.name, artists: e.artists, albumart: album.albumart, id: e.id, explicit: e.explicit })
         );
         console.log(s);
         setSongs(s);
