@@ -84,21 +84,15 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
 }
 
 export function SongList(props: { songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean, logoutData?: any }) {
+
     const songDims = props.dims;
 
     const ret = localStorage.getItem("ret");
     const parsed = ret ? JSON.parse(atob(ret)) : undefined;
-
-    //TODO: FIX
-
-    const initRQS = undefined// parsed ? parsed.data.selectedSong : undefined;
-
-    // useEffect(() => {
-    //     console.log("hi")
-    // }, [])
-    // if (ret) {
-    //     localStorage.removeItem("ret");
-    // }
+    const initRQS = parsed ? parsed.data.selectedSong : undefined;
+    if (ret) {
+        localStorage.removeItem("ret");
+    }
 
     const [requestedSong, setRequestedSong] = useState<SongType | undefined>(initRQS);
     const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);

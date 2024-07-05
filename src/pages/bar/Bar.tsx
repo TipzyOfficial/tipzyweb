@@ -545,9 +545,10 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
 
 const RequestsContentMemo = memo(RequestsContent);
 
+const SongListMemo = memo(SongList, () => true);
+
 const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number }) => {
 
-    const SongListMemo = memo(SongList, (prev, curr) => { return true });
     const topArtists = props.topArtists;
     const topSongs = props.topSongs;
 
