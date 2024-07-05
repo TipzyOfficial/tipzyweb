@@ -11,6 +11,8 @@ import { fetchWithToken } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMusic } from "@fortawesome/free-solid-svg-icons";
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
     const dims = useFdim() / 2;
@@ -136,7 +138,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
                 <Container fluid>
                     <Row className="justify-content-md-center">
                         <Col style={{ display: 'flex', justifyContent: 'center' }}>
-                            <img src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} />
+                            {song.albumart ? <img src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
                         </Col>
                     </Row>
                     <Row className="justify-content-md-center">

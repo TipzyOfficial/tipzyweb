@@ -7,7 +7,7 @@ import FlatList from "flatlist-react/lib";
 import { useState } from "react";
 import RequestSongModal from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
+import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
 
 export function artistsStringListToString(artists: string[]) {
     let out = "";
@@ -23,7 +23,7 @@ export default function Song(props: { song: SongType, dims?: number, noImage?: b
     const bigDims = 128;
     const dims = props.dims ?? 50;
 
-    const Img = () => props.song.albumart === "" ? <div style={{ height: dims, width: dims, backgroundColor: "#888" }}></div>
+    const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
         : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims }} />
 
     return (
