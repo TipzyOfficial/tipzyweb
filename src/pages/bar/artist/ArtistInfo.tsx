@@ -45,6 +45,8 @@ export default function ArtistInfo() {
 
   // console.log("idname", artistID, artistName);
 
+  const TSMemo = memo(SongList, () => true);
+
   async function fetchArtist(id: string): Promise<ArtistType | undefined> {
     if (!barID) return;
     if (!artistName) return;
@@ -71,35 +73,6 @@ export default function ArtistInfo() {
         setAlbums(albums);
       })
       .catch((e: Error) => console.log(`Error: ${e.message}`));
-    // const albums = await fetchNoToken(`tipper/spotify/artist/albums/?business_id=${barID}&artist_id=${artistID}`, 'GET')
-    //   .then(r => r.json())
-    //   .then(json => {
-    //     const data = json.data;
-    //     const albums: AlbumType[] = [];
-    //     console.log("album json", data);
-    //     data.forEach((e: any) =>
-    //       albums.push({ title: e.name, artists: [artistName], albumart: e.images[0].url, id: e.album_id, year: e.release_date.split("-")[0] ?? "No year" })
-    //     );
-    //     return albums;//.sort();
-    //   })
-    //   .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
-
-    // const topSongs = await fetchNoToken(`tipper/spotify/artist/top-tracks/?business_id=${barID}&artist_id=${artistID}`, 'GET')
-    //   .then(r => r.json())
-    //   .then(json => {
-    //     const data = json.data;
-    //     const songs: SongType[] = [];
-    //     data.forEach((e: any) => {
-    //       songs.push({ title: e.name, artists: [artistName], albumart: e.images[2].url, albumartbig: e.images[0].url, id: e.id, explicit: e.explicit })
-    //     }
-    //     );
-    //     return songs;
-    //   })
-    //   .catch((e: Error) => { console.log(`Error: ${e.message}`); return undefined });
-
-    // // if(!albums || !topSongs) return undefined;
-    // setAlbums(albums);
-    // setTopSongs(topSongs ? topSongs.splice(0, 5) : undefined);
   }
 
   useEffect(() => {
@@ -113,8 +86,6 @@ export default function ArtistInfo() {
   if (!artistID) {
     return <NotFoundPage body="We can't seem to find that artist." backPath={"/bar"} />
   }
-
-  const TSMemo = memo(SongList)
 
   function handleBackClick() {
     router.navigate("/bar");

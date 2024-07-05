@@ -27,6 +27,8 @@ import { getCookies } from "../../lib/utils";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
 
+const SongResultListMemo = memo(SongList, () => true);
+
 export default function SongSearch() {
     /**
      * contains all of website's state.
@@ -127,7 +129,6 @@ export default function SongSearch() {
         setSearchResults(response);
     }
 
-    const SongResultListMemo = memo(SongList);
 
     useEffect(() => {
         const androidIsDumb = setTimeout(() => {

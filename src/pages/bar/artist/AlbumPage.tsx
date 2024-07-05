@@ -20,6 +20,8 @@ const LoadingScreen = () =>
     <span>Loading album information...</span>
   </div>;
 
+const TSMemo = memo(SongList, () => true);
+
 export default function AlbumPage() {
   const usc = useContext(UserSessionContext);
   const [ready, setReady] = useState(false);
@@ -65,7 +67,6 @@ export default function AlbumPage() {
     return <NotFoundPage body="We can't seem to find that album." backPath={"/bar"} />
   }
 
-  const TSMemo = memo(SongList)
 
   function handleBackClick() {
     if (loc.state.fromLogin) {
