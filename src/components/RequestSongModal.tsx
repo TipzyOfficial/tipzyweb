@@ -23,7 +23,6 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const [price, setPrice] = useState<number | undefined>(undefined);
 
     const data = { selectedSong: song, ...props.data }
-    console.log("data", data);
 
     const getPrice = async () => {
         setPrice(undefined);

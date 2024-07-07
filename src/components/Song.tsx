@@ -87,13 +87,18 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
 
     const songDims = props.dims;
 
-    const ret = localStorage.getItem("ret");
-    console.log("ret", ret);
-    const parsed = ret ? JSON.parse(atob(ret)) : undefined;
-    console.log("parsed", parsed);
-    const initRQS = parsed ? parsed.data.selectedSong : undefined;
-    console.log("initRQS", initRQS);
-    if (ret) {
+    try {
+        const ret = localStorage.getItem("ret");
+        // console.log("ret", ret);
+        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+        // console.log("parsed", parsed);
+        const initRQS = parsed ? parsed.data?.selectedSong : undefined;
+        // console.log("initRQS", initRQS);
+        if (ret) {
+            localStorage.removeItem("ret");
+        }
+    } catch (e) {
+        console.log("Problem loading previous state:", e)
         localStorage.removeItem("ret");
     }
 
