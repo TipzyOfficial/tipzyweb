@@ -30,6 +30,7 @@ import React from "react";
 import FlatList from "flatlist-react/lib";
 import { fetchNoToken } from "../../lib/serverinfo";
 import defaultBackground from "../../assets/default_background.png"
+import TZButton from "../../components/TZButton";
 
 const utf8Encode = new TextEncoder();
 
@@ -590,10 +591,13 @@ const DisableRequests = (props: { show: boolean, bar: BarType }) => {
         props.show ?
             <div className="App-bluroverlay">
                 <span className="App-subtitle" style={{ color: Colors.primaryRegular, paddingBottom: padding }}>{"Sorry!"}</span>
-                <span className="App-normaltext" style={{ textAlign: 'center' }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
-                <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', cursor: 'pointer' }} onClick={() => {
+                <span className="App-normaltext" style={{ textAlign: 'center', paddingBottom: padding }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
+                <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
                     router.navigate("/code");
-                }}>More bars</span>
+                }}>
+                    <FontAwesomeIcon color={Colors.primaryRegular} icon={faArrowLeft}></FontAwesomeIcon>
+                    <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', paddingLeft: 5 }}>See more bars</span>
+                </div>
             </div> : <></>
     )
 }
