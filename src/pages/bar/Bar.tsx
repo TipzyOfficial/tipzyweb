@@ -131,8 +131,10 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
 
     }).catch(e => console.log("cant get top artists", e));
 
-    if (!noSetBar)
-        userContext.barState.setBar(bar)
+    if (!noSetBar) {
+        if (!userContext.barState.bar || JSON.stringify(userContext.barState.bar) !== JSON.stringify(bar))
+            userContext.barState.setBar(bar)
+    }
 
     console.log("begin")
 
@@ -162,7 +164,7 @@ export default function Bar() {
     // const [topBarRef] = useHookWithRefCallback(); //useRef<HTMLDivElement>(null);
 
     const [height, setHeight] = useState<number | undefined>();
-    const [tbheight, setTBHeight] = useState<number | undefined>();
+    // const [tbheight, setTBHeight] = useState<number | undefined>();
     const [topBar, topBarRef] = useCallbackRef<HTMLDivElement>();
 
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
@@ -200,7 +202,7 @@ export default function Bar() {
             //     left: 0,
             //     behavior: "instant",
             // })
-            setHeight((toggleRef.current?.offsetHeight ?? 0) + (tbheight ?? 0));
+            setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
             setViewInner(v);
             if (v === 1) {
                 setRequestNoti(0);
@@ -209,9 +211,8 @@ export default function Bar() {
     }
 
     useLayoutEffect(() => {
-        setHeight((toggleRef.current?.offsetHeight ?? 0) + (tbheight ?? 0));
-
-    }, [tbheight])
+        setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
+    }, [topBar])
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
@@ -303,6 +304,7 @@ export default function Bar() {
         }
         if (userContext.barState.bar && id === userContext.barState.bar.id.toString()) {
             setReady(true);
+            fetchBarInfo(usc, id);
             return;
         }
         fetchBarInfo(usc, id).then(() => setReady(true))
