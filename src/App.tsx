@@ -105,7 +105,7 @@ export const router = createBrowserRouter([{
       path: "/albums",
       Component: Albums
     }
-    ], errorElement: <NotFoundPage title="404" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />
+    ], errorElement: <NotFoundPage title="Oops!" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />
 }
 ], {});
 

@@ -47,11 +47,11 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             price: price,
             token_count: 0,
             explicit: song.explicit,
-        })).then(response => {
-            if (response === null) throw new Error("null response");
-            if (!response.ok) throw new Error("Bad response " + response.status);
+        })).then(response => response.json()).then(json => {
+            if (json.status === 200) return 1;
+            else if (json.status === 404) return 2;
+            else throw new Error("Error: " + json.detail)
             // console.log("re", response) 
-            return 1;
         }).catch((e: Error) => {
             console.log("error: ", e)
             return 0;
@@ -63,6 +63,11 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         const r = await sendRequest();
         if (r === 0) {
             alert("Failed to send your request. You won't been charged.");
+            props.handleClose();
+            return;
+        }
+        else if (r === 2) {
+            alert("This bar isn't taking requests at the moment. Please come back later.");
             props.handleClose();
             return;
         }

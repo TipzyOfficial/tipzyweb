@@ -155,6 +155,22 @@
   justify-content: flex-start;
 }
 
+.App-bluroverlay {
+  -webkit-backdrop-filter: blur(5px);
+  /* Add this line first, it fixes blur for Safari*/
+  backdrop-filter: blur(5px);
+  /* This line activates blur*/
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 100;
+  background-color: #17171Edd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .App-modal {
   min-width: 80vw;
 }
@@ -194,9 +210,8 @@
   font-weight: bold;
 }
 
-.App-tinytext {
-  font-size: calc(10px + 0.5vmin);
-  font-size: calc(10px + 0.5vmin);
+.App-normaltext {
+  font-size: calc(15px + 0.5vmin);
 }
 
 /* unvisited link */

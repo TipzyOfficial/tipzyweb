@@ -64,7 +64,7 @@ const RenderItem = memo((props: { request: SongRequestType, cancellable?: boolea
                 </div>
                 <Song song={props.request.song}></Song>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <span className="App-tinytext" style={{ display: 'block', color: "#777" }}>{props.request.date.toLocaleString()}</span>
+                    <span className="App-smalltext" style={{ display: 'block', color: "#777" }}>{props.request.date.toLocaleString()}</span>
                     <span style={{ color: statusColor }}>{props.request.status}</span>
                 </div>
             </div>

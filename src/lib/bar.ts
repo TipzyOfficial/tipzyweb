@@ -8,6 +8,7 @@ export type BarType = {
   image_url?: string; //image background of bar
   description: string; //text description of the bar. format is <TIME>///<DAYS OPEN>///<DESCRIPTION>
   active: boolean; //whether the bar is taking requests right now
+  allowingRequests: boolean;
   topArtists?: ArtistType[] //bar's top artists. 
   topSongs?: SongType[] //bar's top songs.
   vibe?: string // bar's vibe

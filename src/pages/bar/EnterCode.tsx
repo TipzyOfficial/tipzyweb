@@ -58,6 +58,7 @@ function EnterCode() {
                     type: e.business_type,
                     description: e.description,
                     image_url: e.image_url,
+                    allowingRequests: e.allowing_requests,
                     vibe: e.vibe,
                     active: e.active,
                 })

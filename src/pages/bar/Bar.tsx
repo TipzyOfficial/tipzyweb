@@ -48,6 +48,7 @@ function parseBusiness(b: any): BarType {
         type: b.business_type,
         description: b.description,
         active: b.active,
+        allowingRequests: b.allowing_requests,
         image_url: b.image_url
     }
 }
@@ -85,6 +86,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
                 image_url: json.image_url,
                 description: json.description,
                 active: json.active,
+                allowingRequests: json.allowing_requests,
             }
             // setBar(bar);
         }).catch((e: Error) => {
@@ -302,7 +304,7 @@ export default function Bar() {
             router.navigate("/code");
             return;
         }
-        if (userContext.barState.bar && id === userContext.barState.bar.id.toString()) {
+        if (userContext.barState.bar && id === userContext.barState.bar.id.toString() && userContext.barState.bar.allowingRequests) {
             setReady(true);
             fetchBarInfo(usc, id);
             return;
@@ -323,7 +325,8 @@ export default function Bar() {
 
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
-            <div className="App-body-top">
+            <div className="App-body-top" style={bar.allowingRequests ? {} : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
+                <DisableRequests show={!bar.allowingRequests} bar={bar} />
                 <div ref={topBarRef} style={{
                     flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%"
                 }}>
@@ -581,3 +584,16 @@ const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: Son
         </div>
     )
 })
+
+const DisableRequests = (props: { show: boolean, bar: BarType }) => {
+    return (
+        props.show ?
+            <div className="App-bluroverlay">
+                <span className="App-subtitle" style={{ color: Colors.primaryRegular, paddingBottom: padding }}>{"Sorry!"}</span>
+                <span className="App-normaltext" style={{ textAlign: 'center' }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
+                <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', cursor: 'pointer' }} onClick={() => {
+                    router.navigate("/code");
+                }}>More bars</span>
+            </div> : <></>
+    )
+}
