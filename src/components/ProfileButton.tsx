@@ -8,7 +8,7 @@ import useWindowDimensions from "../lib/useWindowDimensions";
 
 export default function ProfileButton(props: { position?: "fixed" | "relative", disabled?: boolean, style?: React.CSSProperties }) {
     // const fs = 25
-    const dims = Math.min(Math.max(30, 10 + useWindowDimensions().width * 0.04), 45);
+    const dims = Math.min(Math.max(35, 10 + useWindowDimensions().width * 0.04), 45);
     const position = props.position ?? "fixed";
     // console.log(location.pathname)
 
