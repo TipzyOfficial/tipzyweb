@@ -99,8 +99,7 @@ function EnterCode() {
         <div className="App-body-top" style={{
             backgroundImage: `url(${defaultBackground})`, backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
-            backgroundAttachment: "fixed",
-
+            // backgroundAttachment: "fixed",
         }}>
             <div className="App-body-top" style={{ maxWidth: mW, backgroundColor: "#0000" }}>
                 <ProfileButton position="fixed" style={{
