@@ -103,7 +103,7 @@ function EnterCode() {
 
         }}>
             <div className="App-body-top" style={{ maxWidth: mW, backgroundColor: "#0000" }}>
-                <ProfileButton style={{
+                <ProfileButton position="fixed" style={{
                     top: padding,
                     right: Math.max((useWindowDimensions().width - mW + padding) / 2, padding),
                     backgroundColor: "#0003",
@@ -111,9 +111,11 @@ function EnterCode() {
                     backdropFilter: 'blur(5px)',
                     borderRadius: "100%"
                 }} />
-                <div style={{ paddingBottom: padding }} />
-                <span className="App-subtitle" style={{ fontWeight: 500, padding: padding, width: "100%", }}>Welcome!</span>
-                <div style={{ paddingBottom: padding }} />
+
+                <div style={{ paddingTop: padding * 2, paddingBottom: padding * 2, paddingLeft: padding, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: "100%" }}>
+                    <span className="App-subtitle" style={{ fontWeight: 500 }}>Welcome!</span>
+                </div>
+                {/* <div style={{ paddingBottom: padding }} /> */}
                 <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                     <div style={{ padding: padding * 2, borderRadius: radius, borderStyle: 'solid', borderColor: 'white', borderWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: "100%" }}>
                         <span className="App-tertiarytitle" style={{ fontWeight: 500, width: "100%", textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -9,7 +9,7 @@ import { UserSessionContext } from "../lib/UserSessionContext";
 import { useContext } from "react";
 import { Logout } from "..";
 
-export default function ProfileButton(props: { position?: "fixed" | "relative", disabled?: boolean, style?: React.CSSProperties }) {
+export default function ProfileButton(props: { position?: "fixed" | "relative" | "sticky", disabled?: boolean, style?: React.CSSProperties }) {
     // const fs = 25
     const usc = useContext(UserSessionContext)
     const dims = Math.min(Math.max(35, 10 + useWindowDimensions().width * 0.04), 45);
