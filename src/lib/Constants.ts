@@ -9,9 +9,9 @@ export const Colors = {
     secondaryLight: '#e293ae',
     secondaryRegular: '#F2729F', //#ff76a6
     secondaryDark: '#CA3C6D', //CA3C6D, ae2f5b
-    tertiaryLight: '#4DBC9E',
-    tertiaryRegular: '#276756',
-    tertiaryDark: '#194237',
+    tertiaryLight: '#b5aff7',
+    tertiaryRegular: '#9991F4',
+    tertiaryDark: '#6E63EF',
     green: "#50D66D",
     red: "#e64640",
 }
