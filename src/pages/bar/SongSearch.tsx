@@ -105,11 +105,8 @@ export default function SongSearch() {
         }
         const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
-        console.log("data", json.data)
-
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
-            console.log(item)
             songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images.thumbnail ?? "", albumartbig: item.images.teaser, id: item.id ?? -1, explicit: item.explicit });
         });
 
@@ -139,7 +136,6 @@ export default function SongSearch() {
         const query = loc.state?.query;
 
         if (query) {
-            console.log(userContext);
             getSearchResults(query, limit);
         }
 

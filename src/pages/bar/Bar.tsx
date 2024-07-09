@@ -61,18 +61,6 @@ const LoadingScreen = () =>
         <span>Loading bar information...</span>
     </div>;
 
-// export const fetchPendingRequests = async (userContext: UserSessionContextType) => {
-//     const newUser = structuredClone(userContext.user);
-//     // console.log('getting pending')
-//     newUser.requests = await fetchWithToken(userContext, `tipper/requests/pending/`, 'GET').then(r => r.json())
-//         .then(json => {
-//             // console.log('got pending')
-//             return parseRequests(json);
-//         }).catch((e) => { console.log("error: ", e); return [] })
-
-//     return newUser;
-// }
-
 let currentPCache: SongType | undefined = undefined;
 let pendingReqsCache: SongRequestType[] = [];
 let allReqsCache: SongRequestType[] = [];
@@ -101,8 +89,6 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
     }
 
     await fetchNoToken(`tipper/business/top/?business_id=${id}`, 'GET').then(r => r.json()).then(json => {
-        console.log(json.data.artists);
-
         const data = json.data;
         const artistData = data.artists;
         const songData = data.songs;
@@ -129,18 +115,12 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
         const top = shuffleWithUserID(songs.splice(0, 12), userContext.user);
 
         bar.topSongs = top.concat(songs);
-
-        console.log("bar ts", bar.topSongs.length)
-
     }).catch(e => console.log("cant get top artists", e));
 
     if (!noSetBar) {
         if (!userContext.barState.bar || JSON.stringify(userContext.barState.bar) !== JSON.stringify(bar))
             userContext.barState.setBar(bar)
     }
-
-    console.log("begin")
-
     return bar;
 }
 
@@ -219,7 +199,6 @@ export default function Bar() {
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
-            console.log("fetching the queue")
             if (response === null) throw new Error("null response");
             if (!response.ok) throw new Error("Bad response:" + response.status);
             return response.json();
@@ -229,7 +208,6 @@ export default function Bar() {
             const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images.thumbnail, albumartbig: np.images.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
             const q: SongType[] = [];
             json.data.queue.forEach((e: any) => {
-                // console.log(e);
                 const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit };
                 q.push(song);
             });
@@ -251,9 +229,7 @@ export default function Bar() {
         if (usc.user.access_token === "") return;
         // if (!bar) return;
         if (indicator) setCload(true);
-        console.log('refreshing reqs');
         const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
-            // console.log("got back this: ", json)
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
@@ -299,8 +275,6 @@ export default function Bar() {
     useInterval(() => allRefresh(false), timeout, 500);
 
     useEffect(() => {
-        console.log("id", id)
-
         if (!id) {
             router.navigate("/code");
             return;
@@ -312,7 +286,6 @@ export default function Bar() {
         }
         fetchBarInfo(usc, id).then(() => setReady(true))
             .catch(e => {
-                console.log(e);
                 userContext.barState.setBar(undefined)
                 setReady(true);
             });
@@ -329,7 +302,9 @@ export default function Bar() {
             <div className="App-body-top" style={bar.allowingRequests ? {} : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
                 <DisableRequests show={!bar.allowingRequests} bar={bar} />
                 <div ref={topBarRef} style={{
-                    flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%"
+                    flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
+                    WebkitBackdropFilter: 'blur(5px)',
+                    backdropFilter: 'blur(5px)',
                 }}>
                     <div style={{
                         flex: 1,
@@ -385,6 +360,8 @@ export default function Bar() {
                         backgroundColor: topBarColor,
                         display: 'flex',
                         justifyContent: 'center',
+                        WebkitBackdropFilter: 'blur(5px)',
+                        backdropFilter: 'blur(5px)',
                     }}
                     >
                         <div style={{ flex: 1 }}>

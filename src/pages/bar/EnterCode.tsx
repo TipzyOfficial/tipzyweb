@@ -15,6 +15,7 @@ import defaultBackground from "../../assets/entercode_background.png"
 import defaultBarBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
+import { getCookies } from "../../lib/utils";
 // import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -86,6 +87,8 @@ function EnterCode() {
     }
 
     useEffect(() => {
+        const c = getCookies();
+        c.remove("bar_session");
         getBars();
     }, [])
 

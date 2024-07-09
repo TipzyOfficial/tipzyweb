@@ -14,7 +14,7 @@ import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
 import AppleLogin from 'react-apple-login'
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigation, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAppleAlt, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faApple } from '@fortawesome/free-brands-svg-icons';
@@ -96,7 +96,7 @@ function Login(props: { back?: boolean }) {
     }
 
     useEffect(() => {
-        if (barID) setLoginPrompt(true);
+        if (localStorage.getItem("ret")) setLoginPrompt(true);
     })
 
     useLayoutEffect(() => {
