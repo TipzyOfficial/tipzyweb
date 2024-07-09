@@ -169,8 +169,7 @@ export default function Account() {
                     </div>
                     <TZProfileComponent text="Contact Us" onClick={handleAboutClick}></TZProfileComponent>
                     <TZProfileComponent text="Privacy Policy" onClick={handleAboutClick}></TZProfileComponent>
-                </div>
-                <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
+                    <div style={{ padding: padding * 4 }} />
                     <TZProfileComponent text="Log out"
                         selectedBackgroundColor={Colors.secondaryRegular}
                         borderColor={Colors.secondaryRegular + "88"}
@@ -186,9 +185,12 @@ export default function Account() {
                         color={Colors.secondaryDark}
                         // selectedTextColor=""
                         onClick={DeleteAccount}></TZProfileComponent>
-
-                    {/* <TZButton title={"Delete account"} backgroundColor={Colors.background} color={Colors.secondaryDark} onClick={DeleteAccount}></TZButton> */}
                 </div>
+                {/* <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
+
+
+                    <TZButton title={"Delete account"} backgroundColor={Colors.background} color={Colors.secondaryDark} onClick={DeleteAccount}></TZButton> 
+                </div> */}
             </div>
         </div>
     )
