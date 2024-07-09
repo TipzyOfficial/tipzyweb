@@ -101,7 +101,7 @@ function EnterCode() {
         }}>
             <div className="App-body-top" style={{ maxWidth: mW, backgroundColor: "#0000" }}>
                 <ProfileButton style={{
-                    top: padding * 2,
+                    top: padding,
                     right: Math.max((useWindowDimensions().width - mW + padding) / 2, padding),
                     backgroundColor: "#0003",
                     WebkitBackdropFilter: 'blur(5px)',
