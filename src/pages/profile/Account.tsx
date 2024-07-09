@@ -41,7 +41,7 @@ const ProfileTop = memo(function ProfileItem(props: { title: string, value: stri
                     }
                 </div>
                 <div style={{ padding: padding, display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center', }}>
-                    <span className="App-subtitle" style={{ padding: padding, paddingBottom: '0', display: 'flex' }}>
+                    <span className="App-subtitle" style={{ padding: padding, paddingBottom: 0, display: 'flex' }}>
                         {props.value}
                     </span>
                     <span style={{ padding: padding, paddingTop: 0, color: "#888" }}>{props.email}</span>
@@ -51,31 +51,6 @@ const ProfileTop = memo(function ProfileItem(props: { title: string, value: stri
     );
 }
 );
-
-function AccountComponent(props: { title: string, text: string }) {
-    const profileButton: React.CSSProperties = {
-        width: '100%',
-        borderRadius: radius,
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        borderColor: "#8888",
-        borderWidth: 1,
-        borderStyle: "solid",
-        padding: padding,
-        cursor: 'pointer',
-        transition: 'background-color 0.3s ease, color 0.3s ease'
-    };
-    return (
-        <>
-            <div style={profileButton}>
-                <span className="App-tertiarytitle" style={{ fontWeight: 'normal', color: "#aaa" }}>{props.title}:</span>
-                <span className="App-tertiarytitle" style={{ paddingLeft: 5, fontWeight: 'normal' }}>{props.text}</span>
-            </div>
-            <div style={{ paddingBottom: padding }}></div>
-        </>
-    );
-}
 
 type CardDetailsType = {
     brand: string,
@@ -196,12 +171,23 @@ export default function Account() {
                     <TZProfileComponent text="Privacy Policy" onClick={handleAboutClick}></TZProfileComponent>
                 </div>
                 <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
-                    <TZButton title={"Log out"} onClick={() => {
-                        console.log("logging out...");
-                        Logout(usc, undefined, true)
-                    }}></TZButton>
-                    <div style={{ paddingBottom: padding }}></div>
-                    <TZButton title={"Delete account"} backgroundColor={Colors.background} color={Colors.red} onClick={DeleteAccount}></TZButton>
+                    <TZProfileComponent text="Log out"
+                        selectedBackgroundColor={Colors.secondaryRegular}
+                        borderColor={Colors.secondaryRegular + "88"}
+                        color={Colors.secondaryRegular}
+                        // selectedTextColor=""
+                        onClick={() => {
+                            console.log("logging out...");
+                            Logout(usc, undefined, true)
+                        }}></TZProfileComponent>
+                    <TZProfileComponent text="Delete account"
+                        selectedBackgroundColor={Colors.secondaryDark}
+                        borderColor={Colors.secondaryDark + "88"}
+                        color={Colors.secondaryDark}
+                        // selectedTextColor=""
+                        onClick={DeleteAccount}></TZProfileComponent>
+
+                    {/* <TZButton title={"Delete account"} backgroundColor={Colors.background} color={Colors.secondaryDark} onClick={DeleteAccount}></TZButton> */}
                 </div>
             </div>
         </div>
