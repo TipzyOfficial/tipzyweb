@@ -590,8 +590,8 @@ const DisableRequests = (props: { show: boolean, bar: BarType }) => {
     return (
         props.show ?
             <div className="App-bluroverlay">
-                <span className="App-subtitle" style={{ color: Colors.primaryRegular, paddingBottom: padding }}>{"Sorry!"}</span>
-                <span className="App-normaltext" style={{ textAlign: 'center', paddingBottom: padding }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
+                <span className="App-subtitle" style={{ color: Colors.primaryRegular, }}>{"Sorry!"}</span>
+                <span className="App-normaltext" style={{ textAlign: 'center', padding: padding }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
                 <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
                     router.navigate("/code");
                 }}>
