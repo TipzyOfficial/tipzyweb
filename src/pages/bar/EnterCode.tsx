@@ -33,7 +33,7 @@ function BarRenderItem(props: { bar: BarType }) {
                         <img src={bar.image_url} alt={bar.name} style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 50, }} />
                         : <img src={defaultBarBackground} alt={bar.name} style={{
                             width: 50, height: 50, objectFit: "fill",
-                            transform: `translateX(${Math.random() * 50}%) translateY(${Math.random() * 50}%) scale(${Math.random() * 2 + 2})`,//translate(${Math.floor(Math.random() * 50)}px,${Math.floor(Math.random() * 50)})px`, ${Math.floor(Math.random() * 100)}
+                            transform: `translateX(${Math.random() * 50}%) translateY(${Math.random() * 50}%) scale(${Math.random() + 2}) rotate(${Math.floor(Math.random() * 2) * 180}deg)`,//translate(${Math.floor(Math.random() * 50)}px,${Math.floor(Math.random() * 50)})px`, ${Math.floor(Math.random() * 100)}
                         }} />
                     }
                 </div>
