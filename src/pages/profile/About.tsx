@@ -1,8 +1,5 @@
 import { useContext, useState, memo } from "react";
 import { padding, radius } from "../../lib/Constants";
-import { UserSessionContext } from "../../lib/UserSessionContext";
-import TZButton from "../../components/TZButton";
-import { Logout } from "../..";
 import { router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
@@ -17,13 +14,15 @@ export default function About() {
 
     return (
         <div className={"App-body-top"}>
-            <TZHeader title="Help & Privacy" leftComponent={
+            <TZHeader title="Contact Us" leftComponent={
                 <BackButton onClick={handleBackClick}></BackButton>
             } />
             <div style={styles}>
-                <span>To learn more about how we gather and use your data, please check out our <a href={"https://www.tipzy.app/privacy"} target="_blank" rel="noreferrer">privacy policy.</a></span>
-                <div style={{ padding: padding }}></div>
-                <span>{"\n"}Have a question, need to dispute a transaction or report a concern? Email us at <a href={"mailto:help@tipzy.app"}>help@tipzy.app</a>!</span>
+                <span className="App-normaltext">Thanks for reaching out–we'd love to talk!</span>
+                <br></br>
+                <span className="App-normaltext">Have a question, need to dispute a transaction, or report a concern? Email us at <a href={"mailto:help@tipzy.app"}>help@tipzy.app</a></span>
+                <br></br>
+                <span className="App-normaltext">Want to report a bug? Please refer to this email: <a href={"mailto:bugs@tipzy.app"}>bugs@tipzy.app</a></span>
             </div>
         </div>
     )
@@ -39,9 +38,13 @@ const getInitials = (name: string) => {
 const styles: React.CSSProperties = {
     paddingRight: padding,
     paddingLeft: padding,
+    height: "100%",
     width: "100%",
     maxWidth: "600px",
     margin: '0 auto',
     display: "flex",
-    flexDirection: 'column'
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
 };

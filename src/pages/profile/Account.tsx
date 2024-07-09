@@ -1,5 +1,5 @@
 import { useContext, useState, memo, useEffect } from "react";
-import { padding, radius } from "../../lib/Constants";
+import { Colors, padding, radius } from "../../lib/Constants";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import TZButton from "../../components/TZButton";
 import { Logout, fetchWithToken } from "../..";
@@ -13,6 +13,44 @@ import TZProfileComponent from "../../components/TZProfileComponent";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
 import { getCookies } from "../../lib/utils";
+
+const ProfileTop = memo(function ProfileItem(props: { title: string, value: string, profilePic?: string, email: string, onClick?: () => void }) {
+    //overriding default CSS properties by initializing within the function
+    const defaultProfile: React.CSSProperties = {
+        width: "100px",
+        height: "100px",
+        background: 'linear-gradient(0deg, #c76b89, #d38932)',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: "30px",
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    };
+
+    return (
+        <div style={{ padding: padding, width: "100%", display: "flex", alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: "flex", justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                <div style={{ borderRadius: "50%" }}>
+                    {props.profilePic ? (
+                        <img src={props.profilePic} alt="Profile" style={{ borderRadius: "50%" }} ></img>)
+                        :
+                        (<div style={defaultProfile}>{getInitials(props.value)}</div>)
+                    }
+                </div>
+                <div style={{ padding: padding, display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center', }}>
+                    <span className="App-subtitle" style={{ padding: padding, paddingBottom: '0', display: 'flex' }}>
+                        {props.value}
+                    </span>
+                    <span style={{ padding: padding, paddingTop: 0, color: "#888" }}>{props.email}</span>
+                </div>
+            </div>
+        </div >
+    );
+}
+);
 
 function AccountComponent(props: { title: string, text: string }) {
     const profileButton: React.CSSProperties = {
@@ -68,6 +106,10 @@ export default function Account() {
     }
 
     useEffect(() => {
+        if (user.access_token === "") {
+            Logout(usc, undefined, true);
+            return;
+        }
         getCardDetails();
     }, [])
 
@@ -124,24 +166,34 @@ export default function Account() {
         router.navigate("/invoices");
     };
 
+    const handleAboutClick = () => {
+        router.navigate("/contact-us");
+    };
+
+
     return (
         <div className={"App-body-top"}>
-            <TZHeader title="Your Account" leftComponent={
+            <TZHeader title="" leftComponent={
                 <BackButton onClick={handleBackClick}></BackButton>
             } />
             <div style={styles}>
                 <div>
                     <div style={{ paddingBottom: padding / 2 }}>
-                        <span className="App-tertiarytitle">Your Information</span>
+                        <ProfileTop title="Name" value={user.name} profilePic={user.image} email={user.email} />
+
+                        {/* <span className="App-tertiarytitle">Your Information</span> */}
                     </div>
-                    <AccountComponent title="Name" text={user.name}></AccountComponent>
-                    <AccountComponent title="Email" text={user.email}></AccountComponent>
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
                     <CardDetails />
                     <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails}></TZProfileComponent>
                     <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
+                    <div style={{ paddingBottom: padding / 2 }}>
+                        <span className="App-tertiarytitle">About</span>
+                    </div>
+                    <TZProfileComponent text="Contact Us" onClick={handleAboutClick}></TZProfileComponent>
+                    <TZProfileComponent text="Privacy Policy" onClick={handleAboutClick}></TZProfileComponent>
                 </div>
                 <div style={{ position: "absolute", bottom: padding, width: Math.min(600 - padding * 2, useWindowDimensions().width - padding * 2) }}>
                     <TZButton title={"Log out"} onClick={() => {
@@ -149,7 +201,7 @@ export default function Account() {
                         Logout(usc, undefined, true)
                     }}></TZButton>
                     <div style={{ paddingBottom: padding }}></div>
-                    <TZButton title={"Delete account"} backgroundColor="#800" onClick={DeleteAccount}></TZButton>
+                    <TZButton title={"Delete account"} backgroundColor={Colors.background} color={Colors.red} onClick={DeleteAccount}></TZButton>
                 </div>
             </div>
         </div>

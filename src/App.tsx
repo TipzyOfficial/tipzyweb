@@ -74,15 +74,11 @@ export const router = createBrowserRouter([{
       Component: SongSearch
     },
     {
-      path: "/profile",
-      Component: Profile
-    },
-    {
       path: "/account",
       Component: Account
     },
     {
-      path: "/about",
+      path: "/contact-us",
       Component: About
     },
     {

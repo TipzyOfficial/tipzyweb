@@ -22,7 +22,7 @@ export default function ProfileButton(props: { position?: "fixed" | "relative", 
             ...props.style
         }}>
             <button
-                onClick={() => { if (!props.disabled) router.navigate("/profile") }}
+                onClick={() => { if (!props.disabled) router.navigate("/account") }}
                 style={{
                     display: 'flex',
                     justifyContent: 'center',

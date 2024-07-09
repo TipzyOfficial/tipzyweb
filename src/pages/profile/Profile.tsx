@@ -35,7 +35,7 @@ function ProfileLanding() {
     };
 
     const handleAboutClick = () => {
-        router.navigate("/about");
+        router.navigate("/contact-us");
     };
 
     return (
@@ -99,9 +99,7 @@ const ProfileItem = memo(function ProfileItem(props: { title: string, value: str
 export default function Profile() {
     const usc = useContext(UserSessionContext)
     const user = usc.user;
-    useEffect(() => {
-        if (user.access_token === "") Logout(usc, undefined, true);
-    }, [])
+
     // user.name
     // user.email
 
