@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import '../../App.css'
-import { Button, Card, Container } from "react-bootstrap";
+import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { Colors, padding, radius } from "../../lib/Constants";
 import TZButton from "../../components/TZButton";
 import { router } from "../../App";
@@ -150,7 +150,9 @@ function EnterCode() {
                                         <BarRenderItem bar={item} />
                                     </div>
                                 }
-                            /> : <></>
+                            /> :
+                            <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding }}><Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }} /></div>
+
                         }
                     </div>
                 </div>
