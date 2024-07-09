@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle as faSuccess } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle as faSuccess, faXmarkCircle as faFailure } from '@fortawesome/free-solid-svg-icons';
 
 function TZButton(props: { onClick?: () => void; title?: string, backgroundColor?: string, width?: number, disabled?: boolean, fontSize?: number, color?: string, loading?: boolean, completed?: boolean, leftComponent?: JSX.Element }) {
     const [opacity, setOpacity] = useState(1);
@@ -36,8 +36,8 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
                 opacity: props.disabled ? 0.5 : opacity,
                 border: 'none'
             }}>
-            {props.completed ?
-                <FontAwesomeIcon icon={faSuccess} fontSize={props.fontSize} color="white"></FontAwesomeIcon>
+            {props.completed !== undefined ?
+                <FontAwesomeIcon icon={props.completed ? faSuccess : faFailure} fontSize={props.fontSize} color="white"></FontAwesomeIcon>
                 :
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {props.leftComponent ?? <></>}

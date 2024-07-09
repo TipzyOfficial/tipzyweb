@@ -18,7 +18,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const dims = useFdim() / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
     const [price, setPrice] = useState<number | undefined>(undefined);
 
@@ -48,8 +48,10 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             token_count: 0,
             explicit: song.explicit,
         })).then(response => response.json()).then(json => {
+            console.log("json: ", json)
             if (json.status === 200) return 1;
-            else if (json.status === 404) return 2;
+            else if (json.status === 433) return 2;
+            else if (json.status === 444) return 3;
             else throw new Error("Error: " + json.detail)
             // console.log("re", response) 
         }).catch((e: Error) => {
@@ -61,19 +63,26 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 
     const sendRequestClose = async () => {
         const r = await sendRequest();
-        if (r === 0) {
-            alert("Failed to send your request. You won't been charged.");
-            props.handleClose();
-            return;
+        if (r === 1) {
+            setSuccess(true);
         }
-        else if (r === 2) {
-            alert("This bar isn't taking requests at the moment. Please come back later.");
-            props.handleClose();
-            return;
+        else {
+            setSuccess(false);
+            switch (r) {
+                case 2:
+                    alert("This bar isn't taking requests at the moment. Please come back later.");
+                    break;
+                case 3:
+                    alert("This track has been accepted to be played recently. Please select another song or try requesting it later.");
+                    break;
+                default:
+                    alert("There was a problem sending that request–you won't be charged.");
+                    break;
+
+            }
         }
 
         // alert("Your request was sent! Thank you for using Tipzy :)");
-        setSuccess(true);
         // useInterval(() => props.handleClose(), 500);
         setTimeout(() => props.handleClose(), 500);
     }
@@ -90,14 +99,14 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
                         <Row className="justify-content-md-center">
                             <Col>
                                 <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later.</Modal.Body>
-                                {success ?
+                                {success === true ?
                                     <>
                                         <div style={{ paddingTop: padding }}></div>
                                         <TZButton
                                             fontSize={Math.min(30, dims / 7)}
                                             completed={success}
                                             title={"$2.00"}
-                                            backgroundColor={success ? Colors.green : undefined}
+                                            backgroundColor={success ? Colors.green : success === false ? Colors.red : undefined}
                                         />
                                     </>
 
@@ -166,7 +175,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
                                     loading={disabled || price === undefined}
                                     completed={success}
                                     title={price ? `$${(price / 100).toFixed(2)}` : ""}
-                                    backgroundColor={success ? Colors.green : undefined}
+                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick()} />
                             </div>
                         </Col>
@@ -188,7 +197,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             show={props.show} onShow={() => {
                 getPrice();
                 setPaymentScreenVisible(false);
-                setSuccess(false);
+                setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
