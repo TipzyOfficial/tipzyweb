@@ -82,7 +82,9 @@ function EnterCode() {
                 })
         })
 
-        setBars(o);
+        setBars(o.sort((a, b) => {
+            return (b.id - a.id);
+        }));
     }
 
 
