@@ -366,7 +366,8 @@ export default function Bar() {
                         <div style={{ flex: 1 }}>
                             <ToggleTab labels={[{ label: "Songs", noti: 0 }, { label: "Requests", noti: requestNoti }]} value={view} setValue={setView}></ToggleTab>
                             <div style={{ paddingTop: padding / 2, width: '100%', }}>
-                                {view === 0 ? <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} /> : <></>}
+                                {/* {view === 0 ? <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} /> : <></>} */}
+                                <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} />
                             </div>
                         </div>
                     </div>
