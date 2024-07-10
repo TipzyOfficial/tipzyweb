@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { memo, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import '../../App.css'
 import { Button, Card, Container, Spinner } from "react-bootstrap";
@@ -21,8 +21,10 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import FullLogo from '../../assets/Tipzy_Full_Orange.png';
 
 
-function BarRenderItem(props: { bar: BarType }) {
+const BarRenderItem = memo((props: { bar: BarType }) => {
+    const rand = Math.random();
     const bar = props.bar;
+
     return (
         <div style={{ cursor: 'pointer' }} onClick={() => {
             router.navigate(`/bar?id=${bar.id}`)
@@ -36,7 +38,7 @@ function BarRenderItem(props: { bar: BarType }) {
                         <img src={bar.image_url} alt={bar.name} style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 50, }} />
                         : <img src={defaultBarBackground} alt={bar.name} style={{
                             width: 50, height: 50, objectFit: "fill",
-                            transform: `translateX(${Math.random() * 50}%) translateY(${Math.random() * 50}%) scale(${Math.random() + 2}) rotate(${Math.floor(Math.random() * 2) * 180}deg)`,//translate(${Math.floor(Math.random() * 50)}px,${Math.floor(Math.random() * 50)})px`, ${Math.floor(Math.random() * 100)}
+                            transform: `translateX(${rand * 50}%) translateY(${rand * 50}%) scale(${rand + 2}) rotate(${Math.floor(rand * 2) * 180}deg)`,//translate(${Math.floor(Math.random() * 50)}px,${Math.floor(Math.random() * 50)})px`, ${Math.floor(Math.random() * 100)}
                         }} />
                     }
                 </div>
@@ -52,7 +54,7 @@ function BarRenderItem(props: { bar: BarType }) {
             <div style={{ height: padding }}></div>
         </div>
     )
-}
+})
 
 function EnterCode() {
     const userContext = useContext(UserSessionContext)
