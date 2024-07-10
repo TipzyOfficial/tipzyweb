@@ -142,7 +142,7 @@ export default function Bar() {
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const artistDims = fdim ? Math.max(Math.min(fdim / 4.3, 200), 50) : 120;
     const searchDims = fdim ? Math.max(Math.min(fdim / 17, 40), 20) : 20;
-    const minHeaderHeight = wdim.height && wdim.width ? Math.max(Math.min(wdim.width / 5, wdim.height / 4), 300) : 300;
+    const minHeaderHeight = wdim.height && wdim.width ? Math.max(wdim.height / 4, 250) : 250; // Math.max(Math.min(wdim.width / 5, wdim.height / 4), 250) : 250;
     // const toggleRef = useRef<HTMLDivElement>(null);
     // const [topBarRef] = useHookWithRefCallback(); //useRef<HTMLDivElement>(null);
 
