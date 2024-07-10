@@ -16,6 +16,7 @@ import defaultBarBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 import { getCookies } from "../../lib/utils";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 // import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -56,6 +57,7 @@ function EnterCode() {
     const userContext = useContext(UserSessionContext)
     const [barID, setBarID] = useState("");
     const [bars, setBarsIn] = useState<BarType[] | undefined>();
+    const [codeVisible, setCodeVisible] = useState(false);
     const setBars = (b: BarType[]) => {
         if (JSON.stringify(b) !== JSON.stringify(bars)) setBarsIn(b);
     }
@@ -116,28 +118,56 @@ function EnterCode() {
                 </div>
                 {/* <div style={{ paddingBottom: padding }} /> */}
                 <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                    <div style={{ padding: padding * 2, borderRadius: radius, borderStyle: 'solid', borderColor: 'white', borderWidth: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: "100%" }}>
-                        <span className="App-tertiarytitle" style={{ fontWeight: 500, width: "100%", textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ paddingRight: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FontAwesomeIcon fontSize={"calc(8px + 1vmin)"} icon={faQuestionCircle}></FontAwesomeIcon></div>Don't see your bar on this page?
-                        </span>
-                        <span className="App-normaltext" style={{ width: "100%", textAlign: 'center', paddingBottom: padding }}>Ask a bartender for its unique code!</span>
-                        <input
-                            className="App-tertiarytitle"
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={8} style={{
-                                width: "100%", maxWidth: 300, fontSize: "calc(20px + 1vmin)", textAlign: 'center', padding: 5,
-                            }}
-                            value={barID}
-                            onChange={(e) => {
-                                const v = e.target.value.replace(/\D/g, '');
-                                setBarID(v);
-                            }}
-                        ></input>
-                        <div style={{ paddingTop: padding, width: "100%", maxWidth: 300 }}>
-                            <TZButton title="Continue" onClick={onClick} />
+                    {codeVisible ?
+                        // <div style={{ padding: padding * 2, borderRadius: radius, borderStyle: 'solid', borderColor: 'white', borderWidth: 1, width: "100%", backgroundColor: "#8883"}}>
+                        <div style={{ position: 'relative' }}>
+                            <div style={{
+                                padding: padding * 2, borderRadius: radius, borderStyle: 'solid', borderColor: 'white', borderWidth: 1, width: "100%", backgroundColor: "#8883",
+                                position: 'relative', top: 0,
+
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: "100%", cursor: 'default' }}>
+                                    <span className="App-tertiarytitle" style={{ fontWeight: 500, width: "100%", textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ paddingRight: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FontAwesomeIcon fontSize={"calc(8px + 1vmin)"} icon={faQuestionCircle}></FontAwesomeIcon></div>Don't see your bar on this page?
+                                    </span>
+                                    <span className="App-normaltext" style={{ width: "100%", textAlign: 'center', paddingBottom: padding }}>Ask a bartender for its unique code!</span>
+                                    <input
+                                        className="App-tertiarytitle"
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={8} style={{
+                                            width: "100%", maxWidth: 300, fontSize: "calc(20px + 1vmin)", textAlign: 'center', padding: 5,
+                                        }}
+                                        value={barID}
+                                        onChange={(e) => {
+                                            const v = e.target.value.replace(/\D/g, '');
+                                            setBarID(v);
+                                        }}
+                                    ></input>
+                                    <div style={{ paddingTop: padding, width: "100%", maxWidth: 300 }}>
+                                        <TZButton title="Continue" onClick={onClick} />
+                                    </div>
+                                </div>
+                            </div>
+                            <div style={{ padding: 5, position: 'absolute', right: padding, top: padding, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', cursor: 'pointer' }}
+                                onClick={() => setCodeVisible(false)}
+                            ><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
                         </div>
-                    </div>
+
+                        :
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ backgroundColor: "#8883", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: 'white', borderStyle: 'solid', cursor: 'pointer' }}
+                                onClick={() => setCodeVisible(true)}
+                            >
+                                <div style={{ paddingRight: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FontAwesomeIcon fontSize={"calc(8px + 1vmin)"} icon={faQuestionCircle}></FontAwesomeIcon></div>
+                                <span className="App-tertiarytitle" style={{ fontWeight: 500, textAlign: 'center', }}>
+                                    Don't see your bar on this page?
+                                </span>
+                            </div>
+
+                        </div>
+
+                    }
                     <div style={{ paddingTop: padding * 2 }}>
                         <span className="App-subtitle" style={{ fontSize: "calc(20px + 1vmin)", fontWeight: 'bold' }}>Bars near you</span>
                         <div style={{ padding: padding / 2 }}></div>
