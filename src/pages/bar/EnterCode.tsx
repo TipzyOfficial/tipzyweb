@@ -11,7 +11,6 @@ import FlatList from "flatlist-react/lib";
 import { fetchWithToken } from "../..";
 import { fetchNoToken } from "../../lib/serverinfo";
 import useWindowDimensions from "../../lib/useWindowDimensions";
-import defaultBackground from "../../assets/entercode_background.png"
 import defaultBarBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
@@ -19,6 +18,7 @@ import { getCookies } from "../../lib/utils";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 // import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import FullLogo from '../../assets/Tipzy_Full_Orange.png';
+import defaultBackground from "../../assets/entercode_background.jpg"
 
 
 const BarRenderItem = memo((props: { bar: BarType }) => {
