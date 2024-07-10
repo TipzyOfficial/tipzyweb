@@ -485,12 +485,18 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                                 <span className="App-tertiarytitle">Next up:</span>
                                 :
                                 <>
-                                    <span className="App-tertiarytitle">Next up:</span>
-                                    <div style={{ width: "100%", display: 'flex', justifyContent: 'center', padding: padding, textAlign: "center", flexDirection: 'column' }}>
-                                        <span style={{ fontWeight: 'bold' }}>No songs yet!</span>
-                                        <span> Request a song to hear it played next.</span>
+                                    <div style={{ display: "block" }}>
+                                        <span className="App-tertiarytitle">Next up:</span>
+                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%', padding: padding / 2 }}>
+                                            <div style={{ display: 'inline-block', justifyContent: 'center', padding: padding / 1.5, textAlign: "center", flexDirection: 'column', backgroundColor: "#fff3", borderRadius: radius }}>
+                                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                                    <span style={{ fontWeight: 'bold' }}>Your song could be here!</span>
+                                                    <span> Request a song to hear it played next.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="App-normaltext" style={{ fontWeight: 500 }}>Next from shuffle:</span>
                                     </div>
-                                    <span className="App-normaltext" style={{ fontWeight: 500 }}>Next from shuffle:</span>
                                 </>
                             }
                         </div>
