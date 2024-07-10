@@ -18,6 +18,7 @@ import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 import { getCookies } from "../../lib/utils";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 // import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import FullLogo from '../../assets/Tipzy_Full_Orange.png';
 
 
 function BarRenderItem(props: { bar: BarType }) {
@@ -107,17 +108,34 @@ function EnterCode() {
                 <ProfileButton position="fixed" style={{
                     top: padding,
                     right: Math.max((useWindowDimensions().width - mW + padding) / 2, padding),
-                    backgroundColor: "#0003",
+                    backgroundColor: "#0002",
                     WebkitBackdropFilter: 'blur(5px)',
                     backdropFilter: 'blur(5px)',
                     borderRadius: "100%"
                 }} />
 
-                <div style={{ paddingTop: padding * 2, paddingBottom: padding * 2, paddingLeft: padding, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: "100%" }}>
-                    <span className="App-subtitle" style={{ fontWeight: 500 }}>Welcome!</span>
+                <div style={{ paddingTop: padding * 2, paddingBottom: padding * 2, paddingLeft: padding, display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%" }}>
+                    {/* <span className="App-subtitle" style={{ fontWeight: 500 }}>Welcome!</span> */}
+                    <img src={FullLogo} style={{ maxHeight: 40, objectFit: 'contain' }} alt={"tipzy full logo"}></img>
                 </div>
                 {/* <div style={{ paddingBottom: padding }} /> */}
                 <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                    <div>
+                        <span className="App-subtitle" style={{ fontSize: "calc(20px + 1vmin)", fontWeight: 'bold' }}>Find your bar</span>
+                        <div style={{ padding: padding / 2 }}></div>
+                        {bars ?
+                            <FlatList
+                                list={bars}
+                                renderItem={(item, key) =>
+                                    <div key={item.id + "k_" + key}>
+                                        <BarRenderItem bar={item} />
+                                    </div>
+                                }
+                            /> :
+                            <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding }}><Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }} /></div>
+
+                        }
+                    </div>
                     {codeVisible ?
                         // <div style={{ padding: padding * 2, borderRadius: radius, borderStyle: 'solid', borderColor: 'white', borderWidth: 1, width: "100%", backgroundColor: "#8883"}}>
                         <div style={{ position: 'relative' }}>
@@ -155,35 +173,17 @@ function EnterCode() {
                         </div>
 
                         :
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ backgroundColor: "#8883", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: 'white', borderStyle: 'solid', cursor: 'pointer' }}
-                                onClick={() => setCodeVisible(true)}
-                            >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: "100%" }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding, borderRadius: radius, cursor: 'pointer', width: "100%" }} // backgroundColor: "#8883", borderWidth: 1, borderColor: 'white', borderStyle: 'solid',  }}
+                                onClick={() => setCodeVisible(true)}>
                                 <div style={{ paddingRight: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FontAwesomeIcon fontSize={"calc(8px + 1vmin)"} icon={faQuestionCircle}></FontAwesomeIcon></div>
                                 <span className="App-tertiarytitle" style={{ fontWeight: 500, textAlign: 'center', }}>
                                     Don't see your bar on this page?
                                 </span>
                             </div>
-
                         </div>
-
                     }
-                    <div style={{ paddingTop: padding * 2 }}>
-                        <span className="App-subtitle" style={{ fontSize: "calc(20px + 1vmin)", fontWeight: 'bold' }}>Bars near you</span>
-                        <div style={{ padding: padding / 2 }}></div>
-                        {bars ?
-                            <FlatList
-                                list={bars}
-                                renderItem={(item, key) =>
-                                    <div key={item.id + "k_" + key}>
-                                        <BarRenderItem bar={item} />
-                                    </div>
-                                }
-                            /> :
-                            <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: padding }}><Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }} /></div>
-
-                        }
-                    </div>
+                    <div style={{ height: padding * 2 }}></div>
                 </div>
                 {/* <div style={{ maxWidth: 350 }}>
                 <div style={{ paddingTop: '5dvh', paddingBottom: padding }}>

@@ -138,17 +138,18 @@ export default function Bar() {
     const id = searchParams.get("id") ?? (userContext.barState.bar ? userContext.barState.bar.id : cookies.get("bar_session"));
     const wdim = useWindowDimensions();
     const fdim = useFdim();
-    const padding = fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
+    const padding = basePadding;//fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const artistDims = fdim ? Math.max(Math.min(fdim / 4.3, 200), 50) : 120;
-    const searchDims = fdim ? Math.max(Math.min(fdim / 20, 30), 15) : 15;
-    const minHeaderHeight = wdim.height && wdim.width ? Math.min(wdim.width / 5, wdim.height / 4) : 200;
-    const toggleRef = useRef<HTMLDivElement>(null);
+    const searchDims = fdim ? Math.max(Math.min(fdim / 17, 40), 20) : 20;
+    const minHeaderHeight = wdim.height && wdim.width ? Math.max(Math.min(wdim.width / 5, wdim.height / 4), 300) : 300;
+    // const toggleRef = useRef<HTMLDivElement>(null);
     // const [topBarRef] = useHookWithRefCallback(); //useRef<HTMLDivElement>(null);
 
     const [height, setHeight] = useState<number | undefined>();
     // const [tbheight, setTBHeight] = useState<number | undefined>();
     const [topBar, topBarRef] = useCallbackRef<HTMLDivElement>();
+    const [toggle, toggleRef] = useCallbackRef<HTMLDivElement>();
 
     const [pendingReqs, setPendingReqsUn] = useState<SongRequestType[]>(pendingReqsCache);
     const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
@@ -174,7 +175,7 @@ export default function Bar() {
     const setPendingReqs = useCallback((p: SongRequestType[]) => setPendingReqsUn(p), [setPendingReqsUn]);
     const setAllReqs = useCallback((r: SongRequestType[]) => setAllReqsUn(r), [setAllReqsUn]);
     const setCurrent = useCallback((c: SongType | undefined) => setCurrentUn(c), [setCurrentUn]);
-    const setQueue = useCallback((c: SongType[]) => setQueueUn(c), [setQueueUn]);
+    const setQueue = useCallback((c: SongType[]) => { setQueueUn(c) }, [setQueueUn]);
     const setCload = useCallback((c: boolean) => setCloadUn(c), [setCloadUn]);
     const setReady = useCallback((r: boolean) => setReadyUn(r), [setReadyUn]);
 
@@ -185,7 +186,7 @@ export default function Bar() {
             //     left: 0,
             //     behavior: "instant",
             // })
-            setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
+            setHeight((toggle?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
             setViewInner(v);
             if (v === 1) {
                 setRequestNoti(0);
@@ -194,8 +195,8 @@ export default function Bar() {
     }
 
     useLayoutEffect(() => {
-        setHeight((toggleRef.current?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
-    }, [topBar])
+        setHeight((toggle?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
+    }, [topBar, toggle])
 
     const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
         return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
@@ -208,7 +209,7 @@ export default function Bar() {
             const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images.thumbnail, albumartbig: np.images.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
             const q: SongType[] = [];
             json.data.queue.forEach((e: any) => {
-                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit };
+                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
                 q.push(song);
             });
             return [nowplaying, q];
@@ -220,7 +221,8 @@ export default function Bar() {
             if (!r) return;
             const [c, q] = r;
             setCurrent(c);
-            setQueue(q.splice(0, 4));
+            setQueue(
+                hasManuallyQueued(q) ? q.filter((e) => e.manuallyQueued) : q.splice(0, 1));
             currentPCache = c;
         })
     }
@@ -299,7 +301,7 @@ export default function Bar() {
 
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
-            <div className="App-body-top" style={bar.allowingRequests ? {} : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
+            <div className="App-body-top" style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
                 <DisableRequests show={!bar.allowingRequests} bar={bar} />
                 <div ref={topBarRef} style={{
                     flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
@@ -331,7 +333,7 @@ export default function Bar() {
                         alignItems: 'flex-start',
                         justifyContent: 'flex-end',
                         backgroundColor: "#000",
-                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)'
+                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)',
                     }}
                     >
                         <div style={{ height: topBar?.clientHeight ? topBar.clientHeight : 0 }}></div>
@@ -345,9 +347,6 @@ export default function Bar() {
                                 paddingRight: padding,
                                 textAlign: 'right',
                             }}>{bar.type ?? "Bar"}</span>
-                        </div>
-                        <div style={{ paddingTop: padding, width: '100%', padding: padding, }}>
-                            <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} />
                         </div>
                     </div>
                     <div style={{ paddingBottom: padding / 2 }}></div>
@@ -366,6 +365,9 @@ export default function Bar() {
                     >
                         <div style={{ flex: 1 }}>
                             <ToggleTab labels={[{ label: "Songs", noti: 0 }, { label: "Requests", noti: requestNoti }]} value={view} setValue={setView}></ToggleTab>
+                            <div style={{ paddingTop: padding / 2, width: '100%', }}>
+                                {view === 0 ? <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} /> : <></>}
+                            </div>
                         </div>
                     </div>
 
@@ -430,6 +432,10 @@ export function parseRequests(json: any): SongRequestType[] {
     return reqs.sort(songRequestCompare);
 }
 
+const hasManuallyQueued = (s?: SongType[]) => {
+    return s && s.length > 0 && s[0].manuallyQueued
+}
+
 
 export function parseRequest(r: any): SongRequestType {
     const req: SongRequestType = { id: r.id, song: parseSongIHateMeku(r.song_json), bar: parseBusiness(r.business_info), date: new Date(r.request_time), status: r.status }
@@ -474,7 +480,17 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                         height={v ? 'auto' : 0} // see props documentation below
                     >
                         <div style={{ paddingTop: padding / 2, paddingBottom: padding / 4 }}>
-                            <span className="App-tertiarytitle">Next up:</span>
+                            {hasManuallyQueued(props.queue) ?
+                                <span className="App-tertiarytitle">Next up:</span>
+                                :
+                                <>
+                                    <span className="App-tertiarytitle">Next up:</span>
+                                    <div style={{ width: "100%", display: 'flex', justifyContent: 'center', padding: padding }}>
+                                        <span >No songs yet–request a song to get it played next!</span>
+                                    </div>
+                                    <span className="App-normaltext" style={{ fontWeight: 500 }}>Next from shuffle:</span>
+                                </>
+                            }
                         </div>
                         <FlatList
                             list={props.queue}
@@ -484,9 +500,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                                     <div style={{ paddingBottom: padding }}></div>
                                 </div>
                             }
-                        >
-
-                        </FlatList>
+                        />
                     </AnimateHeight>
                 </div>
             </div>
