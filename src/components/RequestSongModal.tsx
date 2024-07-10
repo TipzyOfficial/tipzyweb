@@ -49,7 +49,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             token_count: 0,
             explicit: song.explicit,
         })).then(response => response.json()).then(json => {
-            console.log("json: ", json)
+            // console.log("json: ", json)
             if (json.status === 200) return 1;
             else if (json.status === 433) return 2;
             else if (json.status === 444) return 3;
@@ -133,7 +133,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
                 .then(r => r.json())
                 .then(json => {
-                    console.log("json gsp", json)
+                    // console.log("json gsp", json)
                     if (!json.has_method) throw new Error("malformed json: no has_method.")
                     return (json.has_method === "True")
                 }).catch((e: Error) => { console.log(e); return null });
