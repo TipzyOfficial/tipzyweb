@@ -17,6 +17,7 @@ import { faMusic } from "@fortawesome/free-solid-svg-icons";
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
     const dims = useFdim() / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
+
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
@@ -52,6 +53,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             if (json.status === 200) return 1;
             else if (json.status === 433) return 2;
             else if (json.status === 444) return 3;
+            else if (json.status === 469) return 4;
             else throw new Error("Error: " + json.detail)
             // console.log("re", response) 
         }).catch((e: Error) => {
@@ -70,10 +72,13 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             setSuccess(false);
             switch (r) {
                 case 2:
-                    alert("This bar isn't taking requests at the moment. Please come back later.");
+                    alert("This establishment isn't taking requests at the moment. Please come back later.");
                     break;
                 case 3:
                     alert("This track has been accepted to be played recently. Please select another song or try requesting it later.");
+                    break;
+                case 4:
+                    alert("This establishment doesn't allow explicit songs to be requested at this time.");
                     break;
                 default:
                     alert("There was a problem sending that request–you won't be charged.");
@@ -196,6 +201,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             dialogClassName="App-modal"
             show={props.show} onShow={() => {
                 getPrice();
+                console.log(props.song)
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
