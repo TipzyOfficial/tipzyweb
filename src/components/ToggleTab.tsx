@@ -42,7 +42,7 @@ const ToggleTab = (props: {
                 >
                     <span className="App-toggletitle">{props.label}</span>
                     <div style={{ paddingLeft: padding / 2 }}></div>
-                    {noti ? <div style={{}}><div style={{ padding: 2, borderRadius: 100, backgroundColor: Colors.primaryRegular, minWidth: 30, minHeight: 30 }}>{noti}</div></div> : <></>}
+                    {noti ? <div><div style={{ padding: 2, borderRadius: 100, backgroundColor: Colors.primaryRegular, minWidth: 30, minHeight: 30 }}>{noti > 99 ? "99+" : noti}</div></div> : <></>}
                 </button>
             </div>
 

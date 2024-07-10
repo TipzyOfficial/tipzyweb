@@ -112,7 +112,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
             songs.push(song);
         })
 
-        const top = shuffleWithUserID(songs.splice(0, 12), userContext.user);
+        const top = shuffleWithUserID(songs.splice(0, 20), userContext.user);
 
         bar.topSongs = top.concat(songs);
     }).catch(e => console.log("cant get top artists", e));
@@ -485,8 +485,9 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                                 :
                                 <>
                                     <span className="App-tertiarytitle">Next up:</span>
-                                    <div style={{ width: "100%", display: 'flex', justifyContent: 'center', padding: padding }}>
-                                        <span >No songs yet–request a song to get it played next!</span>
+                                    <div style={{ width: "100%", display: 'flex', justifyContent: 'center', padding: padding, textAlign: "center", flexDirection: 'column' }}>
+                                        <span style={{ fontWeight: 'bold' }}>No songs yet!</span>
+                                        <span> Request a song to hear it played next.</span>
                                     </div>
                                     <span className="App-normaltext" style={{ fontWeight: 500 }}>Next from shuffle:</span>
                                 </>
