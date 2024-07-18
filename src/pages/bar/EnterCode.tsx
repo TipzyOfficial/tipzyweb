@@ -125,7 +125,7 @@ function EnterCode() {
                 {/* <div style={{ paddingBottom: padding }} /> */}
                 <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                     <div>
-                        <span className="App-subtitle" style={{ fontSize: "calc(20px + 1vmin)", fontWeight: 'bold' }}>Find your bar</span>
+                        <span className="App-subtitle" style={{ fontSize: "calc(20px + 1vmin)", fontWeight: 'bold' }}>For you</span>
                         <div style={{ padding: padding / 2 }}></div>
                         {bars ?
                             <FlatList

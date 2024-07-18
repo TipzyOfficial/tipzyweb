@@ -63,7 +63,7 @@ export default function Albums() {
                 gridGap: "0px",
                 row: true,
               }}
-              renderItem={(e, id) => <div style={{ height: albumDims * 1.65 }}><Album album={e} key={e.id + "_" + id} dims={albumDims} onClick={() => router.navigate("/album", { state: { album: e } })}></Album></div>}
+              renderItem={(e, id) => <div style={{ height: albumDims * 1.65 }}><Album album={e} key={e.id + "_" + id} dims={albumDims} onClick={() => router.navigate("/search/album", { state: { album: e } })}></Album></div>}
             />
           </div>
         </div>

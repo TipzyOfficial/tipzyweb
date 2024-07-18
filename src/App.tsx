@@ -70,7 +70,7 @@ export const router = createBrowserRouter([{
       Component: Bar
     },
     {
-      path: "/bar/search",
+      path: "/search",
       Component: SongSearch
     },
     {
@@ -90,15 +90,15 @@ export const router = createBrowserRouter([{
       Component: Invoices
     },
     {
-      path: "/artist",
+      path: "/search/artist",
       Component: ArtistInfo
     },
     {
-      path: "/album",
+      path: "/search/album",
       Component: AlbumPage
     },
     {
-      path: "/albums",
+      path: "/search/albums",
       Component: Albums
     }
     ], errorElement: <NotFoundPage title="Oops!" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />

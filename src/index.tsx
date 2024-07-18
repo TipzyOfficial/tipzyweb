@@ -30,10 +30,8 @@ root.render(
 );
 
 export function Logout(usc: UserSessionContextType, data?: any, defaultToBar?: boolean) {
-  console.log("logging out", usc.barState.bar);
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, ""));
-  // usc.barState.setBar(undefined);
 
   clearData();
   googleLogout();

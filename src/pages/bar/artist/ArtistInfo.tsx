@@ -110,13 +110,13 @@ export default function ArtistInfo() {
               </div>
               <div style={{ paddingBottom: 0, paddingTop: padding, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <span className='App-artistsubtitle'>Albums</span>
-                <span className='App-tertiarytitle' style={{ color: Colors.primaryRegular, cursor: 'pointer' }} onClick={() => router.navigate("/albums", { state: { albums: albums } })}>See more</span>
+                <span className='App-tertiarytitle' style={{ color: Colors.primaryRegular, cursor: 'pointer' }} onClick={() => router.navigate("/search/albums", { state: { albums: albums } })}>See more</span>
               </div>
             </div>
             <ScrollMenu>
               {albums.map((e, index) => (
                 <div style={{ opacity: 1, paddingLeft: padding }}>
-                  <Album album={e} dims={albumDims} key={"i" + index} onClick={() => router.navigate(`/album`, { state: { album: e } })}></Album>
+                  <Album album={e} dims={albumDims} key={"i" + index} onClick={() => router.navigate(`/search/album`, { state: { album: e } })}></Album>
                 </div>
               ))}
             </ScrollMenu>

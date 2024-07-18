@@ -366,8 +366,7 @@ export default function Bar() {
                         <div style={{ flex: 1 }}>
                             <ToggleTab labels={[{ label: "Songs", noti: 0 }, { label: "Requests", noti: requestNoti }]} value={view} setValue={setView}></ToggleTab>
                             <div style={{ paddingTop: padding / 2, width: '100%', }}>
-                                {/* {view === 0 ? <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} /> : <></>} */}
-                                <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/bar/search`) }} />
+                                <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/search`) }} />
                             </div>
                         </div>
                     </div>
@@ -570,7 +569,7 @@ const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: Son
                     <ScrollMenu
                     >
                         {topArtists.map((e, index) => (
-                            <div key={index + e.id} style={{ opacity: 1, paddingLeft: padding }}><Artist artist={e} dims={props.artistDims} onClick={() => router.navigate(`/artist/`, { state: { artist: e } })}></Artist></div>
+                            <div key={index + e.id} style={{ opacity: 1, paddingLeft: padding }}><Artist artist={e} dims={props.artistDims} onClick={() => router.navigate(`/search/artist`, { state: { artist: e } })}></Artist></div>
                         ))}
                     </ScrollMenu>
                 </div>
