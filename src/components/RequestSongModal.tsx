@@ -55,7 +55,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
     return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={price} getPrice={getPrice} sendRequest={sendRequest} />
 }
 
-export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
+export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
 
@@ -98,10 +98,10 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             return 0;
         });
     }
-    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={price} getPrice={getPrice} />
+    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={price} getPrice={getPrice} refreshRequests={props.refreshRequests} />
 }
 
-function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: () => Promise<number>, price: number | undefined, getPrice: () => Promise<void> }) {
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: () => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void> }) {
     const dims = useFdim() / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
 
@@ -115,6 +115,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         const r = await props.sendRequest();
         if (r === 1) {
             setSuccess(true);
+            if (props.refreshRequests)
+                await props.refreshRequests();
         }
         else {
             setSuccess(false);

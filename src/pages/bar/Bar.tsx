@@ -227,10 +227,15 @@ export default function Bar() {
     }
 
     const refreshAllReqs = async (indicator: boolean) => {
+
+        console.log("refrehing all")
         if (usc.user.access_token === "") return;
-        // if (!bar) return;
         if (indicator) setCload(true);
-        const allr = await fetchWithToken(usc, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+
+        const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
+
+            console.log("allr", json)
+
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
@@ -374,7 +379,7 @@ export default function Bar() {
                     <>
                         {
                             view === 0 ?
-                                <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} />
+                                <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} refreshRequests={() => refreshAllReqs(false)} />
                                 :
                                 <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload} refresh={() => refreshAllReqs(false)} />
                         }
@@ -550,7 +555,7 @@ const RequestsContentMemo = memo(RequestsContent);
 
 const SongListMemo = memo(SongList, () => true);
 
-const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number }) => {
+const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number, refreshRequests: () => Promise<void> }) => {
 
     const topArtists = props.topArtists;
     const topSongs = props.topSongs;
@@ -577,7 +582,7 @@ const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: Son
                 <div style={{ paddingBottom: padding, paddingTop: padding }}>
                     <span className='App-subtitle'>Popular</span>
                 </div>
-                <SongListMemo songs={topSongs} dims={props.songDims} />
+                <SongListMemo songs={topSongs} dims={props.songDims} refreshRequests={props.refreshRequests} />
             </div>
         </div>
     )

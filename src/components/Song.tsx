@@ -83,7 +83,7 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
     )
 }
 
-export function SongList(props: { songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean, logoutData?: any }) {
+export function SongList(props: { songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean, logoutData?: any, refreshRequests?: () => Promise<void> }) {
 
     const songDims = props.dims;
 
@@ -125,7 +125,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                 }
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
-            <RequestSongModal song={requestedSong} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData}></RequestSongModal>
+            <RequestSongModal song={requestedSong} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} refreshRequests={props.refreshRequests} />
             {/* </div> */}
         </>
     )
