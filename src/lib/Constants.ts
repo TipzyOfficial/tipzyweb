@@ -13,6 +13,7 @@ export const Colors = {
     tertiaryRegular: '#9991F4',
     tertiaryDark: '#6E63EF',
     green: "#50D66D",
+    darkerGreen: "#20a85a",
     red: "#e64640",
 }
 

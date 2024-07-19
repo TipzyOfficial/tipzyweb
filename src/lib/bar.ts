@@ -1,4 +1,4 @@
-import { ArtistType, SongType } from "./song";
+import { ArtistType, PlayableType, SongType } from "./song";
 
 export type BarType = {
   id: number; //bar's ID number in the database
@@ -12,4 +12,16 @@ export type BarType = {
   topArtists?: ArtistType[] //bar's top artists. 
   topSongs?: SongType[] //bar's top songs.
   vibe?: string // bar's vibe
+}
+
+export type LiveArtistType = {
+  id: number;
+  name: string;
+  allowingRequests: boolean;
+  instagramUrl?: string;
+  spotifyUrl?: string;
+  description?: string;
+  image_url?: string;
+  minPrice: number;
+  playables: PlayableType[];
 }

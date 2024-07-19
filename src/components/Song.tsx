@@ -1,13 +1,14 @@
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
-import { Colors, padding, useFdim } from "../lib/Constants";
-import { SongType } from "../lib/song";
+import { Colors, padding, radius, useFdim } from "../lib/Constants";
+import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import FlatList from "flatlist-react/lib";
 import { useEffect, useState } from "react";
-import RequestSongModal from "./RequestSongModal";
+import RequestSongModal, { RequestPlayableModal } from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
+import { numberToPrice } from "../lib/utils";
 
 export function artistsStringListToString(artists: string[]) {
     let out = "";
@@ -43,7 +44,7 @@ export default function Song(props: { song: SongType, dims?: number, noImage?: b
 }
 
 
-export function SongRenderItem(props: { song: SongType, dims: number, onClick?: () => void, noImage?: boolean, number?: number }) {
+export function SongRenderItem(props: { song: SongType, dims: number, onClick?: () => void, noImage?: boolean, number?: number, noPlus?: boolean }) {
     const item = props.song;
     const songDims = props.dims;
     const onClick = props.onClick;
@@ -53,7 +54,6 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
             paddingRight: 0,
             paddingLeft: 0,
             paddingTop: 0,
-            paddingBottom: padding * 1.2,
             alignItems: 'center',
             justifyContent: 'space-between',
             boxSizing: "border-box",
@@ -70,7 +70,7 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
                 number={props.number}
                 dims={songDims}
                 song={item} />
-            <div style={{ paddingLeft: 2 }}>
+            {props.noPlus ? <></> : <div style={{ paddingLeft: 2 }}>
                 {/* <div style={{display: 'flex', padding: 10, 
                                     border: 'solid #8888', borderWidth: 0.5, borderRadius: 5,
                                     backgroundColor: '#8881',
@@ -78,7 +78,7 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
                             $1.50
                         </div> */}
                 <FontAwesomeIcon icon={faCirclePlus} color={'#fff8'} fontSize={songDims / 3}></FontAwesomeIcon>
-            </div>
+            </div>}
         </button>
     )
 }
@@ -113,14 +113,93 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                 list={props.songs}
                 renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No songs.</div>}
                 renderItem={(item, index) =>
-                    <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id + "_index" + index} noImage={props.noImage} onClick={() => {
-                        setRequestedSong(item);
-                        setRequestVisible(true);
-                    }} />
+                    <>
+                        <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id + "_index" + index} noImage={props.noImage} onClick={() => {
+                            setRequestedSong(item);
+                            setRequestVisible(true);
+                        }} />
+                        <div style={{
+                            paddingBottom: padding * 1.2,
+                        }}></div>
+                    </>
                 }
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
             <RequestSongModal song={requestedSong} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData}></RequestSongModal>
+            {/* </div> */}
+        </>
+    )
+}
+
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any }) {
+    const songDims = props.dims;
+    let initRQS = undefined;
+    try {
+        const ret = localStorage.getItem("ret");
+        // console.log("ret", ret);
+        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+        // console.log("parsed", parsed);
+        initRQS = parsed ? parsed.data?.selectedSong : undefined;
+        // console.log("initRQS", initRQS);
+        if (ret) {
+            localStorage.removeItem("ret");
+        }
+    } catch (e) {
+        console.log("Problem loading previous state:", e)
+        localStorage.removeItem("ret");
+    }
+
+    const [requestedPlayable, setRequestedPlayable] = useState<PlayableType | undefined>(initRQS);
+    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
+
+    const RenderItem = (props: { item: PlayableType, index: string }) => {
+        const item = props.item;
+        const index = props.index;
+        const ratio = item.amountBid / item.minPrice;
+        const complete = ratio >= 1
+
+        return (
+            <>
+                <div style={{ paddingBottom: padding / 4 }}></div>
+                <div style={{
+                    width: "100%", position: "relative", cursor: "pointer", borderRadius: 5, overflow: 'hidden',
+                    // boxShadow: complete ? `0px 0px 5px ${Colors.secondaryDark}` : undefined
+
+                }} onClick={() => {
+                    setRequestedPlayable(item);
+                    setRequestVisible(true);
+                }}>
+                    {complete ?
+                        <div className="App-animated-gradient" style={{
+                            position: "absolute", left: 0, height: "100%", width: `100%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                        }} />
+                        : <div className="App-animated-gradient" style={{
+                            position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                        }} />}
+                    <div style={{ height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2, backgroundColor: "#fff1" }}>
+                        <div style={{ position: 'relative', flex: 2.5 }}>
+                            <Song song={item.song} dims={songDims} key={item.id + "_index" + index} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flex: 1, minWidth: 50, paddingLeft: 5 }}>
+                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>{numberToPrice(item.amountBid)}/{numberToPrice(item.minPrice)}</span>
+                        </div>
+                    </div>
+                    {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}
+                </div>
+                <div style={{ paddingBottom: padding / 4 }}></div>
+            </>
+        )
+    }
+
+    return (
+        <>
+            <FlatList
+                list={props.playables}
+                renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No songs.</div>}
+                renderItem={(item, index) => <RenderItem key={item.id + "_index" + index} item={item} index={index} />}
+            />
+            {/* <div style={{position: "fixed", top: 0}}> */}
+            <RequestPlayableModal playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} />
             {/* </div> */}
         </>
     )

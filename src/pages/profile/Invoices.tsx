@@ -24,12 +24,12 @@ type InvoiceType = {
     amount: number,
     currency: string,
     paid: boolean,
-    bar: string,
+    merchant: string,
     date: Date
 }
 
 function parseInvoiceJSON(e: any, desc?: string): InvoiceType {
-    return { id: e.id, description: desc ?? e.metadata.song_info, amount: e.amount, currency: e.currency, paid: e.paid, bar: e.metadata.bar_name, date: new Date(parseInt(e.metadata.date)) };
+    return { id: e.id, description: desc ?? e.metadata.song_info, amount: e.amount, currency: e.currency, paid: e.paid, merchant: e.metadata.bar_name ?? e.metadata.liveartist_name, date: new Date(parseInt(e.metadata.date)) };
 }
 
 export default function Invoices() {
@@ -94,7 +94,7 @@ export default function Invoices() {
                         ID: {item.id}
                     </span>
                     <span className="App-smalltext">
-                        {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)} @ {item.bar}
+                        {item.description}, amount: {item.currency === "usd" ? "$" : ""}{(item.amount / 100).toFixed(2)} to {item.merchant}
                     </span>
                 </div>
             </div>

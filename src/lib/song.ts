@@ -1,5 +1,16 @@
 import { BarType } from "./bar";
 
+export type PlayableType = {
+    active: boolean,
+    amountBid: number,
+    minPrice: number,
+    id: number,
+    artistId: number,
+    position: number,
+    song: SongType,
+    status: "ACCEPTED" | "REJECTED" | "LISTED" | "PENDING" | "REFUNDED" | "PLAYED" | "LISTED_ALTERED"
+}
+
 export type SongType = {
     id: string; //ID of song
     title: string, //song's title

@@ -7,6 +7,10 @@ function isMobile() {
     return o;
 }
 
+export function numberToPrice(n: number): string {
+    return `$${(n / 100).toFixed(2)}`;
+}
+
 export function shuffleWithUserID(array: any[], user: Consumer) {
     let seed = 0;
     const userid = (user.name.toString() ?? "" + user.email.toString() ?? "" + user.birthday ?? "")

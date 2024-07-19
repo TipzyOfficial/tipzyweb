@@ -29,6 +29,7 @@ import PaymentSetupScreen from './pages/profile/PaymentSetupScreen';
 import { NotFoundPage } from './pages/bar/NotFoundPage';
 import Invoices from './pages/profile/Invoices';
 import { getCookies, getStored } from './lib/utils';
+import Artist from './pages/artist/Artist';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([{
     {
       path: "/search/albums",
       Component: Albums
+    },
+    {
+      path: "/artist",
+      Component: Artist
     }
     ], errorElement: <NotFoundPage title="Oops!" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />
 }
@@ -123,6 +128,13 @@ export function goToBar(id?: number) {
     // window.location.replace("/");
   });
 }
+
+export function goToArtist(id?: number) {
+  router.navigate(`/artist${id ? `?id=${id}` : ""}`).then(() => {
+    // window.location.replace("/");
+  });
+}
+
 
 export type ReturnLinkType = {
   url: string,

@@ -1,6 +1,6 @@
 import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap";
 import { Colors, padding, useFdim } from "../lib/Constants";
-import { SongType } from "../lib/song";
+import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import { artistsStringListToString } from "./Song";
@@ -14,16 +14,52 @@ import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
 
-export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
-    const dims = useFdim() / 2;
-    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
-
-    const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
-    const [success, setSuccess] = useState<undefined | boolean>(undefined);
+export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any }) {
+    const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
+
     const [price, setPrice] = useState<number | undefined>(undefined);
 
-    const data = { selectedSong: song, ...props.data }
+    const getPrice = async () => {
+        setPrice(props.playable?.minPrice);
+
+        // const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+        //     business_id: userContext.barState.bar?.id
+        // })).catch(e => { throw e });
+
+        // const json = await response.json();
+
+        // setPrice(json.Dynamic_price);
+    }
+
+
+    const sendRequest = async (): Promise<number> => {
+        if (!props.playable) return 0;
+
+        return await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
+            price: 100
+        })).then(response => response.json()).then(json => {
+            console.log("json: ", json)
+            if (json.status === 200) return 1;
+            else if (json.status === 433) return 2;
+            else if (json.status === 444) return 3;
+            else if (json.status === 469) return 4;
+            else throw new Error("Error: ", json)
+            // console.log("re", response) 
+        }).catch((e: Error) => {
+            console.log("error: ", e)
+            return 0;
+        });
+    }
+
+    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={price} getPrice={getPrice} sendRequest={sendRequest} />
+}
+
+export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any }) {
+    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
+    const userContext = useContext(UserSessionContext);
+
+    const [price, setPrice] = useState<number | undefined>(undefined);
 
     const getPrice = async () => {
         setPrice(undefined);
@@ -36,6 +72,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 
         setPrice(json.Dynamic_price);
     }
+
 
     const sendRequest = async (): Promise<number> => {
         if (!userContext.barState.bar) return 0;
@@ -60,11 +97,22 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             console.log("error: ", e)
             return 0;
         });
-        // }
     }
+    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={price} getPrice={getPrice} />
+}
+
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: () => Promise<number>, price: number | undefined, getPrice: () => Promise<void> }) {
+    const dims = useFdim() / 2;
+    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
+
+    const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
+    const [success, setSuccess] = useState<undefined | boolean>(undefined);
+    const userContext = useContext(UserSessionContext);
+
+    const data = { selectedSong: song, ...props.data }
 
     const sendRequestClose = async () => {
-        const r = await sendRequest();
+        const r = await props.sendRequest();
         if (r === 1) {
             setSuccess(true);
         }
@@ -177,9 +225,9 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
                             <div>
                                 <TZButton
                                     fontSize={Math.min(30, dims / 7)}
-                                    loading={disabled || price === undefined}
+                                    loading={disabled || props.price === undefined}
                                     completed={success}
-                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    title={props.price ? `$${(props.price / 100).toFixed(2)}` : ""}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick()} />
                             </div>
@@ -200,7 +248,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
         <Modal
             dialogClassName="App-modal"
             show={props.show} onShow={() => {
-                getPrice();
+                props.getPrice();
                 console.log(props.song)
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);

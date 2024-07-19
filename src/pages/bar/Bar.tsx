@@ -126,16 +126,16 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
 
 export default function Bar() {
     const [searchParams] = useSearchParams();
-    const userContext = useContext(UserSessionContext);
+    const usc = useContext(UserSessionContext);
     const [ready, setReadyUn] = useState(false);
     const [view, setViewInner] = useState(0);
     // const [requestNoti, setRequestNoti] = useState(false)
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
-    const bar = userContext.barState.bar;
+    const bar = usc.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    const id = searchParams.get("id") ?? (userContext.barState.bar ? userContext.barState.bar.id : cookies.get("bar_session"));
+    const id = searchParams.get("id") ?? (usc.barState.bar ? usc.barState.bar.id : cookies.get("bar_session"));
     const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = basePadding;//fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
@@ -155,7 +155,6 @@ export default function Bar() {
     const [allReqs, setAllReqsUn] = useState<SongRequestType[]>(allReqsCache);
     const [cload, setCloadUn] = useState(false);
     const timeout = 10000;
-    const usc = useContext(UserSessionContext);
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
     const topBarColor = Colors.background + "bc";
@@ -231,7 +230,7 @@ export default function Bar() {
         if (usc.user.access_token === "") return;
         // if (!bar) return;
         if (indicator) setCload(true);
-        const allr = await fetchWithToken(userContext, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
+        const allr = await fetchWithToken(usc, `tipper/requests/all/`, 'GET').then(r => r.json()).then(json => {
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
@@ -281,14 +280,14 @@ export default function Bar() {
             router.navigate("/code");
             return;
         }
-        if (userContext.barState.bar && id === userContext.barState.bar.id.toString() && userContext.barState.bar.allowingRequests) {
+        if (usc.barState.bar && id === usc.barState.bar.id.toString() && usc.barState.bar.allowingRequests) {
             setReady(true);
             fetchBarInfo(usc, id);
             return;
         }
         fetchBarInfo(usc, id).then(() => setReady(true))
             .catch(e => {
-                userContext.barState.setBar(undefined)
+                usc.barState.setBar(undefined)
                 setReady(true);
             });
         allRefresh(true);

@@ -2,16 +2,22 @@ import { createContext, useEffect, useRef, useState } from 'react';
 import { Consumer, Users } from './user'
 import { SongRequestType, SongType } from './song';
 import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, rootGetRefreshToken, storeTokens } from '../index'
-import { BarType } from './bar';
+import { BarType, LiveArtistType } from './bar';
 import { DisplayOrLoading } from '../components/DisplayOrLoading';
 import Cookies from 'universal-cookie';
 import { useLocation } from 'react-router-dom';
 import { getCookies, getStored } from './utils';
 import { fetchBarInfo } from '../pages/bar/Bar';
+import { fetchArtistInfo } from '../pages/artist/Artist';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
     return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "")
+}
+
+export type ArtistStateType = {
+    artist?: LiveArtistType,
+    setArtist: (artist: LiveArtistType | undefined) => void
 }
 
 export type BarStateType = {
@@ -23,6 +29,7 @@ export type UserSessionContextType = {
     user: Consumer,
     setUser: (user: Consumer) => void; //do we even need this? or can i just load for asyncstorage
     barState: BarStateType;
+    artistState: ArtistStateType;
     abortController?: AbortController;
 }
 
@@ -30,11 +37,18 @@ const initBar = async (id?: number) => {
     return id ? fetchBarInfo(DefaultUserSessionContext, id, true) : undefined;
 }
 
+const initArtist = async (id?: number) => {
+    return id ? fetchArtistInfo(DefaultUserSessionContext, id, true) : undefined;
+}
+
 export const DefaultUserSessionContext: UserSessionContextType = {
     user: new Consumer("", 0, ""),
     setUser: () => { },
     barState: {
         bar: undefined, setBar: () => { }
+    },
+    artistState: {
+        artist: undefined, setArtist: () => { }
     },
 }
 
@@ -134,10 +148,10 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     const dc = defaultConsumer();
     const [user, setUser] = useState<Consumer>(dc);
     const [bar, setBar] = useState<BarType | undefined>();
+    const [artist, setArtist] = useState<LiveArtistType | undefined>();
     const [ready, setReady] = useState(false);
     const abortController = new AbortController();
     // const signal = abortController.signal;
-
 
     const editUser = (user: Consumer) => {
         // console.log("usc edit to", user);
@@ -147,12 +161,16 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
     const editBar = (bar: BarType | undefined) => {
         if (bar) cookies.set("bar_session", bar.id);
-        // console.log("bar sesh cookie", cookies.get("bar_session"))
         setBar(bar);
     }
 
+    const editArtist = (artist: LiveArtistType | undefined) => {
+        if (artist) cookies.set("artist_session", artist.id);
+        setArtist(artist);
+    }
+
     //10s refresh token data
-    const refreshRate = 10000;
+    // const refreshRate = 10000;
 
     const refreshUserData = (user: Consumer) => {
         const c = new Consumer(
@@ -166,17 +184,32 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         editUser(c);
     }
 
-    const usc = { user: user, setUser: editUser, barState: { bar: bar, setBar: editBar }, abortController: abortController };
+    const usc: UserSessionContextType = { user: user, setUser: editUser, barState: { bar: bar, setBar: editBar }, artistState: { artist: artist, setArtist: editArtist }, abortController: abortController };
 
     const setup = async () => {
-        const queryParameters = new URLSearchParams(window.location.search)
-        const barid = queryParameters.get("id") ?? cookies.get("bar_session");
+        const queryParameters = new URLSearchParams(window.location.search);
 
-        if (barid) cookies.set("bar_session", barid);
+        const pathname = window.location.pathname;
 
-        const bar = await initBar(barid);
+        let barid = cookies.get("bar_session") ?? undefined;
+        let artistid = cookies.get("artist_session") ?? undefined;
 
-        if (bar) setBar(bar);
+        if (pathname === "/bar") {
+            barid = queryParameters.get("id") ?? barid;
+            if (barid) cookies.set("bar_session", barid);
+        } else if (pathname === "/artist") {
+            artistid = queryParameters.get("id") ?? artist;
+            if (artistid) cookies.set("artist_session", artistid);
+        }
+
+        if (barid) {
+            const bar = await initBar(barid);
+            if (bar) setBar(bar);
+        }
+        if (artistid) {
+            const artist = await initArtist(artistid);
+            if (artist) setArtist(artist);
+        }
 
         if (!getStored("refresh_token") || !getStored("access_token")) {
             if (usc.user.access_token) {
