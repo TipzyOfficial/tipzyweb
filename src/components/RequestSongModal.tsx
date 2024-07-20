@@ -5,7 +5,7 @@ import './Song.css'
 import { router } from "../App";
 import { artistsStringListToString } from "./Song";
 import PaymentSetup from "./PaymentSetup";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
 import { fetchWithToken } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
@@ -13,15 +13,18 @@ import { useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
+import '../App.css'
 
-export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any }) {
+export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
 
-    const [price, setPrice] = useState<number | undefined>(undefined);
+    const price = 100;
+
+    // const [price, setPrice] = useState<number>(100);
 
     const getPrice = async () => {
-        setPrice(props.playable?.minPrice);
+        // setPrice(props.playable?.minPrice);
 
         // const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
         //     business_id: userContext.barState.bar?.id
@@ -33,11 +36,15 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
     }
 
 
-    const sendRequest = async (): Promise<number> => {
+    useEffect(() => {
+        console.log("everything rerendered")
+    })
+
+    const sendRequest = async (price: number): Promise<number> => {
         if (!props.playable) return 0;
 
         return await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
-            price: 100
+            price: price
         })).then(response => response.json()).then(json => {
             console.log("json: ", json)
             if (json.status === 200) return 1;
@@ -52,29 +59,29 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
         });
     }
 
-    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={price} getPrice={getPrice} sendRequest={sendRequest} />
+    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={price} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable />
 }
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
 
-    const [price, setPrice] = useState<number | undefined>(undefined);
+    // const [price, setPrice] = useState<number | undefined>(undefined);
 
-    const getPrice = async () => {
-        setPrice(undefined);
+    // const getPrice = async () => {
+    //     setPrice(undefined);
 
-        const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-            business_id: userContext.barState.bar?.id
-        })).catch(e => { throw e });
+    //     const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+    //         business_id: userContext.barState.bar?.id
+    //     })).catch(e => { throw e });
 
-        const json = await response.json();
+    //     const json = await response.json();
 
-        setPrice(json.Dynamic_price);
-    }
+    //     setPrice(json.Dynamic_price);
+    // }
 
 
-    const sendRequest = async (): Promise<number> => {
+    const sendRequest = async (price: number): Promise<number> => {
         if (!userContext.barState.bar) return 0;
 
         return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
@@ -98,21 +105,22 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             return 0;
         });
     }
-    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={price} getPrice={getPrice} refreshRequests={props.refreshRequests} />
+    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={undefined} getPrice={async () => { }} refreshRequests={props.refreshRequests} />
 }
 
-function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: () => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void> }) {
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number) => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void>, playable?: boolean }) {
     const dims = useFdim() / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
-
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
+    const [masterPrice, setMasterPrice] = useState(props.price);
 
     const data = { selectedSong: song, ...props.data }
 
-    const sendRequestClose = async () => {
-        const r = await props.sendRequest();
+    const sendRequestClose = async (price: number | undefined) => {
+        if (!price) return;
+        const r = await props.sendRequest(price);
         if (r === 1) {
             setSuccess(true);
             if (props.refreshRequests)
@@ -152,20 +160,20 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Container fluid>
                         <Row className="justify-content-md-center">
                             <Col>
-                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later.</Modal.Body>
+                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later. {"\n"}<span style={{ fontWeight: "bold" }}>Your charge: ${masterPrice ? (masterPrice / 100).toFixed(2) : "undefined"}</span></Modal.Body>
                                 {success === true ?
                                     <>
                                         <div style={{ paddingTop: padding }}></div>
                                         <TZButton
                                             fontSize={Math.min(30, dims / 7)}
                                             completed={success}
-                                            title={"$2.00"}
+                                            title={masterPrice ? `$${(masterPrice / 100).toFixed(2)}` : ""}
                                             backgroundColor={success ? Colors.green : success === false ? Colors.red : undefined}
                                         />
                                     </>
 
                                     :
-                                    <PaymentSetup handleSubmit={() => sendRequestClose()} />
+                                    <PaymentSetup handleSubmit={() => sendRequestClose(masterPrice)} />
                                 }
                             </Col>
                         </Row>
@@ -177,6 +185,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
     function RequestScreen() {
         const [disabled, setDisabled] = useState(false);
+        const [price, setPrice] = useState(masterPrice);
 
         const checkStripe = async (): Promise<boolean | null> => {
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
@@ -188,15 +197,16 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 }).catch((e: Error) => { console.log(e); return null });
         }
 
-        async function onRequestClick() {
+        async function onRequestClick(price: number | undefined) {
             setDisabled(true);
+            setMasterPrice(price);
             const hasStripe = await checkStripe();
             if (hasStripe === null) {
                 console.log("Error getting Stripe. Are you sure you're logged in?")
             }
             else if (!hasStripe) setPaymentScreenVisible(true);
             else {
-                sendRequestClose();
+                sendRequestClose(price);
             }
         }
 
@@ -222,20 +232,38 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             <Modal.Footer>
                 <Container fluid>
                     <Row className="justify-content-md-center">
-                        <Col style={{ display: 'flex', justifyContent: 'center' }}>
-                            <div>
-                                <TZButton
-                                    fontSize={Math.min(30, dims / 7)}
-                                    loading={disabled || props.price === undefined}
-                                    completed={success}
-                                    title={props.price ? `$${(props.price / 100).toFixed(2)}` : ""}
-                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
-                                    onClick={() => onRequestClick()} />
+                        <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column" }}>
+                                <span>Choose how much to pitch in for this song!</span>
+                                <div style={{ width: "80%", maxWidth: 400 }}>
+                                    <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider" />
+                                </div>
                             </div>
+                        </Modal.Body>
+                    </Row>
+                    <Row className="justify-content-md-center">
+                        <Col style={{ display: 'flex', justifyContent: 'center' }}>
+                            {props.playable ?
+                                <TZButton
+                                    width={"auto"}
+                                    fontSize={Math.min(30, dims / 7)}
+                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
+                                    onClick={() => onRequestClick(price)} />
+                                :
+                                <TZButton
+                                    width={"auto"}
+                                    fontSize={Math.min(30, dims / 7)}
+                                    loading={disabled || price === undefined}
+                                    completed={success}
+                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
+                                    onClick={() => onRequestClick(price)} />
+                            }
                         </Col>
                     </Row>
                     <Row className="justify-content-md-center">
-                        <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>You'll only be charged for requests that a DJ accepts.</Modal.Body>
+                        <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>You'll only be charged for requests that are accepted.</Modal.Body>
                     </Row>
                 </Container>
             </Modal.Footer>
@@ -243,13 +271,23 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         );
     }
 
+    const getPrice = async () => {
+        setMasterPrice(undefined);
 
+        const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+            business_id: userContext.barState.bar?.id
+        })).catch(e => { throw e });
+
+        const json = await response.json();
+
+        setMasterPrice(json.Dynamic_price);
+    }
 
     return (
         <Modal
             dialogClassName="App-modal"
             show={props.show} onShow={() => {
-                props.getPrice();
+                if (!props.playable) getPrice()
                 console.log(props.song)
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);

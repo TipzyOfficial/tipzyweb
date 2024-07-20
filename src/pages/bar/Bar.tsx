@@ -31,6 +31,7 @@ import FlatList from "flatlist-react/lib";
 import { fetchNoToken } from "../../lib/serverinfo";
 import defaultBackground from "../../assets/default_background.png"
 import TZButton from "../../components/TZButton";
+import TopBar from "../../components/TopBar";
 
 const utf8Encode = new TextEncoder();
 
@@ -307,24 +308,14 @@ export default function Bar() {
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top" style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
                 <DisableRequests show={!bar.allowingRequests} bar={bar} />
-                <div ref={topBarRef} style={{
-                    flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
-                    WebkitBackdropFilter: 'blur(5px)',
-                    backdropFilter: 'blur(5px)',
-                }}>
-                    <div style={{
-                        flex: 1,
-                        display: 'flex', alignItems: 'center',
-                        padding: padding,
-                        cursor: 'pointer',
-                        // opacity: 0.8,
-                    }} onClick={() => router.navigate('/code')}>
-                        <FontAwesomeIcon className="App-backarrow" icon={faArrowLeft} ></FontAwesomeIcon>
-                        {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
-                    </div>
-                    <div style={{ flex: 2, justifyContent: 'flex-end', display: 'flex' }}>
-                        <ProfileButton style={{ position: 'relative', top: undefined, right: undefined, padding: padding / 2 }} />
-                    </div>
+                <div ref={topBarRef}
+                    style={{
+                        flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
+                        WebkitBackdropFilter: 'blur(5px)',
+                        backdropFilter: 'blur(5px)',
+                    }}>
+                    <TopBar />
+
                 </div>
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                     <div style={{

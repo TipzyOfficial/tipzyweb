@@ -131,7 +131,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     )
 }
 
-export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any }) {
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, refreshRequests?: () => Promise<void> }) {
     const songDims = props.dims;
     let initRQS = undefined;
     try {
@@ -214,7 +214,7 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                 renderItem={(item, index) => <RenderItem key={item.id + "_index" + index} item={item} index={index} />}
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
-            <RequestPlayableModal playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} />
+            <RequestPlayableModal playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} refreshRequests={props.refreshRequests} />
             {/* </div> */}
         </>
     )

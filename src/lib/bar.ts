@@ -23,5 +23,5 @@ export type LiveArtistType = {
   description?: string;
   image_url?: string;
   minPrice: number;
-  playables: PlayableType[];
+  // playables: PlayableType[];
 }

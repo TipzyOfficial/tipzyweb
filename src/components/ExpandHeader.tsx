@@ -3,15 +3,24 @@ import { Spinner } from "react-bootstrap";
 import { faChevronDown as faDown, faChevronUp as faUp, } from "@fortawesome/free-solid-svg-icons";
 import { padding } from "../lib/Constants";
 import { useState } from "react";
+import { useCallbackRef } from "../lib/utils";
 
-const ExpandHeader = (props: { children?: JSX.Element, zI: number, onClick?: () => void, expanded?: boolean, loading?: boolean, text: string, height: number, initialValue?: boolean }) => {
+const ExpandHeader = (props: { children?: JSX.Element, zI: number, onClick?: () => void, expanded?: boolean, loading?: boolean, text: string, height: number, initialValue?: boolean, scrollToPosition?: boolean }) => {
     const [expanded, setExpanded] = useState(props.initialValue ?? false);
 
-    const defaultOnClick = () => setExpanded(!expanded)
+    const [header, headerRef] = useCallbackRef<HTMLDivElement>();
+
+    const defaultOnClick = () => {
+        console.log(header?.getBoundingClientRect().y);
+        if (props.scrollToPosition)
+            window.scrollTo({ top: header?.getBoundingClientRect().y ?? 100 })
+        setExpanded(!expanded);
+    }
 
     return (
         <>
             <div onClick={props.onClick ?? defaultOnClick}
+                ref={headerRef}
                 style={{
                     width: "100%",
                     boxShadow: '0px 5px 5px rgba(23, 23, 30, 0.5)',
