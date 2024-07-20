@@ -4,7 +4,7 @@ import { fetchNoToken } from "../../lib/serverinfo";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
 import { router } from "../../App";
 import { useSearchParams } from "react-router-dom";
-import { getCookies, useCallbackRef } from "../../lib/utils";
+import { getCookies, useCallbackRef, useInterval } from "../../lib/utils";
 import { Spinner } from "react-bootstrap";
 import { Colors, padding, useFdim } from "../../lib/Constants";
 import { NotFoundPage } from "../bar/NotFoundPage";
@@ -14,6 +14,7 @@ import FlatList from "flatlist-react/lib";
 import { PlayableList } from "../../components/Song";
 import ToggleTab from "../../components/ToggleTab";
 import ExpandHeader from "../../components/ExpandHeader";
+import _ from "lodash"
 
 const LoadingScreen = () =>
     <div className="App-header">
@@ -22,7 +23,7 @@ const LoadingScreen = () =>
         <span>Loading artist information...</span>
     </div>;
 
-export const fetchArtistInfo = async (userContext: UserSessionContextType, id: number, noSetBar?: boolean) => {
+export const fetchArtistInfo = async (userContext: UserSessionContextType, id: number, noSetArtist: boolean, setPlayables?: (p: PlayableType[]) => void) => {
     const artist: LiveArtistType | undefined = await fetchNoToken(`tipper/liveartist/${id}`, 'GET').then(r => r.json())
         .then(json => {
             const pdata = json.playables;
@@ -75,8 +76,9 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
                 minPrice: json.min_price,
                 playables: playables,
             }
-
-            userContext.artistState.setArtist(a)
+            if (noSetArtist)
+                userContext.artistState.setArtist(a);
+            if (setPlayables) setPlayables(playables);
             return a;
         }).catch((e: Error) => {
             console.log("Error loading your artist: " + e.message);
@@ -97,16 +99,68 @@ export default function Artist() {
     const artist = usc.artistState.artist;
     const cookies = getCookies();
     const id = searchParams.get("id") ?? (usc.artistState.artist ? usc.artistState.artist.id : cookies.get("artist_session"));
+    const [playables, setPlayables] = useState<PlayableType[]>([])
+
+    const refreshRate = 5000;
 
     const fdim = useFdim();
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
 
     const [topBar, topBarRef] = useCallbackRef<HTMLDivElement>();
-    const [expand, setExpand] = useState(true);
+    const [expand, setExpand] = useState(false);
 
-    const allRefresh = (indicator: boolean) => {
-        // console.log("refreshing data...")
+    const refreshModified = (indicator: boolean) => {
+        fetchNoToken(`liveartist/set/modified?live_artist_id=${id}`, 'GET').then(r => r.json()).then(json => {
+            // console.log(json.d);
+            const pdata = json.data;
+
+            if (!artist) return;
+
+            const playables: Map<number, PlayableType> = new Map();
+
+            artist.playables.forEach(e => {
+                playables.set(e.id, e);
+            })
+
+            let mods = 0; // # of modifications done
+
+            pdata.forEach((s: any) => {
+                const id = s.id;
+                const e = s.song_json;
+                const song: SongType = {
+                    title: e.name,
+                    albumart: e.images?.thumbnail ?? "",
+                    albumartbig: e.images?.teaser ?? "",
+                    id: e.id,
+                    explicit: e.explicit,
+                    artists: e.artists
+                }
+
+                const p: PlayableType = {
+                    artistId: s.live_artist,
+                    active: s.active,
+                    id: id,
+                    position: s.position,
+                    song: song,
+                    amountBid: s.total_contributed,
+                    minPrice: s.min_price,
+                    status: s.status,
+                }
+
+                playables.set(id, p);
+            });
+
+            const playablesArray = new Array<PlayableType>();
+
+            playables.forEach((e) => {
+                playablesArray.push(e)
+            });
+
+            setPlayables(playablesArray);
+        });
     }
+
+    useInterval(() => { refreshModified(false) }, refreshRate)
 
     useEffect(() => {
         if (!id) {
@@ -115,16 +169,16 @@ export default function Artist() {
         }
         if (usc.artistState.artist && id === usc.artistState.artist.id.toString() && usc.artistState.artist.allowingRequests) {
             setReady(true);
-            fetchArtistInfo(usc, id);
+            fetchArtistInfo(usc, id, false, setPlayables);
             return;
         }
-        fetchArtistInfo(usc, id).then(() => setReady(true))
+        fetchArtistInfo(usc, id, false, setPlayables).then(() => setReady(true))
             .catch(e => {
                 console.log("error", e)
                 usc.artistState.setArtist(undefined)
                 setReady(true);
             });
-        allRefresh(true);
+        // allRefresh(true);
     }, [])
 
     if (ready === false)
@@ -143,15 +197,15 @@ export default function Artist() {
             <div className="App-body-top" style={artist.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
                 {usc.artistState.artist?.name}
                 <div style={{ width: "100%", position: "sticky", top: 0, zIndex: 4 }} ref={topBarRef}>
-                    <ExpandHeader zI={4} height={0} text="Hot Right Now" onClick={() => setExpand(!expand)} expanded={expand} />
+                    <ExpandHeader zI={4} height={0} text="Sent to Artist" onClick={() => setExpand(!expand)} expanded={expand} />
                 </div>
                 {expand ?
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={listed} dims={songDims} />
-                    </div> : <></>}
-                <ExpandHeader zI={4} height={topBar?.clientHeight ?? 0} text="Sent To Artist">
-                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                         <PlayableListMemo playables={pending} dims={songDims} />
+                    </div> : <></>}
+                <ExpandHeader zI={4} height={topBar?.clientHeight ?? 0} text="Hot Right Now" initialValue={true}>
+                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                        <PlayableListMemo playables={listed} dims={songDims} />
                     </div>
                 </ExpandHeader>
                 <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0) * 2} text="Already Played">

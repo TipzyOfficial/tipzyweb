@@ -157,31 +157,46 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
         const index = props.index;
         const ratio = item.amountBid / item.minPrice;
         const complete = ratio >= 1
+        const status = props.item.status;
+
+        const disabled = status === "ACCEPTED" || status === "REJECTED" || status === "REFUNDED"
 
         return (
             <>
                 <div style={{ paddingBottom: padding / 4 }}></div>
                 <div style={{
-                    width: "100%", position: "relative", cursor: "pointer", borderRadius: 5, overflow: 'hidden',
+                    width: "100%", position: "relative", cursor: disabled ? undefined : "pointer", borderRadius: 5, overflow: 'hidden',
                     // boxShadow: complete ? `0px 0px 5px ${Colors.secondaryDark}` : undefined
+                    opacity: disabled ? 0.5 : 1
 
                 }} onClick={() => {
-                    setRequestedPlayable(item);
-                    setRequestVisible(true);
+                    if (!disabled) {
+                        setRequestedPlayable(item);
+                        setRequestVisible(true);
+                    }
                 }}>
-                    {complete ?
-                        <div className="App-animated-gradient" style={{
-                            position: "absolute", left: 0, height: "100%", width: `100%`, backgroundColor: Colors.secondaryDark, zIndex: 0
-                        }} />
-                        : <div className="App-animated-gradient" style={{
-                            position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
-                        }} />}
-                    <div style={{ height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2, backgroundColor: "#fff1" }}>
+                    {disabled ?
+                        <></>
+                        :
+                        complete ?
+                            <div className="App-animated-gradient" style={{
+                                position: "absolute", left: 0, height: "100%", width: `100%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                            }} />
+                            : <div className="App-animated-gradient" style={{
+                                position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                            }} />}
+                    <div style={{
+                        height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2,
+                        backgroundColor: status === "ACCEPTED" ? Colors.secondaryDark : "#fff1"
+                    }}>
                         <div style={{ position: 'relative', flex: 2.5 }}>
                             <Song song={item.song} dims={songDims} key={item.id + "_index" + index} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flex: 1, minWidth: 50, paddingLeft: 5 }}>
-                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>{numberToPrice(item.amountBid)}/{numberToPrice(item.minPrice)}</span>
+                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>
+                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") : (numberToPrice(item.amountBid)) + "/" + (numberToPrice(item.minPrice))}
+                            </span>
+
                         </div>
                     </div>
                     {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}

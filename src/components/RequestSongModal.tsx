@@ -143,7 +143,6 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     }
 
     function PaymentScreen() {
-
         return (
             <>
                 <Modal.Header closeButton>
