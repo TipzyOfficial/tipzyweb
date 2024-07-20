@@ -282,6 +282,8 @@ export default function Bar() {
     useInterval(() => allRefresh(false), timeout, 500);
 
     useEffect(() => {
+        getCookies().remove("artist_session");
+
         if (!id) {
             router.navigate("/code");
             return;

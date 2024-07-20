@@ -251,6 +251,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     width={"auto"}
                                     fontSize={Math.min(30, dims / 7)}
                                     title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    loading={disabled || price === undefined}
+                                    completed={success}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick(price)} />
                                 :

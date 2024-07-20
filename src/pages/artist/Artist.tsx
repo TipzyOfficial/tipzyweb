@@ -105,14 +105,16 @@ export default function Artist() {
     useInterval(refreshModified, refreshRate)
 
     useEffect(() => {
+        getCookies().remove("bar_session");
 
         if (!id) {
             router.navigate("/code");
             return;
         }
         if (usc.artistState.artist && id === usc.artistState.artist.id.toString() && usc.artistState.artist.allowingRequests) {
-            setReady(true);
-            fetchArtistInfo(usc, id, false, setPlayables);
+            fetchArtistInfo(usc, id, false, setPlayables).then(() => {
+                setReady(true);
+            });
             return;
         }
         fetchArtistInfo(usc, id, false, setPlayables).then(() => setReady(true))
@@ -172,7 +174,7 @@ export default function Artist() {
                     <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Sent to Artist" onClick={() => {
                         // topExpand?.scrollIntoView(true)
                         setExpand(!expand);
-                        if (!expand)
+                        if (expand)
                             window.scrollTo({ top: (topContent?.offsetTop ?? 0) - (topBar?.clientHeight ?? 0) - (topExpand?.clientHeight ?? 0) })
                         console.log(topContent?.offsetTop);
                     }} expanded={expand} />
@@ -220,8 +222,6 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
 
             const playables: PlayableType[] = []
 
-            console.log(pdata)
-
             if (setPlayables)
                 pdata.forEach((s: any) => {
                     const e = s.song_json;
@@ -261,6 +261,7 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
             if (noSetArtist)
                 userContext.artistState.setArtist(a);
             if (setPlayables) setPlayables(playables);
+
             return a;
         }).catch((e: Error) => {
             console.log("Error loading your artist: " + e.message);
