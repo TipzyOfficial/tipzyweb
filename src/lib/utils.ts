@@ -8,7 +8,7 @@ function isMobile() {
 }
 
 export function numberToPrice(n: number): string {
-    return `$${(n / 100).toFixed(2)}`;
+    return `${(n / 100).toFixed(2)}`;
 }
 
 export function shuffleWithUserID(array: any[], user: Consumer) {

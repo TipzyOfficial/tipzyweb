@@ -8,19 +8,21 @@ import { useCallbackRef } from "../lib/utils";
 const ExpandHeader = (props: { children?: JSX.Element, zI: number, onClick?: () => void, expanded?: boolean, loading?: boolean, text: string, height: number, initialValue?: boolean, scrollToPosition?: boolean }) => {
     const [expanded, setExpanded] = useState(props.initialValue ?? false);
 
-    const [header, headerRef] = useCallbackRef<HTMLDivElement>();
+    const [content, contentRef] = useCallbackRef<HTMLDivElement>();
 
     const defaultOnClick = () => {
-        console.log(header?.getBoundingClientRect().y);
-        if (props.scrollToPosition)
-            window.scrollTo({ top: header?.getBoundingClientRect().y ?? 100 })
+        if (!expanded) {
+            if (props.scrollToPosition) {
+                console.log("content", (content?.offsetTop ?? 0) - props.height)
+                window.scrollTo({ top: (content?.offsetTop ?? 0) - props.height })
+            }
+        }
         setExpanded(!expanded);
     }
 
     return (
         <>
             <div onClick={props.onClick ?? defaultOnClick}
-                ref={headerRef}
                 style={{
                     width: "100%",
                     boxShadow: '0px 5px 5px rgba(23, 23, 30, 0.5)',
@@ -47,7 +49,9 @@ const ExpandHeader = (props: { children?: JSX.Element, zI: number, onClick?: () 
                         )}
                 </div>
             </div>
-            {(!props.loading && (props.expanded ?? expanded)) ? props.children : <></>}
+            <div ref={contentRef} style={{ width: '100%' }}>
+                {(!props.loading && (props.expanded ?? expanded)) ? props.children : <></>}
+            </div>
         </>
     )
 }

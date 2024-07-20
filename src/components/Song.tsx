@@ -186,17 +186,18 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                                 position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
                             }} />}
                     <div style={{
-                        height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2,
-                        backgroundColor: status === "ACCEPTED" ? Colors.secondaryDark : "#fff1"
+                        height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2, justifyContent: 'space-between',
+                        backgroundColor: status === "ACCEPTED" ? Colors.secondaryDark : "#fff1", //flexWrap: 'wrap'
                     }}>
-                        <div style={{ position: 'relative', flex: 2.5 }}>
+                        <div style={{ position: 'relative', flexGrow: 0, flexShrink: 1 }}>
                             <Song song={item.song} dims={songDims} key={item.id + "_index" + index} />
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flex: 1, minWidth: 50, paddingLeft: 5 }}>
-                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>
-                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") : (numberToPrice(item.amountBid)) + "/" + (numberToPrice(item.minPrice))}
+                        <div style={{
+                            display: 'flex', justifyContent: 'flex-end', alignItems: 'center', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1
+                        }}>
+                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
+                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") : "$" + (numberToPrice(item.amountBid)) + "/" + (numberToPrice(item.minPrice))}
                             </span>
-
                         </div>
                     </div>
                     {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}

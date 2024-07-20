@@ -41,7 +41,7 @@ export default function Artist() {
 
     const [topBar, topBarRef] = useCallbackRef<HTMLDivElement>();
     const [topExpand, topExpandRef] = useCallbackRef<HTMLDivElement>();
-    const [header, headerRef] = useCallbackRef<HTMLDivElement>();
+    const [topContent, topContentRef] = useCallbackRef<HTMLDivElement>();
 
     const [expand, setExpand] = useState(false);
 
@@ -122,7 +122,7 @@ export default function Artist() {
                 setReady(true);
             });
         // allRefresh(true);
-    }, [])
+    }, []);
 
     if (ready === false)
         return <LoadingScreen />
@@ -148,7 +148,7 @@ export default function Artist() {
                     }}>
                     <TopBar />
                 </div>
-                <div ref={headerRef}
+                <div
                     style={{
                         width: '100%', minHeight: minHeaderHeight,
                         objectFit: 'cover', backgroundImage: (artist.image_url && artist.image_url.length > 0) ? `url(${artist.image_url})` : `url(${defaultBackground})`,
@@ -170,15 +170,20 @@ export default function Artist() {
                 </div>
                 <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
                     <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Sent to Artist" onClick={() => {
-                        if (expand === false)
-                            window.scrollTo({ top: topExpand?.getBoundingClientRect().y ?? 0 })
+                        // topExpand?.scrollIntoView(true)
                         setExpand(!expand);
+                        if (!expand)
+                            window.scrollTo({ top: (topContent?.offsetTop ?? 0) - (topBar?.clientHeight ?? 0) - (topExpand?.clientHeight ?? 0) })
+                        console.log(topContent?.offsetTop);
                     }} expanded={expand} />
                 </div>
-                {expand ?
+                <div ref={topContentRef} style={{ width: '100%' }}>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={pending} dims={songDims} refreshRequests={refreshModified} />
-                    </div> : <></>}
+                        {expand ?
+                            <PlayableListMemo playables={pending} dims={songDims} refreshRequests={refreshModified} />
+                            : <></>}
+                    </div>
+                </div>
                 <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                         <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} />
