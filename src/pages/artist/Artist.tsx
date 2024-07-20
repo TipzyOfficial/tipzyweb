@@ -6,7 +6,7 @@ import { router } from "../../App";
 import { useSearchParams } from "react-router-dom";
 import { getCookies, useCallbackRef, useInterval } from "../../lib/utils";
 import { Spinner } from "react-bootstrap";
-import { Colors, padding, useFdim } from "../../lib/Constants";
+import { Colors, padding, radius, useFdim } from "../../lib/Constants";
 import { NotFoundPage } from "../bar/NotFoundPage";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { PlayableType, SongType } from "../../lib/song";
@@ -20,6 +20,7 @@ import defaultBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProfileButton from "../../components/ProfileButton";
 import TopBar from "../../components/TopBar";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 export default function Artist() {
     const [searchParams] = useSearchParams();
@@ -142,6 +143,8 @@ export default function Artist() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top" style={artist.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
+                <DisableRequests show={!artist.allowingRequests} artist={artist} />
+
                 <div ref={topBarRef}
                     style={{
                         flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
@@ -250,7 +253,7 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
             const a: LiveArtistType = {
                 id: json.id,
                 name: json.title,
-                allowingRequests: json.active,
+                allowingRequests: json.allowing_requests,
                 instagramUrl: json.artist_instagram_url,
                 spotifyUrl: json.artist_spotify_url,
                 description: json.description,
@@ -277,3 +280,20 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
 
 
 const PlayableListMemo = memo(PlayableList)
+
+
+const DisableRequests = (props: { show: boolean, artist: LiveArtistType }) => {
+    return (
+        props.show ?
+            <div className="App-bluroverlay">
+                <span className="App-subtitle" style={{ color: Colors.primaryRegular, }}>{"Sorry!"}</span>
+                <span className="App-normaltext" style={{ textAlign: 'center', padding: padding }}>{props.artist.name} isn't live at the moment.</span>
+                <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
+                    router.navigate("/code");
+                }}>
+                    <FontAwesomeIcon color={Colors.primaryRegular} icon={faArrowLeft}></FontAwesomeIcon>
+                    <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', paddingLeft: 5 }}>Back to search</span>
+                </div>
+            </div> : <></>
+    )
+}
