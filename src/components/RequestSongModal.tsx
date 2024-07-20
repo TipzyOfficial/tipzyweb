@@ -231,16 +231,19 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             </Modal.Body>
             <Modal.Footer>
                 <Container fluid>
-                    <Row className="justify-content-md-center">
-                        <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column" }}>
-                                <span>Choose how much to pitch in for this song!</span>
-                                <div style={{ width: "80%", maxWidth: 400 }}>
-                                    <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider" />
+                    {props.playable ?
+
+                        <Row className="justify-content-md-center">
+                            <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column" }}>
+                                    <span>Choose how much to pitch in for this song!</span>
+                                    <div style={{ width: "80%", maxWidth: 400 }}>
+                                        <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider" />
+                                    </div>
                                 </div>
-                            </div>
-                        </Modal.Body>
-                    </Row>
+                            </Modal.Body>
+                        </Row> : <></>
+                    }
                     <Row className="justify-content-md-center">
                         <Col style={{ display: 'flex', justifyContent: 'center' }}>
                             {props.playable ?
