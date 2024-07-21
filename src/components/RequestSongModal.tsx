@@ -3,27 +3,36 @@ import { Colors, padding, useFdim } from "../lib/Constants";
 import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
-import { artistsStringListToString } from "./Song";
+import Song, { artistsStringListToString } from "./Song";
 import PaymentSetup from "./PaymentSetup";
 import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
 import { fetchWithToken } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
-import { useInterval } from "../lib/utils";
+import { numberToPrice, useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
 import '../App.css'
 
 export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
-    const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
+    // const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
 
-    const price = 100;
+    const minPrice = props.playable?.minPrice;
+    const amountBid = props.playable?.amountBid;
+
+    const p = minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100;
+
+    // const [price, setPrice] = useState(p)
+
+
+    // console.log("price", p, minPrice, amountBid, minPrice !== undefined, amountBid !== undefined)
 
     // const [price, setPrice] = useState<number>(100);
 
     const getPrice = async () => {
+        // setPrice(minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100);
         // setPrice(props.playable?.minPrice);
 
         // const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
@@ -59,7 +68,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
         });
     }
 
-    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={price} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable />
+    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={p} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
 }
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
@@ -108,13 +117,16 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={undefined} getPrice={async () => { }} refreshRequests={props.refreshRequests} />
 }
 
-function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number) => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void>, playable?: boolean }) {
-    const dims = useFdim() / 2;
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number) => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
+
+    const fdim = useFdim();
+    const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
     const [masterPrice, setMasterPrice] = useState(props.price);
+    // console.log(masterPrice);
 
     const data = { selectedSong: song, ...props.data }
 
@@ -210,38 +222,57 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             }
         }
 
+
+        const sum = (props.contributed ?? 0) + (price ?? 0);
+
         return (<>
-            <Modal.Header className="m-auto" style={{ width: "100%" }}>
+            {!props.playable ? <Modal.Header className="m-auto" style={{ width: "100%" }}>
                 <Modal.Title style={{ color: 'white', width: "100%", textAlign: 'center' }} className="m-auto">Request a song</Modal.Title>
-            </Modal.Header>
+            </Modal.Header> : <></>}
             <Modal.Body>
-                <Container fluid>
-                    <Row className="justify-content-md-center">
-                        <Col style={{ display: 'flex', justifyContent: 'center' }}>
-                            {song.albumart ? <img style={{ objectFit: 'contain' }} src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
-                        </Col>
-                    </Row>
-                    <Row className="justify-content-md-center">
-                        <Col>
-                            <Modal.Title style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>{song.title}</Modal.Title>
-                            <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>{artistsStringListToString(song.artists)}</Modal.Body>
-                        </Col>
-                    </Row>
-                </Container>
-            </Modal.Body>
+                {props.playable ?
+                    <Container fluid>
+                        <Row className="justify-content-md-center">
+                            <Col style={{ display: 'flex', justifyContent: 'flex-end', alignItems: "center" }}>
+                                {song.albumart ? <img style={{ objectFit: 'contain' }} src={song.albumartbig ?? song.albumart} width={dims * 0.7} height={dims * 0.7} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
+                            </Col>
+                            <Col>
+                                <Modal.Title style={{ textAlign: "left", paddingTop: padding, color: 'white', fontSize: Math.max(dims / 10, 20) }}>{song.title}</Modal.Title>
+                                <Modal.Body style={{ textAlign: "left", padding: 0, color: 'white' }}>{artistsStringListToString(song.artists)}</Modal.Body>
+                            </Col>
+                        </Row>
+                    </Container>
+                    :
+                    <Container fluid>
+                        <Row className="justify-content-md-center">
+                            <Col style={{ display: 'flex', justifyContent: 'center' }}>
+                                {song.albumart ? <img style={{ objectFit: 'contain' }} src={song.albumartbig ?? song.albumart} width={dims} height={dims} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
+                            </Col>
+                        </Row>
+                        <Row className="justify-content-md-center">
+                            <Col>
+                                <Modal.Title style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>{song.title}</Modal.Title>
+                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>{artistsStringListToString(song.artists)}</Modal.Body>
+                            </Col>
+                        </Row>
+                    </Container>}
+            </Modal.Body >
             <Modal.Footer>
                 <Container fluid>
                     {props.playable ?
-
                         <Row className="justify-content-md-center">
-                            <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}>
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column" }}>
-                                    <span>Choose how much to pitch in for this song!</span>
-                                    <div style={{ width: "80%", maxWidth: 400 }}>
-                                        <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider" />
-                                    </div>
+                            {/* <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}> */}
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
+                                <span>Choose how much to pitch in for this song!</span>
+                                <div style={{ width: "60%", maxWidth: 400, padding: padding }}>
+                                    <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
+                                        style={{
+                                            backgroundImage: `linear-gradient(to right, #5ca1c7 0%, #5ca1c7 ${((price ?? 100) - 100) / 9}%, #fff3 ${((price ?? 100) - 100) / 9}%, #fff3 100%)`
+                                        }}
+                                    />
                                 </div>
-                            </Modal.Body>
+                            </div>
+                            {/* </Modal.Body> */}
                         </Row> : <></>
                     }
                     <Row className="justify-content-md-center">
@@ -249,8 +280,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                             {props.playable ?
                                 <TZButton
                                     width={"auto"}
-                                    fontSize={Math.min(30, dims / 7)}
-                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    // fontSize={Math.min(30, dims / 7)}
+                                    title={price ? `Request $${(price / 100).toFixed(2)}` : ""}
                                     loading={disabled || price === undefined}
                                     completed={success}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
@@ -268,7 +299,39 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                         </Col>
                     </Row>
                     <Row className="justify-content-md-center">
-                        <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>You'll only be charged for requests that are accepted.</Modal.Body>
+                        {props.playable ?
+                            <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
+                                <div style={{
+                                    width: "100%", maxWidth: 300, //display: "flex", alignItems: 'center', flexDirection: 'column'  
+
+                                }}>
+                                    <div
+                                        // className="App-animated-gradient-fast-light"
+                                        style={{
+                                            flex: 1,
+                                            overflow: 'hidden', borderRadius: 20, backgroundColor: "#fff1", //outlineColor: "#fff", outlineWidth: 2, outlineStyle: 'solid'
+                                            boxShadow: sum / (props.minPrice ?? 1) > 1 ? '0px 0px 7px #fff8' : '0px 0px 0px #fff0',
+                                            transition: "box-shadow .2s"
+                                        }}>
+                                        <div className={`App-animated-gradient-fast${sum / (props.minPrice ?? 1) > 1 ? "-light" : ""}`} style={{
+                                            borderRadius: 20,
+                                            height: 20,
+                                            width: `${sum / (props.minPrice ?? 1) <= 1 ? sum / (props.minPrice ?? 1) * 100 : 100}%`,
+                                        }} />
+                                    </div>
+                                    <div style={{ paddingLeft: padding }}>
+                                        <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1 }}>{priceWords(props.minPrice, props.contributed, price)}</span>
+                                    </div>
+                                </div>
+                                <span style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
+                            </Modal.Body>
+                            :
+                            <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                                <div style={{
+
+                                }}></div>
+                            </Modal.Body>
+                        }
                     </Row>
                 </Container>
             </Modal.Footer>
@@ -276,23 +339,38 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         );
     }
 
+    const priceWords = (minPrice: number | undefined, contributed: number | undefined, price: number | undefined) => {
+        console.log(minPrice, contributed, price)
+        if (minPrice === undefined || price === undefined || contributed === undefined) return "Something went wrong.";
+        if (minPrice <= contributed) return `We reached the goal–add another $${numberToPrice(price)}!`;
+        const diff = minPrice - contributed - price;
+        if (diff < 0) return `This puts us $${numberToPrice((diff) * -1)} past the goal!`
+        if (diff === 0) return `Just enough to reach the goal!`
+        if (diff > 0) return `$${numberToPrice((diff))} more to reach the goal...`
+    }
+
     const getPrice = async () => {
-        setMasterPrice(undefined);
+        if (props.playable) {
+            setMasterPrice(props.price);
+        }
+        else {
+            setMasterPrice(undefined);
 
-        const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-            business_id: userContext.barState.bar?.id
-        })).catch(e => { throw e });
+            const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+                business_id: userContext.barState.bar?.id
+            })).catch(e => { throw e });
 
-        const json = await response.json();
+            const json = await response.json();
 
-        setMasterPrice(json.Dynamic_price);
+            setMasterPrice(json.Dynamic_price);
+        }
     }
 
     return (
         <Modal
             dialogClassName="App-modal"
             show={props.show} onShow={() => {
-                if (!props.playable) getPrice()
+                getPrice();
                 console.log(props.song)
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);

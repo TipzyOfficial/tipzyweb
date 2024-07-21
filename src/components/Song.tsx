@@ -4,7 +4,7 @@ import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import FlatList from "flatlist-react/lib";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import RequestSongModal, { RequestPlayableModal } from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
@@ -131,7 +131,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     )
 }
 
-export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, refreshRequests?: () => Promise<void> }) {
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, refreshRequests?: () => Promise<void>, RQP: React.MemoExoticComponent<typeof RequestPlayableModal> }) {
     const songDims = props.dims;
     let initRQS = undefined;
     try {
@@ -215,8 +215,9 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                 renderItem={(item, index) => <RenderItem key={item.id + "_index" + index} item={item} index={index} />}
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
-            <RequestPlayableModal playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} refreshRequests={props.refreshRequests} />
             {/* </div> */}
+            <props.RQP playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} refreshRequests={props.refreshRequests} />
         </>
+
     )
 }

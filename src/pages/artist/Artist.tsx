@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProfileButton from "../../components/ProfileButton";
 import TopBar from "../../components/TopBar";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { RequestPlayableModal } from "../../components/RequestSongModal";
 
 export default function Artist() {
     const [searchParams] = useSearchParams();
@@ -30,6 +31,7 @@ export default function Artist() {
     const cookies = getCookies();
     const id = searchParams.get("id") ?? (usc.artistState.artist ? usc.artistState.artist.id : cookies.get("artist_session"));
     const [playables, setPlayables] = useState<PlayableType[]>([]);
+
     const wdim = useWindowDimensions();
     const topBarColor = Colors.background + "bc";
 
@@ -44,7 +46,7 @@ export default function Artist() {
     const [topExpand, topExpandRef] = useCallbackRef<HTMLDivElement>();
     const [topContent, topContentRef] = useCallbackRef<HTMLDivElement>();
 
-    const [expand, setExpand] = useState(false);
+    const [expand, setExpand] = useState(true);
 
     const refreshModified = async () => {
         console.log("refreshing modified")
@@ -55,10 +57,14 @@ export default function Artist() {
             if (!artist) return;
 
             const pl: Map<number, PlayableType> = new Map();
+            const pending: number[] = [];
 
             playables.forEach(e => {
                 pl.set(e.id, e);
+                if (e.status === "PENDING") pending.push(e.id);
             })
+
+            console.log("Pending before", pending)
 
             let mods = 0; // # of modifications done
 
@@ -84,11 +90,27 @@ export default function Artist() {
                     minPrice: s.min_price,
                     status: s.status,
                 }
+
+                if (pending.includes(p.id)) {
+                    console.log("includes pending:", p.status);
+                    pending.splice(pending.indexOf(p.id), 1);
+                }
+
                 if (JSON.stringify(pl.get(id)) !== JSON.stringify(p)) {
                     mods++;
                     pl.set(id, p);
                 }
             });
+
+            console.log("Pending now", pending)
+
+            pending.forEach((e) => {
+                const oldP = pl.get(e);
+                if (!oldP) return;
+                const newP: PlayableType = { ...oldP, status: "ACCEPTED" };
+                mods++;
+                pl.set(e, newP);
+            })
 
             const playablesArray = new Array<PlayableType>();
 
@@ -96,10 +118,10 @@ export default function Artist() {
                 playablesArray.push(e)
             });
 
-            if (mods !== 0) {
-                console.log("setplayables mods", mods)
-                setPlayables(playablesArray);
-            }
+            // if (mods !== 0) {
+            console.log("setplayables mods", mods)
+            setPlayables(playablesArray);
+            // }
         });
     }
 
@@ -130,11 +152,11 @@ export default function Artist() {
     if (ready === false)
         return <LoadingScreen />
     else if (artist === undefined)
-        return <NotFoundPage body="We can't find that artist...are you sure you got the right ID?" backPath="./code" />
+        return <NotFoundPage body="We can't find that artist...are you sure you got the right ID?" backPath="/code" />
 
     const sortByPrice = (a: PlayableType, b: PlayableType) => b.amountBid - a.amountBid
-    const listed = playables.filter((e) => (e.status === "LISTED_ALTERED" || e.status === "LISTED")).sort(sortByPrice);
-    const pending = playables.filter((e) => e.status === "PENDING").sort(sortByPrice);
+    const listed = playables.filter((e) => (e.status === "LISTED_ALTERED" || e.status === "LISTED" || e.status === "PENDING")).sort(sortByPrice);
+    //const pending = playables.filter((e) => e.status === "PENDING").sort(sortByPrice);
     const accepted = playables.filter((e) => e.status === "ACCEPTED").sort(sortByPrice);
     const rejected = playables.filter((e) => e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
 
@@ -174,7 +196,7 @@ export default function Artist() {
                     </div>
                 </div>
                 <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
-                    <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Sent to Artist" onClick={() => {
+                    <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Hot Right Now" onClick={() => {
                         // topExpand?.scrollIntoView(true)
                         setExpand(!expand);
                         if (expand)
@@ -185,25 +207,26 @@ export default function Artist() {
                 <div ref={topContentRef} style={{ width: '100%' }}>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                         {expand ?
-                            <PlayableListMemo playables={pending} dims={songDims} refreshRequests={refreshModified} />
+                            <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
                             : <></>}
                     </div>
                 </div>
-                <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
+                {/* <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                         <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} />
                     </div>
-                </ExpandHeader>
+                </ExpandHeader> */}
                 <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 2 + (topBar?.clientHeight ?? 0)} text="Already Played" scrollToPosition>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={accepted} dims={songDims} refreshRequests={refreshModified} />
+                        <PlayableListMemo playables={accepted} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
                     </div>
                 </ExpandHeader>
                 <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 3 + (topBar?.clientHeight ?? 0)} text="Refunded Songs" scrollToPosition>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={rejected} dims={songDims} refreshRequests={refreshModified} />
+                        <PlayableListMemo playables={rejected} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
                     </div>
                 </ExpandHeader>
+
             </div>
         </DisplayOrLoading>
 
@@ -280,6 +303,7 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
 
 
 const PlayableListMemo = memo(PlayableList)
+const RQPMmemo = memo(RequestPlayableModal)
 
 
 const DisableRequests = (props: { show: boolean, artist: LiveArtistType }) => {
