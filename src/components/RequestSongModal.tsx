@@ -329,7 +329,10 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
                                 <div style={{
 
-                                }}></div>
+                                }}>
+                                    <span style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
+
+                                </div>
                             </Modal.Body>
                         }
                     </Row>
@@ -340,13 +343,12 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     }
 
     const priceWords = (minPrice: number | undefined, contributed: number | undefined, price: number | undefined) => {
-        console.log(minPrice, contributed, price)
         if (minPrice === undefined || price === undefined || contributed === undefined) return "Something went wrong.";
         if (minPrice <= contributed) return `We reached the goal–add another $${numberToPrice(price)}!`;
         const diff = minPrice - contributed - price;
-        if (diff < 0) return `This puts us $${numberToPrice((diff) * -1)} past the goal!`
+        if (diff < 0) return `Puts us $${numberToPrice((diff) * -1)} past the goal!`
         if (diff === 0) return `Just enough to reach the goal!`
-        if (diff > 0) return `$${numberToPrice((diff))} more to reach the goal...`
+        if (diff > 0) return `$${numberToPrice((diff))} left to reach the goal...`
     }
 
     const getPrice = async () => {

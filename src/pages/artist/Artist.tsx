@@ -136,10 +136,10 @@ export default function Artist() {
                 playablesArray.push(e)
             });
 
-            // if (mods !== 0) {
-            console.log("setplayables mods", mods)
-            setPlayables(playablesArray);
-            // }
+            if (mods !== 0) {
+                // console.log("setplayables mods", mods)
+                setPlayables(playablesArray);
+            }
         });
     }
 
@@ -173,8 +173,11 @@ export default function Artist() {
         return <NotFoundPage body="We can't find that artist...are you sure you got the right ID?" backPath="/code" />
 
     const sortByPrice = (a: PlayableType, b: PlayableType) => b.amountBid - a.amountBid
-    const listed = playables.filter((e) => (e.status === "LISTED_ALTERED" || e.status === "LISTED" || e.status === "PENDING")).sort(sortByPrice);
-    //const pending = playables.filter((e) => e.status === "PENDING").sort(sortByPrice);
+    const listed = playables.filter((e) => (e.status === "LISTED_ALTERED" || e.status === "LISTED")).sort(sortByPrice);
+    const pending = playables.filter((e) => e.status === "PENDING").sort(sortByPrice);
+
+    const listedAndPending = pending.concat(listed);
+
     const accepted = playables.filter((e) => e.status === "ACCEPTED").sort(sortByPrice);
     const rejected = playables.filter((e) => e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
 
@@ -227,7 +230,7 @@ export default function Artist() {
                     <div ref={topContentRef} style={{ width: '100%' }}>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                             {expand ?
-                                <PlayableListMemo playables={listed} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                                <PlayableListMemo playables={listedAndPending} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                                 : <></>}
                         </div>
                     </div>
@@ -308,7 +311,7 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
                 minPrice: json.min_price,
                 // playables: playables,
             }
-            if (noSetArtist)
+            if (!noSetArtist)
                 userContext.artistState.setArtist(a);
             if (setPlayables) setPlayables(playables);
 
@@ -319,7 +322,8 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
         })
 
     if (!artist) {
-        userContext.artistState.setArtist(artist)
+        if (!noSetArtist)
+            userContext.artistState.setArtist(artist)
         return undefined;
     }
     return artist;

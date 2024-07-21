@@ -177,10 +177,20 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                             <Song song={item.song} dims={songDims} key={item.id + "_index" + index} />
                         </div>
                         <div style={{
-                            display: 'flex', justifyContent: 'flex-end', alignItems: 'center', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1
+                            display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1, flexDirection: "column"
                         }}>
                             <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
-                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") : "$" + (numberToPrice(item.amountBid)) + "/" + (numberToPrice(item.minPrice))}
+                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") :
+                                    <>
+                                        {/* <span className="App-smalltext">Goal: </span> */}
+                                        ${numberToPrice(item.amountBid)}
+                                    </>
+                                }
+                            </span>
+                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
+                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") :
+                                    <span className="App-smalltext">Goal: ${numberToPrice(item.minPrice)}</span>
+                                }
                             </span>
                         </div>
                     </div>
