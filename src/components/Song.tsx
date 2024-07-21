@@ -187,6 +187,7 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                             <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
                                 {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") :
                                     <>
+                                        <span className="App-smalltext" style={{ lineHeight: 1 }}>Bid: </span>
                                         ${numberToPrice(item.amountBid)}
                                     </>
                                 }

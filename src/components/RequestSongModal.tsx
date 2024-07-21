@@ -341,7 +341,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                 </div>
                                 <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1.2, paddingTop: padding }}>{priceWords(props.minPrice, props.contributed, price)}</span>
 
-                                <span className="App-smalltext" style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
+                                <span className="App-smalltext" style={{ paddingTop: padding }}>Putting in more money increases the chance an artist plays a song! If they don't, you won't be charged.</span>
                             </Modal.Body>
                             :
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>

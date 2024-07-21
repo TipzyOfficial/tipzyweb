@@ -218,9 +218,9 @@ export default function Artist() {
                             <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{artist.name}</span>
                         </div>
                     </div>
-                    <div style={{ width: "100%", paddingLeft: padding, paddingRight: padding }}>
+                    {/* <div style={{ width: "100%", paddingLeft: padding, paddingRight: padding }}>
                         <span className="App-tertiarytoggle">Next up:</span>
-                    </div>
+                    </div> */}
                     <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
                         <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text={`Sent to ${artist.name}`} onClick={() => {
                             // topExpand?.scrollIntoView(true)
