@@ -261,7 +261,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     </Container>}
             </Modal.Body >
             <Modal.Footer>
-                <Container fluid>
+                <Container fluid style={{ padding: 0 }}>
                     {props.playable ?
                         <Row className="justify-content-md-center">
                             {/* <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}> */}
@@ -285,7 +285,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                             }
                         </Col>
                     </Row>
-                    <Row className="justify-content-md-center">
+                    <Row className="justify-content-md-center" style={{ padding: 0 }}>
                         {props.playable ?
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
@@ -340,8 +340,13 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     </div>
                                 </div>
                                 <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1.2, paddingTop: padding }}>{priceWords(props.minPrice, props.contributed, price)}</span>
-
-                                <span className="App-smalltext" style={{ paddingTop: padding }}>Putting in more money increases the chance an artist plays a song! If they don't, you won't be charged.</span>
+                                {((props.minPrice ?? 0) <= (props.contributed ?? 0)) ?
+                                    <span className="App-smalltext" style={{ paddingTop: padding }}>Pitching in money increases the chance an artist plays a song! <span style={{ fontStyle: 'italic' }}>And if they don't, you won't be charged.</span></span>
+                                    :
+                                    <span className="App-smalltext" style={{ paddingTop: padding }}>
+                                        This song needs to get at least ${numberToPrice((props.minPrice ?? 0) - (props.contributed ?? 0))} more to get played.<br></br><span style={{ fontStyle: 'italic' }}>You won't be charged if a song you contributed to isn't played by the end of the performance.</span>
+                                    </span>
+                                }
                             </Modal.Body>
                             :
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
