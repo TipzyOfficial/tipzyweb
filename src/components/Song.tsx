@@ -131,7 +131,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     )
 }
 
-export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, RQP: React.MemoExoticComponent<typeof RequestPlayableModal>, setRequestedPlayable: (p: PlayableType) => void, setRequestVisible: (b: boolean) => void }) {
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, setRequestedPlayable: (p: PlayableType) => void, setRequestVisible: (b: boolean) => void }) {
     const songDims = props.dims;
     const setRequestedPlayable = props.setRequestedPlayable;
     const setRequestVisible = props.setRequestVisible;

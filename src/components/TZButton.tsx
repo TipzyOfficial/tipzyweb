@@ -42,7 +42,7 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {props.leftComponent ?? <></>}
                     <span className="App-tertiarytitle" style={{ color: props.color ?? "white", fontWeight: 500, fontSize: props.fontSize }}>{props.title ?? ""}</span>
-                    {props.loading ? <div style={{ paddingLeft: 5 }}><Spinner style={{ color: "white", paddingTop: 3 }} size='sm'></Spinner></div> : <></>}
+                    {props.loading ? <div style={{ paddingLeft: 5 }}><Spinner style={{ color: props.color, paddingTop: 3 }} size='sm' ></Spinner></div> : <></>}
                 </div>
             }
 

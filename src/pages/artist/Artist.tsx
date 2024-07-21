@@ -230,23 +230,23 @@ export default function Artist() {
                     <div ref={topContentRef} style={{ width: '100%' }}>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                             {expand ?
-                                <PlayableListMemo playables={listedAndPending} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                                <PlayableListMemo playables={listedAndPending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                                 : <></>}
                         </div>
                     </div>
-                    {/* <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
-                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} />
-                    </div>
-                </ExpandHeader> */}
+                    <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
+                        <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                            <PlayableListMemo playables={listed} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                        </div>
+                    </ExpandHeader>
                     <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 2 + (topBar?.clientHeight ?? 0)} text="Already Played" scrollToPosition>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                            <PlayableListMemo playables={accepted} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                            <PlayableListMemo playables={accepted} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                         </div>
                     </ExpandHeader>
                     <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 3 + (topBar?.clientHeight ?? 0)} text="Refunded Songs" scrollToPosition>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                            <PlayableListMemo playables={rejected} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                            <PlayableListMemo playables={rejected} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                         </div>
                     </ExpandHeader>
                 </div>

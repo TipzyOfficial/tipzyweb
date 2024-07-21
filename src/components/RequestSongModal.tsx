@@ -1,5 +1,5 @@
 import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap";
-import { Colors, padding, useFdim } from "../lib/Constants";
+import { Colors, padding, radius, useFdim } from "../lib/Constants";
 import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
@@ -263,7 +263,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                         <Row className="justify-content-md-center">
                             {/* <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}> */}
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
-                                <span>Choose how much to pitch in for this song!</span>
+                                <span style={{ textAlign: 'center' }}>Choose how much to pitch in for this song!</span>
                                 <div style={{ width: "60%", maxWidth: 400, padding: padding }}>
                                     <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
                                         style={{
@@ -278,14 +278,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Row className="justify-content-md-center">
                         <Col style={{ display: 'flex', justifyContent: 'center' }}>
                             {props.playable ?
-                                <TZButton
-                                    width={"auto"}
-                                    // fontSize={Math.min(30, dims / 7)}
-                                    title={price ? `Request $${(price / 100).toFixed(2)}` : ""}
-                                    loading={disabled || price === undefined}
-                                    completed={success}
-                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
-                                    onClick={() => onRequestClick(price)} />
+                                <></>
                                 :
                                 <TZButton
                                     width={"auto"}
@@ -302,22 +295,42 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                         {props.playable ?
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
                                 <div style={{
-                                    width: "100%", maxWidth: 300, //display: "flex", alignItems: 'center', flexDirection: 'column'  
-
+                                    // width: "100%",// maxWidth: 300, //display: "flex", alignItems: 'center', flexDirection: 'column'  
+                                    display: "flex", alignItems: 'center', flexDirection: 'column'
                                 }}>
                                     <div
                                         // className="App-animated-gradient-fast-light"
                                         style={{
-                                            flex: 1,
-                                            overflow: 'hidden', borderRadius: 20, backgroundColor: "#fff1", //outlineColor: "#fff", outlineWidth: 2, outlineStyle: 'solid'
+                                            // flex: 1,
+                                            overflow: 'hidden', backgroundColor: "#fff1", //outlineColor: "#fff", outlineWidth: 2, outlineStyle: 'solid'
                                             boxShadow: sum / (props.minPrice ?? 1) > 1 ? '0px 0px 7px #fff8' : '0px 0px 0px #fff0',
-                                            transition: "box-shadow .2s"
+                                            transition: "box-shadow .2s",
+                                            width: "auto",
+                                            borderRadius: radius,
+                                            position: "relative"
                                         }}>
                                         <div className={`App-animated-gradient-fast${sum / (props.minPrice ?? 1) > 1 ? "-light" : ""}`} style={{
-                                            borderRadius: 20,
-                                            height: 20,
+                                            // borderRadius: radius,
+                                            height: "100%",
+                                            position: 'absolute',
                                             width: `${sum / (props.minPrice ?? 1) <= 1 ? sum / (props.minPrice ?? 1) * 100 : 100}%`,
                                         }} />
+                                        <div style={{
+                                            position: 'relative', padding: 5
+                                        }}>
+                                            <div style={{ borderRadius: radius, backgroundColor: Colors.background }}>
+                                                <TZButton
+                                                    width={"100%"}
+                                                    // fontSize={Math.min(30, dims / 7)}
+                                                    title={price ? `Request $${(price / 100).toFixed(2)}` : ""}
+                                                    loading={disabled || price === undefined}
+                                                    completed={success}
+                                                    color={Colors.background}
+                                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : "white"}
+                                                    onClick={() => onRequestClick(price)} />
+                                            </div>
+                                        </div>
+
                                     </div>
                                     <div style={{ paddingLeft: padding }}>
                                         <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1 }}>{priceWords(props.minPrice, props.contributed, price)}</span>
