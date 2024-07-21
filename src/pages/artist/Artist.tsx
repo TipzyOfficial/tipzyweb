@@ -47,6 +47,24 @@ export default function Artist() {
     const [topContent, topContentRef] = useCallbackRef<HTMLDivElement>();
 
     const [expand, setExpand] = useState(true);
+    let initRQS = undefined;
+    try {
+        const ret = localStorage.getItem("ret");
+        // console.log("ret", ret);
+        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+        // console.log("parsed", parsed);
+        initRQS = parsed ? parsed.data?.selectedSong : undefined;
+        // console.log("initRQS", initRQS);
+        if (ret) {
+            localStorage.removeItem("ret");
+        }
+    } catch (e) {
+        console.log("Problem loading previous state:", e)
+        localStorage.removeItem("ret");
+    }
+
+    const [requestedPlayable, setRequestedPlayable] = useState<PlayableType | undefined>(initRQS);
+    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
 
     const refreshModified = async () => {
         console.log("refreshing modified")
@@ -160,78 +178,84 @@ export default function Artist() {
     const accepted = playables.filter((e) => e.status === "ACCEPTED").sort(sortByPrice);
     const rejected = playables.filter((e) => e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
 
+
     // const heightOffset = (header?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0);
 
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
-            <div className="App-body-top" style={artist.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
-                <DisableRequests show={!artist.allowingRequests} artist={artist} />
+            <>
+                <div className="App-body-top" style={artist.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
+                    <DisableRequests show={!artist.allowingRequests} artist={artist} />
 
-                <div ref={topBarRef}
-                    style={{
-                        flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
-                        WebkitBackdropFilter: 'blur(5px)',
-                        backdropFilter: 'blur(5px)',
-                    }}>
-                    <TopBar />
-                </div>
-                <div
-                    style={{
-                        width: '100%', minHeight: minHeaderHeight,
-                        objectFit: 'cover', backgroundImage: (artist.image_url && artist.image_url.length > 0) ? `url(${artist.image_url})` : `url(${defaultBackground})`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: "cover",
-                        display: "flex",
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-end',
-                        backgroundColor: "#000",
-                        boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)',
-                    }}
+                    <div ref={topBarRef}
+                        style={{
+                            flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
+                            WebkitBackdropFilter: 'blur(5px)',
+                            backdropFilter: 'blur(5px)',
+                        }}>
+                        <TopBar />
+                    </div>
+                    <div
+                        style={{
+                            width: '100%', minHeight: minHeaderHeight,
+                            objectFit: 'cover', backgroundImage: (artist.image_url && artist.image_url.length > 0) ? `url(${artist.image_url})` : `url(${defaultBackground})`,
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "cover",
+                            display: "flex",
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-end',
+                            backgroundColor: "#000",
+                            boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)',
+                        }}
 
-                >
-                    <div style={{ height: topBar?.clientHeight ? topBar.clientHeight : 0 }}></div>
-                    <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
-                        <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{artist.name}</span>
+                    >
+                        <div style={{ height: topBar?.clientHeight ? topBar.clientHeight : 0 }}></div>
+                        <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+                            <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{artist.name}</span>
+                        </div>
                     </div>
-                </div>
-                <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
-                    <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Hot Right Now" onClick={() => {
-                        // topExpand?.scrollIntoView(true)
-                        setExpand(!expand);
-                        if (expand)
-                            window.scrollTo({ top: (topContent?.offsetTop ?? 0) - (topBar?.clientHeight ?? 0) - (topExpand?.clientHeight ?? 0) })
-                        console.log(topContent?.offsetTop);
-                    }} expanded={expand} />
-                </div>
-                <div ref={topContentRef} style={{ width: '100%' }}>
-                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        {expand ?
-                            <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
-                            : <></>}
+                    <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
+                        <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Hot Right Now" onClick={() => {
+                            // topExpand?.scrollIntoView(true)
+                            setExpand(!expand);
+                            if (expand)
+                                window.scrollTo({ top: (topContent?.offsetTop ?? 0) - (topBar?.clientHeight ?? 0) - (topExpand?.clientHeight ?? 0) })
+                            console.log(topContent?.offsetTop);
+                        }} expanded={expand} />
                     </div>
-                </div>
-                {/* <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
+                    <div ref={topContentRef} style={{ width: '100%' }}>
+                        <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                            {expand ?
+                                <PlayableListMemo playables={listed} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                                : <></>}
+                        </div>
+                    </div>
+                    {/* <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) + (topBar?.clientHeight ?? 0)} text="Hot Right Now" initialValue={true} scrollToPosition>
                     <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                         <PlayableListMemo playables={listed} dims={songDims} refreshRequests={refreshModified} />
                     </div>
                 </ExpandHeader> */}
-                <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 2 + (topBar?.clientHeight ?? 0)} text="Already Played" scrollToPosition>
-                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={accepted} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
-                    </div>
-                </ExpandHeader>
-                <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 3 + (topBar?.clientHeight ?? 0)} text="Refunded Songs" scrollToPosition>
-                    <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
-                        <PlayableListMemo playables={rejected} dims={songDims} refreshRequests={refreshModified} RQP={RQPMmemo} />
-                    </div>
-                </ExpandHeader>
-
-            </div>
+                    <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 2 + (topBar?.clientHeight ?? 0)} text="Already Played" scrollToPosition>
+                        <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                            <PlayableListMemo playables={accepted} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                        </div>
+                    </ExpandHeader>
+                    <ExpandHeader zI={4} height={(topExpand?.clientHeight ?? 0) * 3 + (topBar?.clientHeight ?? 0)} text="Refunded Songs" scrollToPosition>
+                        <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
+                            <PlayableListMemo playables={rejected} dims={songDims} RQP={RQPMmemo} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                        </div>
+                    </ExpandHeader>
+                </div>
+                <RQPMmemo playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={undefined} refreshRequests={refreshModified} />
+            </>
         </DisplayOrLoading>
 
     );
 }
+
+const PlayableListMemo = memo(PlayableList)
+const RQPMmemo = memo(RequestPlayableModal, (o, n) => (o.show === n.show))
 
 
 const LoadingScreen = () =>
@@ -300,10 +324,6 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
     }
     return artist;
 }
-
-
-const PlayableListMemo = memo(PlayableList)
-const RQPMmemo = memo(RequestPlayableModal)
 
 
 const DisableRequests = (props: { show: boolean, artist: LiveArtistType }) => {

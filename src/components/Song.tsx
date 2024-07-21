@@ -131,26 +131,10 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     )
 }
 
-export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, refreshRequests?: () => Promise<void>, RQP: React.MemoExoticComponent<typeof RequestPlayableModal> }) {
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, RQP: React.MemoExoticComponent<typeof RequestPlayableModal>, setRequestedPlayable: (p: PlayableType) => void, setRequestVisible: (b: boolean) => void }) {
     const songDims = props.dims;
-    let initRQS = undefined;
-    try {
-        const ret = localStorage.getItem("ret");
-        // console.log("ret", ret);
-        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
-        // console.log("parsed", parsed);
-        initRQS = parsed ? parsed.data?.selectedSong : undefined;
-        // console.log("initRQS", initRQS);
-        if (ret) {
-            localStorage.removeItem("ret");
-        }
-    } catch (e) {
-        console.log("Problem loading previous state:", e)
-        localStorage.removeItem("ret");
-    }
-
-    const [requestedPlayable, setRequestedPlayable] = useState<PlayableType | undefined>(initRQS);
-    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
+    const setRequestedPlayable = props.setRequestedPlayable;
+    const setRequestVisible = props.setRequestVisible;
 
     const RenderItem = (props: { item: PlayableType, index: string }) => {
         const item = props.item;
@@ -216,7 +200,6 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
             {/* </div> */}
-            <props.RQP playable={requestedPlayable} show={requestVisible} handleClose={() => setRequestVisible(false)} data={props.logoutData} refreshRequests={props.refreshRequests} />
         </>
 
     )
