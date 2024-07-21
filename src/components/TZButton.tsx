@@ -33,11 +33,11 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
                 boxSizing: "border-box",
                 WebkitBoxSizing: "border-box",
                 MozBoxSizing: "border-box",
-                opacity: props.disabled ? 0.5 : opacity,
+                opacity: props.disabled ? 0.5 : props.completed || props.loading ? 1 : opacity,
                 border: 'none'
             }}>
             {props.completed !== undefined ?
-                <FontAwesomeIcon icon={props.completed ? faSuccess : faFailure} fontSize={props.fontSize} color="white"></FontAwesomeIcon>
+                <FontAwesomeIcon icon={props.completed ? faSuccess : faFailure} fontSize={props.fontSize} color={props.color ?? "white"}></FontAwesomeIcon>
                 :
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {props.leftComponent ?? <></>}

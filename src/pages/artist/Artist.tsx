@@ -82,8 +82,6 @@ export default function Artist() {
                 if (e.status === "PENDING") pending.push(e.id);
             })
 
-            console.log("Pending before", pending)
-
             let mods = 0; // # of modifications done
 
             pdata.forEach((s: any) => {
@@ -110,7 +108,6 @@ export default function Artist() {
                 }
 
                 if (pending.includes(p.id)) {
-                    console.log("includes pending:", p.status);
                     pending.splice(pending.indexOf(p.id), 1);
                 }
 
@@ -120,7 +117,6 @@ export default function Artist() {
                 }
             });
 
-            console.log("Pending now", pending)
 
             pending.forEach((e) => {
                 const oldP = pl.get(e);

@@ -210,6 +210,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
+            console.log("setting disabled true");
             setDisabled(true);
             setMasterPrice(price);
             const hasStripe = await checkStripe();
@@ -287,31 +288,27 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     </Row>
                     <Row className="justify-content-md-center" style={{ padding: 0 }}>
                         {props.playable ?
-                            <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
+                            <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white', paddingBottom: padding }}>
                                     <span style={{ textAlign: 'center' }}>Choose how much to pitch in for this song!</span>
-                                    <div style={{ width: "60%", maxWidth: 400, padding: padding }}>
-                                        <input type="range" min={100} max={max} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
-                                            style={{
-                                                backgroundImage: `linear-gradient(to right, #5ca1c7 0%, #5ca1c7 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 100%)`
-                                            }}
-                                        />
-                                    </div>
                                 </div>
                                 <div style={{
                                     // width: "100%",// maxWidth: 300, //display: "flex", alignItems: 'center', flexDirection: 'column'  
-                                    display: "flex", alignItems: 'center', flexDirection: 'column', width: "60%", maxWidth: 400
+                                    display: "flex", alignItems: 'center', flexDirection: 'column', width: "60%", maxWidth: 400,
                                 }}>
+                                    {/* <div style={{
+                                        padding: padding, width: "100%"
+                                    }}> */}
                                     <div
                                         // className="App-animated-gradient-fast-light"
                                         style={{
                                             // flex: 1,
                                             overflow: 'hidden', backgroundColor: "#fff1", //outlineColor: "#fff", outlineWidth: 2, outlineStyle: 'solid'
-                                            boxShadow: sum / (props.minPrice ?? 1) > 1 ? '0px 0px 7px #fff8' : '0px 0px 0px #fff0',
+                                            boxShadow: sum / (props.minPrice ?? 1) > 1 ? `0px 0px ${Math.max((price ?? 0) / max * 10, 6)}px #fff8` : '0px 0px 0px #fff0',
                                             transition: "box-shadow .2s",
                                             width: "100%",
                                             borderRadius: radius,
-                                            position: "relative"
+                                            position: "relative",
                                         }}>
                                         <div className={`App-animated-gradient-fast${sum / (props.minPrice ?? 1) > 1 ? "-light" : ""}`} style={{
                                             // borderRadius: radius,
@@ -326,20 +323,25 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                                 <TZButton
                                                     width={"100%"}
                                                     // fontSize={Math.min(30, dims / 7)}
-                                                    title={price ? `Request $${(price / 100).toFixed(2)}` : ""}
+                                                    title={price ? `Add $${(price / 100).toFixed(2)}` : ""}
                                                     loading={disabled || price === undefined}
                                                     completed={success}
-                                                    color={Colors.background}
-                                                    backgroundColor={success === true ? Colors.green : success === false ? Colors.red : "white"}
+                                                    color={success ? Colors.green : success === false ? Colors.red : Colors.background}
+                                                    backgroundColor={"white"}                                                   // backgroundColor={success === true ? Colors.green : success === false ? Colors.red : "white"}
                                                     onClick={() => onRequestClick(price)} />
                                             </div>
                                         </div>
-
-                                    </div>
-                                    <div style={{}}>
+                                        {/* </div> */}
                                     </div>
                                 </div>
                                 <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1.2, paddingTop: padding }}>{priceWords(props.minPrice, props.contributed, price)}</span>
+                                <div style={{ width: "60%", maxWidth: 400, paddingTop: 20 }}>
+                                    <input type="range" min={100} max={max} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
+                                        style={{
+                                            backgroundImage: `linear-gradient(to right, #5ca1c7 0%, #5ca1c7 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 100%)`
+                                        }}
+                                    />
+                                </div>
                                 {((props.minPrice ?? 0) <= (props.contributed ?? 0)) ?
                                     <span className="App-smalltext" style={{ paddingTop: padding }}>Pitching in money increases the chance an artist plays a song! <span style={{ fontStyle: 'italic' }}>And if they don't, you won't be charged.</span></span>
                                     :
