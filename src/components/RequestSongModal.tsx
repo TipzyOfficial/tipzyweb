@@ -224,6 +224,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
 
         const sum = (props.contributed ?? 0) + (price ?? 0);
+        const max = Math.max((props.minPrice ?? 0) * 2, 1000);
+        // const step = (props.contributed ?? 0 > 20) ? 1000 : 50
 
         return (<>
             {!props.playable ? <Modal.Header className="m-auto" style={{ width: "100%" }}>
@@ -236,9 +238,10 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                             <Col style={{ display: 'flex', justifyContent: 'flex-end', alignItems: "center" }}>
                                 {song.albumart ? <img style={{ objectFit: 'contain' }} src={song.albumartbig ?? song.albumart} width={dims * 0.7} height={dims * 0.7} alt={song.title} /> : <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>}
                             </Col>
-                            <Col>
-                                <Modal.Title style={{ textAlign: "left", paddingTop: padding, color: 'white', fontSize: Math.max(dims / 10, 20) }}>{song.title}</Modal.Title>
-                                <Modal.Body style={{ textAlign: "left", padding: 0, color: 'white' }}>{artistsStringListToString(song.artists)}</Modal.Body>
+                            <Col style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', padding: 0 }}>
+                                <Modal.Title style={{ textAlign: "left", paddingTop: padding, color: 'white' }}>
+                                    <span className="onelinetext" style={{ textOverflow: 'ellipsis', WebkitLineClamp: 3, overflow: "hidden", fontSize: Math.max(dims / 10, 20), lineHeight: 1.2 }}>{song.title}</span></Modal.Title>
+                                <div style={{ textAlign: "left", padding: 0, color: 'white', height: "auto", fontSize: Math.max(dims / 15, 15) }}>{artistsStringListToString(song.artists)}</div>
                             </Col>
                         </Row>
                     </Container>
@@ -262,16 +265,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     {props.playable ?
                         <Row className="justify-content-md-center">
                             {/* <Modal.Body style={{ textAlign: "center", paddingTop: 0, color: 'white' }}> */}
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
-                                <span style={{ textAlign: 'center' }}>Choose how much to pitch in for this song!</span>
-                                <div style={{ width: "60%", maxWidth: 400, padding: padding }}>
-                                    <input type="range" min={100} max={1000} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
-                                        style={{
-                                            backgroundImage: `linear-gradient(to right, #5ca1c7 0%, #5ca1c7 ${((price ?? 100) - 100) / 9}%, #fff3 ${((price ?? 100) - 100) / 9}%, #fff3 100%)`
-                                        }}
-                                    />
-                                </div>
-                            </div>
+
                             {/* </Modal.Body> */}
                         </Row> : <></>
                     }
@@ -294,9 +288,19 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Row className="justify-content-md-center">
                         {props.playable ?
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white', alignItems: "center", display: "flex", flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column", color: 'white' }}>
+                                    <span style={{ textAlign: 'center' }}>Choose how much to pitch in for this song!</span>
+                                    <div style={{ width: "60%", maxWidth: 400, padding: padding }}>
+                                        <input type="range" min={100} max={max} value={price} onChange={(e) => setPrice(parseInt(e.target.value))} step={50} className="slider"
+                                            style={{
+                                                backgroundImage: `linear-gradient(to right, #5ca1c7 0%, #5ca1c7 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 ${((price ?? 100) - 100) / (max / 100 - 1)}%, #fff3 100%)`
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                                 <div style={{
                                     // width: "100%",// maxWidth: 300, //display: "flex", alignItems: 'center', flexDirection: 'column'  
-                                    display: "flex", alignItems: 'center', flexDirection: 'column'
+                                    display: "flex", alignItems: 'center', flexDirection: 'column', width: "60%", maxWidth: 400
                                 }}>
                                     <div
                                         // className="App-animated-gradient-fast-light"
@@ -305,7 +309,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                             overflow: 'hidden', backgroundColor: "#fff1", //outlineColor: "#fff", outlineWidth: 2, outlineStyle: 'solid'
                                             boxShadow: sum / (props.minPrice ?? 1) > 1 ? '0px 0px 7px #fff8' : '0px 0px 0px #fff0',
                                             transition: "box-shadow .2s",
-                                            width: "auto",
+                                            width: "100%",
                                             borderRadius: radius,
                                             position: "relative"
                                         }}>
@@ -332,11 +336,12 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                         </div>
 
                                     </div>
-                                    <div style={{ paddingLeft: padding }}>
-                                        <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1 }}>{priceWords(props.minPrice, props.contributed, price)}</span>
+                                    <div style={{}}>
                                     </div>
                                 </div>
-                                <span style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
+                                <span className="App-smalltext" style={{ fontWeight: 'bold', lineHeight: 1.2, paddingTop: padding }}>{priceWords(props.minPrice, props.contributed, price)}</span>
+
+                                <span className="App-smalltext" style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
                             </Modal.Body>
                             :
                             <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>

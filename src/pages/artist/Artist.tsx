@@ -218,8 +218,11 @@ export default function Artist() {
                             <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{artist.name}</span>
                         </div>
                     </div>
+                    <div style={{ width: "100%", paddingLeft: padding, paddingRight: padding }}>
+                        <span className="App-tertiarytoggle">Next up:</span>
+                    </div>
                     <div style={{ width: "100%", position: "sticky", top: topBar?.clientHeight, zIndex: 4 }} ref={topExpandRef}>
-                        <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text="Hot Right Now" onClick={() => {
+                        <ExpandHeader zI={4} height={(topBar?.clientHeight ?? 0)} text={`Sent to ${artist.name}`} onClick={() => {
                             // topExpand?.scrollIntoView(true)
                             setExpand(!expand);
                             if (expand)
@@ -230,7 +233,7 @@ export default function Artist() {
                     <div ref={topContentRef} style={{ width: '100%' }}>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%" }}>
                             {expand ?
-                                <PlayableListMemo playables={listedAndPending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
+                                <PlayableListMemo playables={pending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                                 : <></>}
                         </div>
                     </div>
