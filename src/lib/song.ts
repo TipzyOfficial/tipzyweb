@@ -50,7 +50,7 @@ export function songListIsEqual(s1: SongType[], s2: SongType[]): boolean {
     return true;
 }
 
-export type SongRequestStatusType = "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELLED" | "EXPIRED";
+export type SongRequestStatusType = "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELED" | "EXPIRED";
 
 export type SongRequestType = {
     id: number,

@@ -45,7 +45,7 @@ const RenderItem = memo((props: { request: SongRequestType, cancellable?: boolea
         case "REJECTED":
             statusColor = Colors.secondaryRegular;
             break;
-        case "CANCELLED":
+        case "CANCELED":
             statusColor = Colors.red;
             break;
         case "EXPIRED":
