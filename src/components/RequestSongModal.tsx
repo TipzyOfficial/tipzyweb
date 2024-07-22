@@ -211,6 +211,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
         async function onRequestClick(price: number | undefined) {
             console.log("setting disabled true");
+            if (disabled) return;
             setDisabled(true);
             setMasterPrice(price);
             const hasStripe = await checkStripe();

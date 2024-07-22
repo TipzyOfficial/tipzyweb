@@ -158,6 +158,7 @@ export default function Bar() {
     const timeout = 10000;
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
+    const [topRequest, setTopRequest] = useState<SongRequestType | undefined>();
     const topBarColor = Colors.background + "bc";
 
 
@@ -233,8 +234,18 @@ export default function Bar() {
         if (usc.user.access_token === "") return;
         if (indicator) setCload(true);
 
-        const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
+        if (topRequest) {
+            console.log("toppy time!!")
+            const firstJson = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${1}&offset=${0}`, 'GET').then(r => r.json())
+            const req = parseRequest(firstJson.data[0]);
+            if (req.id === topRequest.id && req.status === topRequest.status) {
+                return;
+            }
+            // setTopRequest(req);
+        }
 
+        const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
+            setTopRequest(parseRequest(json.data[0]));
             console.log("allr", json)
 
             const reqs = new Array<SongRequestType>();

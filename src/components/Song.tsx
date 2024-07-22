@@ -24,8 +24,8 @@ export default function Song(props: { song: SongType, dims?: number, noImage?: b
     const bigDims = 128;
     const dims = props.dims ?? 50;
 
-    const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
-        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims }} />
+    const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ borderRadius: 0, overflow: "hidden", height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
+        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims, borderRadius: 0, overflow: "hidden", }} />
 
     return (
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1 }}>

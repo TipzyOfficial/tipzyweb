@@ -50,13 +50,15 @@ export function songListIsEqual(s1: SongType[], s2: SongType[]): boolean {
     return true;
 }
 
+export type SongRequestStatusType = "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELLED" | "EXPIRED";
+
 export type SongRequestType = {
     id: number,
     song: SongType,
     bar: BarType,
     cost?: number,
     date: Date,
-    status: "ACCEPTED" | "REJECTED" | "PENDING" | "CANCELLED" | "EXPIRED"
+    status: SongRequestStatusType
 }
 
 export function songRequestCompare(r1: SongRequestType, r2: SongRequestType): number {
