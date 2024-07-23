@@ -159,6 +159,7 @@ export default function Bar() {
     const [current, setCurrentUn] = useState<SongType | undefined>(currentPCache);
     const [queue, setQueueUn] = useState<SongType[]>([]);
     const [topRequest, setTopRequest] = useState<SongRequestType | undefined>();
+    const [disableEverything, setDisableEverything] = useState(false);
     const topBarColor = Colors.background + "bc";
 
 
@@ -221,6 +222,11 @@ export default function Bar() {
         getCurrentQueue().then((r) => {
             if (!r) return;
             const [c, q] = r;
+            if (!c) {
+                setDisableEverything(true);
+            } else {
+                if (setDisableEverything) setDisableEverything(false)
+            }
             setCurrent(c);
             setQueue(
                 hasManuallyQueued(q) ? q.filter((e) => e.manuallyQueued) : q.splice(0, 1));
@@ -320,7 +326,7 @@ export default function Bar() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top" style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
-                <DisableRequests show={!bar.allowingRequests} bar={bar} />
+                <DisableRequests show={!bar.allowingRequests || disableEverything} bar={bar} />
                 <div ref={topBarRef}
                     style={{
                         flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
