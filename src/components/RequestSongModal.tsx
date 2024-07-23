@@ -44,11 +44,6 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
         // setPrice(json.Dynamic_price);
     }
 
-
-    useEffect(() => {
-        console.log("everything rerendered")
-    })
-
     const sendRequest = async (price: number): Promise<number> => {
         if (!props.playable) return 0;
 
@@ -60,7 +55,10 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
             else if (json.status === 433) return 2;
             else if (json.status === 444) return 3;
             else if (json.status === 469) return 4;
-            else throw new Error("Error: ", json)
+            else {
+                console.log("Business ID", userContext.artistState.artist?.id)
+                throw new Error("Error: ", json);
+            }
             // console.log("re", response) 
         }).catch((e: Error) => {
             console.log("error: ", e)
@@ -126,6 +124,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
     const [masterPrice, setMasterPrice] = useState(props.price);
+    const [disabled, setDisabled] = useState(false);
+
     // console.log(masterPrice);
 
     const data = { selectedSong: song, ...props.data }
@@ -196,8 +196,11 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     }
 
     function RequestScreen() {
-        const [disabled, setDisabled] = useState(false);
         const [price, setPrice] = useState(masterPrice);
+
+        useEffect(() => {
+            console.log("modal rerendered. disabled: ", disabled);
+        })
 
         const checkStripe = async (): Promise<boolean | null> => {
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
@@ -398,6 +401,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         <Modal
             dialogClassName="App-modal"
             show={props.show} onShow={() => {
+                setDisabled(false);
                 getPrice();
                 console.log(props.song)
                 setPaymentScreenVisible(false);
