@@ -31,7 +31,7 @@ root.render(
 
 export function Logout(usc: UserSessionContextType, data?: any, defaultToBar?: boolean) {
   usc.abortController?.abort();
-  usc.setUser(new Consumer("", 0, ""));
+  usc.setUser(new Consumer("", 0, "", -1));
 
   clearData();
   googleLogout();
@@ -74,7 +74,7 @@ export async function getTipper(usc: UserSessionContextType, cookies: Cookies) {
 }
 
 export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
-  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, user ? user.image : undefined, d.user_info.email, user ? user.requests : undefined)
+  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, d.id, user ? user.image : undefined, d.user_info.email, user ? user.requests : undefined)
   c.setBirthday(d.birthday);
   return (c);
 }

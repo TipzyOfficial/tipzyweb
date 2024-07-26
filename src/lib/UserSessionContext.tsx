@@ -12,7 +12,7 @@ import { fetchArtistInfo } from '../pages/artist/Artist';
 
 export const defaultConsumer: () => Consumer = () => {
     const cookies = getCookies();
-    return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "")
+    return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "", -1)
 }
 
 export type ArtistStateType = {
@@ -42,7 +42,7 @@ const initArtist = async (id?: number) => {
 }
 
 export const DefaultUserSessionContext: UserSessionContextType = {
-    user: new Consumer("", 0, ""),
+    user: new Consumer("", 0, "", -1),
     setUser: () => { },
     barState: {
         bar: undefined, setBar: () => { }
@@ -177,6 +177,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             user.access_token,
             user.expires_at,
             user.name,
+            user.id,
             user.image,
             user.email,
         );

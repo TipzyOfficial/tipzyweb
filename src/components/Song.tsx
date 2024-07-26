@@ -18,14 +18,15 @@ export function artistsStringListToString(artists: string[]) {
     return out.substring(2);
 }
 
-export default function Song(props: { song: SongType, dims?: number, noImage?: boolean, number?: number }) {
+export default function Song(props: { song: SongType, dims?: number, noImage?: boolean, number?: number, roundedEdges?: boolean }) {
     // const big = props.big ?? false;
 
+    const radius = 5;
     const bigDims = 128;
     const dims = props.dims ?? 50;
 
-    const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ borderRadius: 0, overflow: "hidden", height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
-        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims, borderRadius: 0, overflow: "hidden", }} />
+    const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ borderRadius: props.roundedEdges ? radius : 0, overflow: "hidden", height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
+        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims, borderRadius: props.roundedEdges ? radius : 0, overflow: "hidden", }} />
 
     return (
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1 }}>
@@ -147,7 +148,6 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
 
         return (
             <>
-                <div style={{ paddingBottom: padding / 4 }}></div>
                 <div style={{
                     width: "100%", position: "relative", cursor: disabled ? undefined : "pointer", borderRadius: 5, overflow: 'hidden',
                     // boxShadow: complete ? `0px 0px 5px ${Colors.secondaryDark}` : undefined
@@ -174,7 +174,7 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                         backgroundColor: status === "ACCEPTED" ? Colors.secondaryDark : "#fff1", //flexWrap: 'wrap'
                     }}>
                         <div style={{ position: 'relative', flexGrow: 0, flexShrink: 1 }}>
-                            <Song song={item.song} dims={songDims} key={item.id + "_index" + index} />
+                            <Song song={item.song} dims={songDims} key={item.id + "_index" + index} roundedEdges />
                         </div>
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1, flexDirection: "column"
@@ -196,7 +196,8 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                     </div>
                     {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}
                 </div>
-                <div style={{ paddingBottom: padding / 4 }}></div>
+                {/* <div style={{ paddingBottom: padding / 4 }}></div> */}
+                <div style={{ paddingBottom: padding / 2 }}></div>
             </>
         )
     }

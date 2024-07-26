@@ -210,7 +210,7 @@ function Login(props: { back?: boolean }) {
         const img = undefined;
         const expires_at = expiresAt;
 
-        const user = new Consumer(accessToken, expires_at, name ?? "", img ?? undefined);
+        const user = new Consumer(accessToken, expires_at, name ?? "", -1, img ?? undefined);
         usc.setUser(user);
 
         // console.log("login", user);

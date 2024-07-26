@@ -11,6 +11,14 @@ export function numberToPrice(n: number): string {
     return `${(n / 100).toFixed(2)}`;
 }
 
+export function shuffleArrayMutate(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 export function shuffleWithUserID(array: any[], user: Consumer) {
     let seed = 0;
     const userid = (user.name.toString() ?? "" + user.email.toString() ?? "" + user.birthday ?? "")

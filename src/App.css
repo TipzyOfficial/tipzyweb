@@ -232,6 +232,10 @@
   transition: width .2s;
 }
 
+.App-modal .modal-content {
+  background-color: #17171E;
+}
+
 .App-animated-gradient-fast {
   background: linear-gradient(90deg, #D98205, #CA3C6D, #D98205);
   /* background: linear-gradient(90deg, #FCC679, #d5648b, #FCC679); */

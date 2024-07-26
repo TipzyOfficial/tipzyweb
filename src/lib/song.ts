@@ -8,7 +8,9 @@ export type PlayableType = {
     artistId: number,
     position: number,
     song: SongType,
-    status: "ACCEPTED" | "REJECTED" | "LISTED" | "PENDING" | "REFUNDED" | "PLAYED" | "LISTED_ALTERED"
+    lastModified: Date,
+    status: "ACCEPTED" | "REJECTED" | "LISTED" | "PENDING" | "REFUNDED" | "PLAYED" | "LISTED_ALTERED" | "LOCKED",
+    tipperRelevant: boolean,
 }
 
 export type SongType = {

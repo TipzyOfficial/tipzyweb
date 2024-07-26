@@ -7,7 +7,7 @@ export class Users {
     image?: string;
     email: string;
 
-    constructor(token: string, expires_at: number, name: string, image?: string, email ?: string) {
+    constructor(token: string, expires_at: number, name: string, image?: string, email?: string) {
         this.access_token = token;
         this.expires_at = expires_at;
         this.name = name;
@@ -15,11 +15,11 @@ export class Users {
         this.email = email ?? "";
     }
 
-    setName(name: string){
+    setName(name: string) {
         this.name = name;
     }
 
-    setEmail(email: string){
+    setEmail(email: string) {
         this.email = email;
     }
 }
@@ -27,9 +27,11 @@ export class Users {
 export class Consumer extends Users {
     birthday?: string;
     requests: SongRequestType[];
+    id: number;
 
-    constructor(token: string, expires_at: number, name: string, image?: string, email ?: string, requests?: SongRequestType[]) {
+    constructor(token: string, expires_at: number, name: string, id: number, image?: string, email?: string, requests?: SongRequestType[]) {
         super(token, expires_at, name, image, email);
+        this.id = id;
         this.requests = requests ?? [];
     }
 
