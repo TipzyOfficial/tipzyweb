@@ -132,10 +132,11 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     )
 }
 
-export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, setRequestedPlayable: (p: PlayableType) => void, setRequestVisible: (b: boolean) => void }) {
+export function PlayableList(props: { playables: PlayableType[], dims: number, noImage?: boolean, logoutData?: any, setRequestedPlayable: (p: PlayableType) => void, setRequestVisible: (b: boolean) => void, disabled?: boolean }) {
     const songDims = props.dims;
     const setRequestedPlayable = props.setRequestedPlayable;
     const setRequestVisible = props.setRequestVisible;
+    const masterDisabled = props.disabled;
 
     const RenderItem = (props: { item: PlayableType, index: string }) => {
         const item = props.item;
@@ -154,7 +155,7 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
                     opacity: disabled ? 0.5 : 1
 
                 }} onClick={() => {
-                    if (!disabled) {
+                    if (!disabled && !masterDisabled) {
                         setRequestedPlayable(item);
                         setRequestVisible(true);
                     }

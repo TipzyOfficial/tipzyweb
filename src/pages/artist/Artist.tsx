@@ -38,11 +38,13 @@ type SearchModalProps = {
 const SearchModal = (props: SearchModalProps) => {
     const [query, setQuery] = useState("");
     const [input, inputRef] = useCallbackRef<HTMLInputElement>();
+    const [disabled, setDisabled] = useState(true);
 
     return (
         <Modal className="App-modal" show={props.searchVisible} onEntered={() => {
             if (input) input.focus();
-        }} onHide={() => props.setSearchVisible(false)} data-bs-theme={"dark"} centered>
+            setDisabled(false);
+        }} onHide={() => { props.setSearchVisible(false); setDisabled(true); }} data-bs-theme={"dark"} centered>
             <div style={{ paddingBottom: padding }}>
                 <div style={{
                     maxHeight: 500, height: "60%", color: "white", paddingLeft: padding, paddingRight: padding, paddingBottom: padding, overflow: 'scroll',
@@ -60,7 +62,7 @@ const SearchModal = (props: SearchModalProps) => {
                             );
                         })}
                     </div>
-                    <PlayableListMemo playables={props.allPending.filter((v) => {
+                    <PlayableListMemo disabled={disabled} playables={props.allPending.filter((v) => {
                         const lowercase = query.toLowerCase();
 
                         if (v.song.title.substring(0, query.length).toLowerCase() === lowercase) return true;
