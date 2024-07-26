@@ -131,81 +131,87 @@ export default function Artist() {
             fetchWithToken(usc, `liveartist/set/modified?live_artist_id=${id}`, 'GET') :
             fetchNoToken(`liveartist/set/modified?live_artist_id=${id}`, 'GET');
 
-        await func.then(r => r.json()).then(json => {
-            // console.log(json.d);
-            console.log("pdata", json);
+        const json = await func.then(r => r.json())
 
-            const pdata = json.data;
+        // console.log(json.d);
+        console.log("pdata", json);
 
-            if (!artist) return;
+        const pdata = json.data;
 
-            const pl: Map<number, PlayableType> = new Map();
-            const pendingLocked: number[] = [];
+        if (!artist) return;
 
-            playables.forEach(e => {
-                pl.set(e.id, e);
-                if (e.status === "PENDING" || e.status === "LOCKED") pendingLocked.push(e.id);
-            })
+        const pl: Map<number, PlayableType> = new Map();
+        const ids: number[] = [];
+        const pendingLocked: number[] = [];
 
-            let mods = 0; // # of modifications done
+        playables.forEach(e => {
+            pl.set(e.id, e);
+            ids.push(e.id);
+            if (e.status === "PENDING" || e.status === "LOCKED") pendingLocked.push(e.id);
+        })
 
-            pdata.forEach((s: any) => {
-                const id = s.id;
-                const e = s.song_json;
-                const song: SongType = {
-                    title: e.name,
-                    albumart: e.images?.thumbnail ?? "",
-                    albumartbig: e.images?.teaser ?? "",
-                    id: e.id,
-                    explicit: e.explicit,
-                    artists: e.artists
-                }
+        let mods = 0; // # of modifications done
 
-                // console.log(s);
+        for (const s of pdata) {
+            if (ids.indexOf(s.id) === -1) {
+                setPlayables([]);
+                await fetchArtistInfo(usc, id, false, setPlayables, setAllArtists);
+                return;
+            }
+            const e = s.song_json;
+            const song: SongType = {
+                title: e.name,
+                albumart: e.images?.thumbnail ?? "",
+                albumartbig: e.images?.teaser ?? "",
+                id: e.id,
+                explicit: e.explicit,
+                artists: e.artists
+            }
 
-                const p: PlayableType = {
-                    artistId: s.live_artist,
-                    active: s.active,
-                    id: id,
-                    position: s.position,
-                    song: song,
-                    amountBid: s.total_contributed,
-                    minPrice: s.min_price,
-                    status: s.status,
-                    lastModified: new Date(s.last_modified),
-                    tipperRelevant: s.tipper_relevant,
-                }
+            // console.log(s);
 
-                if (pendingLocked.includes(p.id)) {
-                    pendingLocked.splice(pendingLocked.indexOf(p.id), 1);
-                }
+            const p: PlayableType = {
+                artistId: s.live_artist,
+                active: s.active,
+                id: s.id,
+                position: s.position,
+                song: song,
+                amountBid: s.total_contributed,
+                minPrice: s.min_price,
+                status: s.status,
+                lastModified: new Date(s.last_modified),
+                tipperRelevant: s.tipper_relevant,
+            }
 
-                if (JSON.stringify(pl.get(id)) !== JSON.stringify(p)) {
-                    mods++;
-                    pl.set(id, p);
-                }
-            });
+            if (pendingLocked.includes(p.id)) {
+                pendingLocked.splice(pendingLocked.indexOf(p.id), 1);
+            }
 
-
-            pendingLocked.forEach((e) => {
-                const oldP = pl.get(e);
-                if (!oldP) return;
-                const newP: PlayableType = { ...oldP, status: "ACCEPTED" };
+            if (JSON.stringify(pl.get(s.id)) !== JSON.stringify(p)) {
                 mods++;
-                pl.set(e, newP);
-            })
+                pl.set(s.id, p);
+            }
+        }
 
-            const playablesArray = new Array<PlayableType>();
 
-            pl.forEach((e) => {
-                playablesArray.push(e)
-            });
+        pendingLocked.forEach((e) => {
+            const oldP = pl.get(e);
+            if (!oldP) return;
+            const newP: PlayableType = { ...oldP, status: "ACCEPTED" };
+            mods++;
+            pl.set(e, newP);
+        })
 
-            // if (mods !== 0) {
-            // console.log("setplayables mods", mods)
-            setPlayables(playablesArray);
-            // }
+        const playablesArray = new Array<PlayableType>();
+
+        pl.forEach((e) => {
+            playablesArray.push(e)
         });
+
+        // if (mods !== 0) {
+        // console.log("setplayables mods", mods)
+        setPlayables(playablesArray);
+        // }
     }
 
     const setAllArtistArray = () => {
@@ -259,24 +265,23 @@ export default function Artist() {
 
     const sortByPrice = (a: PlayableType, b: PlayableType) => b.amountBid - a.amountBid
 
-    console.log("playables", playables);
+    const activePlayables = playables.filter((e) => e.active);
+    const lockedin = activePlayables.filter((e) => (e.status === "LOCKED")).sort(sortByPrice);
+    const listed = activePlayables.filter((e) => (e.status === "LISTED")).sort(sortByPrice);
+    const listedAltered = activePlayables.filter((e) => (e.status === "LISTED_ALTERED")).sort(sortByPrice);
+    const tipperRelevant = activePlayables.filter((p) => p.tipperRelevant)
 
-    const lockedin = playables.filter((e) => (e.status === "LOCKED")).sort(sortByPrice);
-    const listed = playables.filter((e) => (e.status === "LISTED")).sort(sortByPrice);
-    const listedAltered = playables.filter((e) => (e.status === "LISTED_ALTERED")).sort(sortByPrice);
-    const tipperRelevant = playables.filter((p) => p.tipperRelevant)
-
-    const allPending = playables.filter((e) => (
+    const allPending = activePlayables.filter((e) => (
         e.status === "LISTED" ||
         e.status === "LISTED_ALTERED" ||
         e.status === "PENDING"
     )).sort(sortByPrice);
 
-    const pending = playables.filter((e) => e.status === "PENDING").sort(sortByPrice);
+    const pending = activePlayables.filter((e) => e.status === "PENDING").sort(sortByPrice);
 
     const listedAndPending = pending.concat(listedAltered);
 
-    const completed = playables.filter((e) => e.status === "ACCEPTED" || e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
+    const completed = activePlayables.filter((e) => e.status === "ACCEPTED" || e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
     // const rejected = playables.filter((e) => e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
 
 
@@ -392,6 +397,8 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
         .then(json => {
             const pdata = json.playables;
 
+            console.log("pdata init", pdata)
+
             const playables: PlayableType[] = []
 
             if (setPlayables) {
@@ -425,7 +432,7 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
 
                 if (setAllArtists) {
                     const artists = new Map<string, number>();
-                    const aps = shuffleArrayMutate(playables).slice(0, 50);
+                    const aps = playables;//shuffleArrayMutate(playables).slice(0, 50);
 
                     for (const p of aps) {
                         for (const a of p.song.artists) {
