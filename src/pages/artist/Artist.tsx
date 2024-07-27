@@ -365,15 +365,16 @@ export default function Artist() {
                                 </div>
                                 <div style={{ paddingTop: padding, paddingBottom: padding / 2, display: "flex", alignItems: 'center' }}>
                                     <span style={{ paddingRight: padding }} className="App-subtitle">Coming up</span>
-                                    <HelpButton text={`These are the songs next in line to send to ${artist.name}. Put more money into a song to move it up the queue!`}></HelpButton>
+                                    <HelpButton text={`These are the songs next in line to send to ${artist.name}. The more money put into a song, the higher it moves up on the queue!`}></HelpButton>
                                 </div>
                                 {pending.length > 0 ? <PlayableListMemo playables={pending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} /> :
                                     <div style={{ width: "100%", display: "flex", padding: padding, backgroundColor: "#fff3", borderRadius: radius }}>
                                         <span style={{ textAlign: 'center', width: "100%" }}>No more songs in queue...request now to be the next song sent to {artist.name}!</span>
                                     </div>
                                 }
-                                <div style={{ paddingTop: padding, paddingBottom: padding / 2 }}>
-                                    <span className="App-subtitle">Hot Right Now 🔥</span>
+                                <div style={{ paddingTop: padding, paddingBottom: padding / 2, display: "flex", alignItems: 'center' }}>
+                                    <span style={{ paddingRight: padding }} className="App-subtitle">Hot Right Now 🔥</span>
+                                    <HelpButton text={`Once these songs reach their goal price, they will be queued up to send over to ${artist.name}. Pitch in some cash to help them get there!`}></HelpButton>
                                 </div>
                                 <PlayableListMemo playables={listedAndAltered} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                                 <div style={{ paddingTop: padding, paddingBottom: padding / 2 }}>
