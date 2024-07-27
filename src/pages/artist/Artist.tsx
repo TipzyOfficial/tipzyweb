@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect, useState } from "react";
+import { memo, SetStateAction, useContext, useEffect, useState } from "react";
 import { LiveArtistType } from "../../lib/bar";
 import { fetchNoToken } from "../../lib/serverinfo";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
@@ -101,30 +101,14 @@ export default function Artist() {
     const [searchVisible, setSearchVisible] = useState(false);
     const [allArtists, setAllArtists] = useState<string[]>([]);
     // const [view, setView] = useState(0);
-    let initRQS = undefined;
+    // let initRQS: SetStateAction<PlayableType | undefined> = undefined;
 
     const setToggle = (n: number) => {
         setToggleIn(n);
     }
 
-
-    try {
-        const ret = localStorage.getItem("ret");
-        // console.log("ret", ret);
-        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
-        // console.log("parsed", parsed);
-        initRQS = parsed ? parsed.data?.selectedSong : undefined;
-        // console.log("initRQS", initRQS);
-        if (ret) {
-            localStorage.removeItem("ret");
-        }
-    } catch (e) {
-        console.log("Problem loading previous state:", e)
-        localStorage.removeItem("ret");
-    }
-
-    const [requestedPlayable, setRequestedPlayable] = useState<PlayableType | undefined>(initRQS);
-    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
+    const [requestedPlayable, setRequestedPlayable] = useState<PlayableType | undefined>();
+    const [requestVisible, setRequestVisible] = useState(false);
 
     const refreshModified = async () => {
         console.log("refreshing modified");
@@ -241,6 +225,27 @@ export default function Artist() {
     useEffect(() => {
         getCookies().remove("bar_session");
 
+        let initRQS: PlayableType | undefined = undefined;
+
+        try {
+            const ret = localStorage.getItem("ret");
+            // console.log("ret", ret);
+            const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+            // console.log("parsed", parsed);
+            initRQS = parsed ? parsed.data?.selectedPlayable : undefined;
+
+            console.log("initRQS", initRQS)
+            // console.log("initRQS", initRQS);
+            if (ret) {
+                localStorage.removeItem("ret");
+            }
+        } catch (e) {
+            console.log("Problem loading previous state:", e)
+            localStorage.removeItem("ret");
+        }
+
+        setRequestedPlayable(initRQS);
+        setRequestVisible(initRQS !== undefined);
 
         if (!id) {
             router.navigate("/code");

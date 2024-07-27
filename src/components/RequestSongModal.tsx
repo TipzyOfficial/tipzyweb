@@ -31,7 +31,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
 
         return await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
             price: price
-        })).then(response => response.json()).then(json => {
+        }), props.data).then(response => response.json()).then(json => {
             console.log("json: ", json)
             if (json.status === 200) return 1;
             else if (json.status === 433) return 2;
@@ -48,7 +48,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
         });
     }
 
-    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={props.data} price={p} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
+    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={{ selectedPlayable: props.playable }} price={p} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
 }
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
@@ -110,7 +110,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
     // console.log(masterPrice);
 
-    const data = { selectedSong: song, ...props.data }
+    const data = props.playable ? props.data : { selectedSong: song, ...props.data }
 
     const sendRequestClose = async (price: number | undefined) => {
         if (!price) return;
@@ -195,6 +195,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
+
             console.log("setting disabled true");
             if (disabled) return;
             setDisabled(true);
