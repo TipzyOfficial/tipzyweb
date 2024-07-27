@@ -11,7 +11,7 @@ import { NotFoundPage } from "../bar/NotFoundPage";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { ArtistType, PlayableType, SongRequestType, SongType } from "../../lib/song";
 import FlatList from "flatlist-react/lib";
-import { PlayableList } from "../../components/Song";
+import { Playable, PlayableList } from "../../components/Song";
 import ToggleTab from "../../components/ToggleTab";
 import ExpandHeader from "../../components/ExpandHeader";
 import _ from "lodash"
@@ -24,6 +24,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { RequestPlayableModal } from "../../components/RequestSongModal";
 import { TZArtistSearchButton } from "../../components/TZSearchButton";
 import { fetchWithToken } from "../..";
+import HelpButton from "../../components/HelpButton";
 
 type SearchModalProps = {
     searchVisible: boolean,
@@ -136,7 +137,7 @@ export default function Artist() {
         const json = await func.then(r => r.json())
 
         // console.log(json.d);
-        console.log("pdata", json);
+        // console.log("pdata", json);
 
         const pdata = json.data;
 
@@ -240,16 +241,18 @@ export default function Artist() {
     useEffect(() => {
         getCookies().remove("bar_session");
 
+
         if (!id) {
             router.navigate("/code");
             return;
         }
-        if (usc.artistState.artist && id === usc.artistState.artist.id.toString() && usc.artistState.artist.allowingRequests) {
-            fetchArtistInfo(usc, id, false, setPlayables, setAllArtists).then(() => {
-                setReady(true);
-            });
-            return;
-        }
+        // if (usc.artistState.artist && id === usc.artistState.artist.id.toString() && usc.artistState.artist.allowingRequests) {
+        //     setReady(true);
+        //     fetchArtistInfo(usc, id, false, setPlayables, setAllArtists).then(() => {
+        //         console.timeEnd("timeFAI")
+        //     });
+        //     return;
+        // }
         fetchArtistInfo(usc, id, false, setPlayables, setAllArtists).then(() => {
             setReady(true);
         })
@@ -269,8 +272,10 @@ export default function Artist() {
 
     const activePlayables = playables.filter((e) => e.active);
     const lockedin = activePlayables.filter((e) => (e.status === "LOCKED")).sort(sortByPrice);
-    const listed = activePlayables.filter((e) => (e.status === "LISTED")).sort(sortByPrice);
-    const listedAltered = activePlayables.filter((e) => (e.status === "LISTED_ALTERED")).sort(sortByPrice);
+    // const listed = activePlayables.filter((e) => (e.status === "LISTED")).sort(sortByPrice);
+    // const listedAltered = activePlayables.filter((e) => (e.status === "LISTED_ALTERED")).sort(sortByPrice);
+    const listedAndAltered = activePlayables.filter((e) => (e.status === "LISTED" || e.status === "LISTED_ALTERED")).sort(sortByPrice);
+
     const tipperRelevant = activePlayables.filter((p) => p.tipperRelevant)
 
     const allPending = activePlayables.filter((e) => (
@@ -281,7 +286,7 @@ export default function Artist() {
 
     const pending = activePlayables.filter((e) => e.status === "PENDING").sort(sortByPrice);
 
-    const listedAndPending = pending.concat(listedAltered);
+    // const listedAndPending = pending.concat(listedAltered);
 
     const completed = activePlayables.filter((e) => e.status === "ACCEPTED" || e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
     // const rejected = playables.filter((e) => e.status === "REJECTED" || e.status === "REFUNDED").sort(sortByPrice);
@@ -342,19 +347,35 @@ export default function Artist() {
                                 <div style={{ padding: padding / 2, backgroundColor: "#fff2", borderRadius: 5 }}>
                                     <span className="App-montserrat-normaltext" style={{ fontWeight: "bold" }}>Sent to {artist.name}:</span>
                                     <div style={{ paddingBottom: 5 }} />
-                                    {lockedin.length > 0 ?
-                                        <PlayableListMemo playables={lockedin} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
-                                        :
-                                        <div style={{ width: "100%", display: "flex", padding: padding, backgroundColor: "#fff3", borderRadius: radius }}>
-                                            <span style={{ textAlign: 'center', width: "100%" }}>No songs yet...be the first to request a song to {artist.name}!</span>
+                                    {completed.length > 0 ?
+                                        <div>
+                                            <Playable item={completed.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime())[0]} dims={songDims} onClick={() => { }} currentlyPlaying />
                                         </div>
+                                        : <></>}
+                                    {lockedin.length > 0 ?
+                                        <Playable item={lockedin[0]} dims={songDims} onClick={() => { }} />
+                                        :
+                                        <></>
+                                        // pending.length > 0 ?
+                                        //     <Playable item={pending[0]} dims={songDims} onClick={() => { }} />
+                                        //     :
+                                        //     <></>
+                                        // }
                                     }
                                 </div>
-                                <div style={{ paddingTop: padding, paddingBottom: padding / 2 }}>
-                                    <span className="App-subtitle">Hot Right Now</span>
+                                <div style={{ paddingTop: padding, paddingBottom: padding / 2, display: "flex", alignItems: 'center' }}>
+                                    <span style={{ paddingRight: padding }} className="App-subtitle">Coming up</span>
+                                    <HelpButton text={`These are the songs next in line to send to ${artist.name}. Put more money into a song to move it up the queue!`}></HelpButton>
                                 </div>
-                                <PlayableListMemo playables={allPending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
-
+                                {pending.length > 0 ? <PlayableListMemo playables={pending} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} /> :
+                                    <div style={{ width: "100%", display: "flex", padding: padding, backgroundColor: "#fff3", borderRadius: radius }}>
+                                        <span style={{ textAlign: 'center', width: "100%" }}>No more songs in queue...request now to be the next song sent to {artist.name}!</span>
+                                    </div>
+                                }
+                                <div style={{ paddingTop: padding, paddingBottom: padding / 2 }}>
+                                    <span className="App-subtitle">Hot Right Now 🔥</span>
+                                </div>
+                                <PlayableListMemo playables={listedAndAltered} dims={songDims} setRequestVisible={setRequestVisible} setRequestedPlayable={setRequestedPlayable} />
                                 <div style={{ paddingTop: padding, paddingBottom: padding / 2 }}>
                                     <span className="App-subtitle">Completed Requests</span>
                                 </div>
@@ -394,17 +415,18 @@ const LoadingScreen = () =>
 
 export const fetchArtistInfo = async (userContext: UserSessionContextType, id: number, noSetArtist: boolean, setPlayables?: (p: PlayableType[]) => void, setAllArtists?: (a: string[]) => void) => {
     const func = userContext.user.access_token ? fetchWithToken(userContext, `tipper/liveartist/${id}`, 'GET') : fetchNoToken(`tipper/liveartist/${id}`, 'GET');
-
+    if (setPlayables) console.time("timeAll");
+    if (setPlayables) console.time("timeFetch");
     const artist: LiveArtistType | undefined = await func.then(r => r.json())
         .then(json => {
+            if (setPlayables) console.timeEnd("timeFetch");
             const pdata = json.playables;
-
-            console.log("pdata init", pdata)
-
             const playables: PlayableType[] = []
+            const artists = new Map<string, number>();
 
             if (setPlayables) {
-                pdata.forEach((s: any) => {
+
+                for (const s of pdata) {
                     const e = s.song_json;
                     const song: SongType = {
                         title: e.name,
@@ -428,33 +450,27 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
                         tipperRelevant: s.tipper_relevant,
                     }
                     playables.push(p);
-                });
+
+                    if (setAllArtists) {
+                        const a = p.song.artists[0]
+                        const val = artists.get(a);
+                        if (val)
+                            artists.set(a, val + 1);
+                        else
+                            artists.set(a, 1);
+                    }
+
+                }
+
 
                 setPlayables(playables);
 
                 if (setAllArtists) {
-                    const artists = new Map<string, number>();
-                    const aps = playables;//shuffleArrayMutate(playables).slice(0, 50);
-
-                    for (const p of aps) {
-                        for (const a of p.song.artists) {
-                            const val = artists.get(a);
-                            if (val)
-                                artists.set(a, val + 1);
-                            else
-                                artists.set(a, 1);
-                        }
-                    }
-
-
                     const artistsArray = [...artists.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0])
-                    // .sort((a, b) => b[1] - a[1]).map(e => e[0])
-
-                    // console.log("artists", artistsArray);
-
                     setAllArtists(artistsArray)
                 }
             }
+
 
             const a: LiveArtistType = {
                 id: json.id,
@@ -469,11 +485,14 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
             }
             if (!noSetArtist)
                 userContext.artistState.setArtist(a);
+
             return a;
         }).catch((e: Error) => {
             console.log("Error loading your artist: " + e.message);
             return undefined;
-        })
+        });
+
+    if (setPlayables) console.timeEnd("timeAll");
 
     if (!artist) {
         if (!noSetArtist)

@@ -37,8 +37,9 @@ const initBar = async (id?: number) => {
     return id ? fetchBarInfo(DefaultUserSessionContext, id, true) : undefined;
 }
 
-const initArtist = async (id?: number) => {
-    return id ? fetchArtistInfo(DefaultUserSessionContext, id, true) : undefined;
+const initArtist = async (id?: number): Promise<LiveArtistType | undefined> => {
+    return id ? { id: id, name: "", allowingRequests: false, minPrice: -1 } : undefined
+    // fetchArtistInfo(DefaultUserSessionContext, id, true) : undefined;
 }
 
 export const DefaultUserSessionContext: UserSessionContextType = {

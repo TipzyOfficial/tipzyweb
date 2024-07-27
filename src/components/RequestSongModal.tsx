@@ -24,25 +24,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
 
     const p = minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100;
 
-    // const [price, setPrice] = useState(p)
-
-
-    // console.log("price", p, minPrice, amountBid, minPrice !== undefined, amountBid !== undefined)
-
-    // const [price, setPrice] = useState<number>(100);
-
-    const getPrice = async () => {
-        // setPrice(minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100);
-        // setPrice(props.playable?.minPrice);
-
-        // const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-        //     business_id: userContext.barState.bar?.id
-        // })).catch(e => { throw e });
-
-        // const json = await response.json();
-
-        // setPrice(json.Dynamic_price);
-    }
+    const getPrice = async () => { };
 
     const sendRequest = async (price: number): Promise<number> => {
         if (!props.playable) return 0;

@@ -138,81 +138,89 @@ export function PlayableList(props: { playables: PlayableType[], dims: number, n
     const setRequestVisible = props.setRequestVisible;
     const masterDisabled = props.disabled;
 
-    const RenderItem = (props: { item: PlayableType, index: string }) => {
-        const item = props.item;
-        const index = props.index;
-        const ratio = item.amountBid / item.minPrice;
-        const complete = ratio >= 1
-        const status = props.item.status;
-
-        const disabled = status === "ACCEPTED" || status === "REJECTED" || status === "REFUNDED"
-
-        return (
-            <>
-                <div style={{
-                    width: "100%", position: "relative", cursor: disabled ? undefined : "pointer", borderRadius: 5, overflow: 'hidden',
-                    // boxShadow: complete ? `0px 0px 5px ${Colors.secondaryDark}` : undefined
-                    opacity: disabled ? 0.5 : 1
-
-                }} onClick={() => {
-                    if (!disabled && !masterDisabled) {
-                        setRequestedPlayable(item);
-                        setRequestVisible(true);
-                    }
-                }}>
-                    {disabled ?
-                        <></>
-                        :
-                        complete ?
-                            <div className="App-animated-gradient" style={{
-                                position: "absolute", left: 0, height: "100%", width: `100%`, backgroundColor: Colors.secondaryDark, zIndex: 0
-                            }} />
-                            : <div className="App-animated-gradient" style={{
-                                position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
-                            }} />}
-                    <div style={{
-                        height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2, justifyContent: 'space-between',
-                        backgroundColor: status === "ACCEPTED" ? Colors.secondaryDark : "#fff1", //flexWrap: 'wrap'
-                    }}>
-                        <div style={{ position: 'relative', flexGrow: 0, flexShrink: 1 }}>
-                            <Song song={item.song} dims={songDims} key={item.id + "_index" + index} roundedEdges />
-                        </div>
-                        <div style={{
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1, flexDirection: "column"
-                        }}>
-                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>
-                                {disabled || item.minPrice <= item.amountBid ? "" :
-                                    <span className="App-smalltext" style={{ lineHeight: 1 }}>Goal: ${numberToPrice(item.minPrice)}</span>
-                                }
-                            </span>
-                            <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
-                                {disabled ? (props.item.status === "ACCEPTED" ? "Played" : "Refunded") :
-                                    <>
-                                        <span className="App-smalltext" style={{ lineHeight: 1 }}>Bid: </span>
-                                        ${numberToPrice(item.amountBid)}
-                                    </>
-                                }
-                            </span>
-                        </div>
-                    </div>
-                    {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}
-                </div>
-                {/* <div style={{ paddingBottom: padding / 4 }}></div> */}
-                <div style={{ paddingBottom: padding / 2 }}></div>
-            </>
-        )
-    }
-
     return (
         <>
             <FlatList
                 list={props.playables}
                 renderWhenEmpty={() => <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No songs.</div>}
-                renderItem={(item, index) => <RenderItem key={item.id + "_index" + index} item={item} index={index} />}
+                renderItem={(item, index) => <Playable key={item.id + "_index" + index} item={item} index={index} dims={songDims} onClick={() => {
+                    if (!masterDisabled) {
+                        setRequestedPlayable(item);
+                        setRequestVisible(true);
+                    }
+                }
+                } />}
             />
             {/* <div style={{position: "fixed", top: 0}}> */}
             {/* </div> */}
         </>
 
+    )
+}
+
+export const Playable = (props: { item: PlayableType, index?: string, onClick: () => void, dims: number, currentlyPlaying?: boolean }) => {
+    const item = props.item;
+    const index = props.index;
+    const ratio = item.amountBid / item.minPrice;
+    const complete = ratio >= 1
+    const status = props.item.status;
+
+    const disabled = status === "ACCEPTED" || status === "REJECTED" || status === "REFUNDED"
+
+    return (
+        <>
+            <div style={{
+                width: "100%", position: "relative", cursor: disabled ? undefined : "pointer", borderRadius: 5, overflow: 'hidden',
+                boxShadow: props.currentlyPlaying ? `0px 0px 5px ${"#fff8"}` : undefined,
+                opacity: disabled && !props.currentlyPlaying ? 0.5 : 1
+            }} onClick={() => { if (!disabled) props.onClick() }}>
+                {disabled ?
+                    <></>
+                    :
+                    complete ?
+                        <div className="App-animated-gradient" style={{
+                            position: "absolute", left: 0, height: "100%", width: `100%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                        }} />
+                        : <div className="App-animated-gradient" style={{
+                            position: "absolute", left: 0, height: "100%", width: `${ratio * 100}%`, backgroundColor: Colors.secondaryDark, zIndex: 0
+                        }} />}
+                <div style={{
+                    height: "100%", width: "100%", display: 'flex', zIndex: 2, padding: padding / 2, justifyContent: 'space-between',
+                    backgroundColor: status === "ACCEPTED" ?
+                        props.currentlyPlaying ?
+                            Colors.secondaryRegular : Colors.secondaryDark
+                        : "#fff1", //flexWrap: 'wrap'
+                }}>
+                    <div style={{ position: 'relative', flexGrow: 0, flexShrink: 1 }}>
+                        <Song song={item.song} dims={props.dims} key={item.id + "_index" + index} roundedEdges />
+                    </div>
+                    <div style={{
+                        display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', minWidth: 0, paddingLeft: 5, flexShrink: 0, flexGrow: 1, flexDirection: "column"
+                    }}>
+                        {/* <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold' }}>
+                            {disabled || item.minPrice <= item.amountBid ? "" :
+                            }
+                        </span> */}
+                        <span className="App-montserrat-normaltext" style={{ position: "relative", right: 0, fontWeight: 'bold',/* wordBreak: "break-all", overflowWrap: "break-word" */ }}>
+                            {disabled ? (props.item.status === "ACCEPTED" ? (props.currentlyPlaying ? "Playing!" : "Played") : "Refunded") :
+                                item.minPrice <= item.amountBid ?
+                                    <>
+                                        {item.status === "LOCKED" ? <></> : <span className="App-smalltext" style={{ lineHeight: 1 }}>Bid: </span>}
+                                        ${numberToPrice(item.amountBid)}
+                                    </>
+                                    :
+                                    item.amountBid === 0 ?
+                                        <span style={{ lineHeight: 1 }}>${numberToPrice(item.minPrice)}</span>
+                                        :
+                                        <span className="App-smalltext" style={{ lineHeight: 1, padding: 3, backgroundColor: "white", color: 'black', borderRadius: 5 }}>${numberToPrice(item.minPrice - item.amountBid)} left! 📈</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+                {/* <div style={{ position: "absolute", left: 0, height: "100%", width: `${Math.random() * 100}%`, backgroundColor: "red" }} /> */}
+            </div>
+            {/* <div style={{ paddingBottom: padding / 4 }}></div> */}
+            <div style={{ paddingBottom: padding / 2 }}></div>
+        </>
     )
 }
