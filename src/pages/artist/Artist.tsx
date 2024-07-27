@@ -20,7 +20,7 @@ import defaultBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProfileButton from "../../components/ProfileButton";
 import TopBar from "../../components/TopBar";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRotateLeft, faArrowRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { RequestPlayableModal } from "../../components/RequestSongModal";
 import { TZArtistSearchButton } from "../../components/TZSearchButton";
 import { fetchWithToken } from "../..";
@@ -516,6 +516,13 @@ const DisableRequests = (props: { show: boolean, artist: LiveArtistType }) => {
             <div className="App-bluroverlay">
                 <span className="App-subtitle" style={{ color: Colors.primaryRegular, }}>{"Sorry!"}</span>
                 <span className="App-normaltext" style={{ textAlign: 'center', padding: padding }}>{props.artist.name} isn't live at the moment.</span>
+                <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
+                    window.location.reload();
+                }}>
+                    <FontAwesomeIcon color={Colors.primaryRegular} icon={faArrowRotateRight}></FontAwesomeIcon>
+                    <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', paddingLeft: 5 }}>Reload page</span>
+                </div>
+                <div style={{ paddingBottom: padding }}></div>
                 <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
                     router.navigate("/code");
                 }}>
