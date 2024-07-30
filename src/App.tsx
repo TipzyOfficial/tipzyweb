@@ -1,6 +1,7 @@
 import './index.css';
 // import './App.css'
 import Login from './pages/Login';
+import Register from './pages/Register'
 import {
   createBrowserRouter,
   Outlet,
@@ -18,13 +19,17 @@ import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { fetchPaymentSheetParams } from './lib/stripe';
 import { DisplayOrLoading } from './components/DisplayOrLoading';
+import Profile from './pages/profile/Profile';
 import ArtistInfo from './pages/bar/artist/ArtistInfo';
 import Account from './pages/profile/Account';
 import About from './pages/profile/About';
 import AlbumPage from './pages/bar/artist/AlbumPage';
 import Albums from './pages/bar/artist/Albums';
+import PaymentSetupScreen from './pages/profile/PaymentSetupScreen';
 import { NotFoundPage } from './pages/bar/NotFoundPage';
+import Invoices from './pages/profile/Invoices';
 import { getCookies, getStored } from './lib/utils';
+import Artist from './pages/artist/Artist';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -32,7 +37,7 @@ function Redirect() {
   const userContext = useContext(UserSessionContext)
   const cookies = getCookies();
   const session = cookies.get("bar_session");
-  let loggedin = getStored("refresh_token") && getStored("expires_at") && userContext.user.user.access_token;
+  let loggedin = getStored("refresh_token") && getStored("expires_at") && userContext.user.access_token;
 
   //reset refresh expiry time
   // if (loggedin) cookies.set("refresh_token", cookies.get("refresh_token"), { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
@@ -52,6 +57,10 @@ export const router = createBrowserRouter([{
     {
       path: "/login",
       Component: Login
+    },
+    {
+      path: "/register",
+      Component: Register
     },
     {
       path: "/code",
@@ -74,6 +83,14 @@ export const router = createBrowserRouter([{
       Component: About
     },
     {
+      path: "/payments",
+      Component: PaymentSetupScreen
+    },
+    {
+      path: "/invoices",
+      Component: Invoices
+    },
+    {
       path: "/search/artist",
       Component: ArtistInfo
     },
@@ -84,6 +101,10 @@ export const router = createBrowserRouter([{
     {
       path: "/search/albums",
       Component: Albums
+    },
+    {
+      path: "/artist",
+      Component: Artist
     }
     ], errorElement: <NotFoundPage title="Oops!" body={"We can't seem to find that page. Are you sure you entered everything correctly?"} backPath={-1} />
 }

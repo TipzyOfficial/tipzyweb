@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { consumerFromJSON } from "..";
-import { Business } from "./user";
+import { Consumer } from "./user";
 
 export const ServerInfo = {
     baseurl: "https://www.tipzyapi.com/",

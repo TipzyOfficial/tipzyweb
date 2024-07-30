@@ -237,7 +237,7 @@ export default function Bar() {
     const refreshAllReqs = async (indicator: boolean) => {
 
         console.log("refrehing all")
-        if (usc.user.user.access_token === "") return;
+        if (usc.user.access_token === "") return;
         if (indicator) setCload(true);
 
         if (topRequest) {

@@ -27,7 +27,7 @@ export default function ProfileButton(props: { position?: "fixed" | "relative" |
         }}>
             <button
                 onClick={() => {
-                    if (!usc.user.user.access_token) {
+                    if (!usc.user.access_token) {
                         Logout(usc);
                         return;
                     }

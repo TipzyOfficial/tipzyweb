@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
-import { Business } from "./user";
+import { Consumer } from "./user";
 
 function isMobile() {
     const o = typeof window.screen.orientation !== 'undefined';
@@ -19,9 +19,9 @@ export function shuffleArrayMutate(array: any[]) {
     return array;
 }
 
-export function shuffleWithUserID(array: any[], user: Business) {
+export function shuffleWithUserID(array: any[], user: Consumer) {
     let seed = 0;
-    const userid = (user.user.name.toString() ?? "" + user.user.email.toString() ?? "")
+    const userid = (user.name.toString() ?? "" + user.email.toString() ?? "" + user.birthday ?? "")
 
     for (let i = 0; i < userid.length; i++) {
         seed += userid.charCodeAt(i);

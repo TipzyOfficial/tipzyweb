@@ -7,7 +7,7 @@ import { clearData, getCookies, getStored, setStored } from './lib/utils';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import { TokenReturnType, getUser } from './lib/serverinfo';
-import { Business, DefaultUser, Users } from './lib/user';
+import { Consumer, Users } from './lib/user';
 import Cookies from 'universal-cookie';
 import { fetchWithToken as sharedFetchWithToken } from './lib/serverinfo';
 import { useCookies } from 'react-cookie';
@@ -31,7 +31,7 @@ root.render(
 
 export function Logout(usc: UserSessionContextType, data?: any, defaultToBar?: boolean) {
   usc.abortController?.abort();
-  usc.setUser(new Business(usc.user.user));
+  usc.setUser(new Consumer("", 0, "", -1));
 
   clearData();
   googleLogout();
@@ -63,22 +63,23 @@ async function resetTokenValues(usc: UserSessionContextType, tokens: TokenReturn
 
   // await cookies.set("expires_at", tokens.refresh_token, { path: '/' });
   const newUser = structuredClone(usc.user);
-  newUser.user.access_token = tokens.access_token;
-  newUser.user.expires_at = tokens.expires_at
+  newUser.access_token = tokens.access_token;
+  newUser.expires_at = tokens.expires_at
 
   usc.setUser(newUser);
 }
 
 export async function getTipper(usc: UserSessionContextType, cookies: Cookies) {
-  return getUser("business", usc.user.user.access_token, usc.user.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc), (tokens: TokenReturnType) => resetTokenValues(usc, tokens));
+  return getUser("tipper", usc.user.access_token, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc), (tokens: TokenReturnType) => resetTokenValues(usc, tokens));
 }
 
-export const consumerFromJSON = (user: Business | undefined, d: any) => {
-  const c = new Business(user?.user ?? new Users("", 0, ""), user?.business_name, user?.business_image, user?.business_id, user?.allowing_requests, user?.auto_accept_requests, user?.type, user?.address, user?.vibe, user?.hour_explicit_allowed, user?.hour_explicit_blocked)
+export const consumerFromJSON = (user: Consumer | undefined, d: any) => {
+  const c = new Consumer(user ? user.access_token : d.access_token, user ? user.expires_at : d.expires_at, `${d.user_info.first_name} ${d.user_info.last_name}`, d.id, user ? user.image : undefined, d.user_info.email, user ? user.requests : undefined)
+  c.setBirthday(d.birthday);
   return (c);
 }
 
-export async function checkIfAccountExists(usc: UserSessionContextType): Promise<{ result: boolean, data: Business }> {
+export async function checkIfAccountExists(usc: UserSessionContextType): Promise<{ result: boolean, data: Consumer }> {
   return getTipper(usc, cookies).then(json => {
     const d = json.data;
     return {
@@ -99,7 +100,7 @@ async function handleResponse(response: Response | null) {
 }
 
 export async function fetchWithToken(usc: UserSessionContextType, urlEnding: string, fetchMethod: string, body?: string, data?: any) {
-  const response = await sharedFetchWithToken(usc.user.user.access_token, urlEnding, usc.user.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, data), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
+  const response = await sharedFetchWithToken(usc.user.access_token, urlEnding, usc.user.expires_at, () => rootGetRefreshToken(cookies), () => Logout(usc, data), (tokens: TokenReturnType) => resetTokenValues(usc, tokens), fetchMethod, body, usc.abortController?.signal).then(response => {
     return handleResponse(response);
   }).catch((e: Error) => {
     if (e.name === "AbortError") {
@@ -123,7 +124,7 @@ export async function storeTokens(accessToken: string, refreshToken: string, exp
 }
 
 export async function storeAll(usc: UserSessionContextType, refreshToken: string) {
-  await storeTokens(usc.user.user.access_token, refreshToken, usc.user.user.expires_at);
+  await storeTokens(usc.user.access_token, refreshToken, usc.user.expires_at);
   const json = await getTipper(usc, cookies);
 
   return consumerFromJSON(usc.user, json.data);

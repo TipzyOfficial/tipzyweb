@@ -5,10 +5,11 @@ import TZButton from '../components/TZButton';
 import { CredentialResponse, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import GoogleButton from 'react-google-button';
 import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
-import { Business, Users } from '../lib/user';
+import { Consumer } from '../lib/user';
 import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from '../index';
 import { ReturnLinkType, router } from '../App';
 import { UserSessionContext } from '../lib/UserSessionContext';
+import Register from './Register';
 import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
@@ -117,7 +118,7 @@ function Login(props: { back?: boolean }) {
     }
 
     function loginWithGoogleToken(token: string | null) {
-        if (!token) {
+        if (token == null) {
             alert("Null token when logging into Google. Contact an admin for more information.")
             return;
         }
@@ -149,7 +150,7 @@ function Login(props: { back?: boolean }) {
         }
     }
 
-    const createAccount = async (user: Business, isApple?: boolean, customName?: AppleReturnType) => {
+    const createAccount = async (user: Consumer, isApple?: boolean, customName?: AppleReturnType) => {
         console.log(customName);
 
         if (!isApple)
@@ -157,7 +158,7 @@ function Login(props: { back?: boolean }) {
                 method: 'POST',
                 headers:
                 {
-                    Authorization: `Bearer ${user.user.access_token}`,
+                    Authorization: `Bearer ${user.access_token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -172,7 +173,7 @@ function Login(props: { back?: boolean }) {
                 fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.name.firstName}&last_name=${customName.name.lastName}&email=${customName.email}`, {
                     method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${user.user.access_token}`,
+                        Authorization: `Bearer ${user.access_token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -186,7 +187,7 @@ function Login(props: { back?: boolean }) {
                 fetch(`${ServerInfo.baseurl}tipper/?first_name=${localStorage.getItem("firstName") ?? "Guest"}&last_name=${localStorage.getItem("lastName") ?? "Guest"}&email=${localStorage.getItem("email") ?? "guest@guest.com"}`, {
                     method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${user.user.access_token}`,
+                        Authorization: `Bearer ${user.access_token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -209,7 +210,7 @@ function Login(props: { back?: boolean }) {
         const img = undefined;
         const expires_at = expiresAt;
 
-        const user = new Business(new Users(accessToken, expires_at, name ?? "", img ?? undefined));
+        const user = new Consumer(accessToken, expires_at, name ?? "", -1, img ?? undefined);
         usc.setUser(user);
 
         // console.log("login", user);
@@ -441,41 +442,83 @@ function Login(props: { back?: boolean }) {
                             <img src={FullLogo} style={{ width: "30%", minWidth: 100, maxWidth: 180, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
                             <br></br>
                             <span className='App-logintitle' style={{ whiteSpace: 'pre-line' }}>
-                                BUSINESS DASHBOARD
+                                YOUR TUNES,{"\n"}
+                                YOUR CALL,{"\n"}
+                                YOUR VIBE.
                             </span>
                             {/* <img src={FullLogo} style={{ minWidth: 100, maxWidth: 200, objectFit: 'contain' }} alt={"tipzy full logo"}></img> */}
                         </div>
                     </div>
                     <div style={{
-                        zIndex: 1, justifyContent: 'flex-start', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 1,
+                        zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
                         width: "100%",
                         maxWidth: 500,
+                        padding: padding, borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
                     }}>
-                        <div style={{
-                            padding: padding, borderRadius: radius, backgroundColor: Colors.background, width: "100%"
-                        }}>
-                            <TZButton leftComponent={
-                                <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
-                            } onClick={googleLogin} backgroundColor="#white" fontSize={20} color="black" title="Continue With Google" />
-                            <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
-                                By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
-                                <br></br>
-                                Questions? <a style={{ textDecoration: 'underline', color: "#AAA" }} href="mailto:help@tipzy.app" target='_blank' rel="noreferrer">Contact us.</a>
-                            </div>
-
+                        <AppleLogin
+                            clientId="app.tipzy.TipzyAppleSignIn"
+                            redirectURI="https://app.tipzy.app/"
+                            // redirectURI="https://tipzyapi.com/auth/token"
+                            usePopup={true}
+                            // responseType="code id_token"
+                            responseType="code"
+                            callback={() => {
+                                console.log("response from apple: ");
+                            }} // Catch the response
+                            scope="name email"
+                            // responseType='id_token'
+                            responseMode="query"
+                            render={renderProps => (  //Custom Apple Sign in Button
+                                <TZButton leftComponent={
+                                    <><FontAwesomeIcon fontSize={18} icon={faApple} color={"black"} /> <div style={{ paddingRight: 5 }} /></>
+                                } onClick={renderProps.onClick} backgroundColor="white" fontSize={20} color="black" title="Continue With Apple" />
+                            )}
+                        />
+                        <div style={{ paddingBottom: padding }}></div>
+                        <TZButton leftComponent={
+                            <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
+                        } onClick={googleLogin} backgroundColor="#white" fontSize={20} color="black" title="Continue With Google" />
+                        <div style={{ paddingBottom: padding }}></div>
+                        {
+                            usernameShowing ?
+                                <div style={{
+                                    backgroundColor: "#8885", width: "100%",
+                                    paddingTop: padding / 2, paddingBottom: padding, paddingLeft: padding, paddingRight: padding,
+                                    borderRadius: radius
+                                }}>
+                                    <div style={{ width: "100%", display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: padding / 2 }}>
+                                        <div style={{ cursor: 'pointer' }} onClick={() => setUsernameShowing(false)}><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
+                                    </div>
+                                    <div style={{ paddingBottom: 10, width: "100%" }}>
+                                        <input className='input' placeholder='Username' autoCorrect='off' autoCapitalize='off' value={username} onChange={(e) => setUsername(e.target.value)} />
+                                    </div>
+                                    <div style={{ paddingBottom: 10, width: "100%" }}>
+                                        <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    </div>
+                                    <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
+                                    {/* <TZButton onClick={() => setUsernameShowing(false)} title={"back"} disabled={loginPressed}></TZButton> */}
+                                </div>
+                                :
+                                <TZButton onClick={() => setUsernameShowing(true)} backgroundColor="#8885" fontSize={20} color="white" title="Sign in with Username" />
+                        }
+                        <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                            Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
+                        </div>
+                        <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
+                            By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                            <br></br>
+                            Questions? <a style={{ textDecoration: 'underline', color: "#AAA" }} href="mailto:help@tipzy.app" target='_blank' rel="noreferrer">Contact us.</a>
                         </div>
                     </div>
                 </div >
-                : <Register />
+                : <Register />}
+            {(globalDisable || loginPressed) ?
+                <div className='App-body' style={{ position: 'fixed', zIndex: 10, top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
+                    <Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }}></Spinner>
+                </div>
+                : <></>
             }
-            {
-                (globalDisable || loginPressed) ?
-                    <div className='App-body' style={{ position: 'fixed', zIndex: 10, top: 0, display: 'flex', flex: 1, width: '100%', backgroundColor: Colors.background + "aa" }}>
-                        <Spinner style={{ color: Colors.primaryRegular, width: 75, height: 75 }}></Spinner>
-                    </div>
-                    : <></>
-            }
-        </div >
+        </div>
     )
 }
 
