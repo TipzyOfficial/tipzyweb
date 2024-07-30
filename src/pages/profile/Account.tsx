@@ -81,7 +81,7 @@ export default function Account() {
     }
 
     useEffect(() => {
-        if (user.access_token === "") {
+        if (user.user.access_token === "") {
             Logout(usc, undefined, true);
             return;
         }
@@ -113,20 +113,22 @@ export default function Account() {
     }
 
     function DeleteAccount() {
-        const mr = Math.random() * 1000000;
-        const letters = ["L", "E", "S", "G", "T", "P", "Z", "Y", "B", "A"]
-        const r = letters[(Math.floor(mr) % 10)] + letters[(Math.floor(mr / 10) % 10)] + (mr).toString().substring(0, 5);
-        const s = prompt(
-            `WARNING: You're about to permanently delete your account and all your data. This action is NOT REVERSIBLE and your transactions WILL NOT be refunded. ${"\n\n"} If you still want to continue, enter "${r}" below.`,
-        )
-        if (s === r) {
-            fetchWithToken(usc, `tipper/`, 'DELETE').then(r => {
-                console.log("deleting acc...");
-                Logout(usc, undefined, true);
-            }).catch((e) => { alert(`Error: Problem deleting account: ${e}. Please try again later.`) })
-        } else {
-            alert("Account not deleted. You didn't enter in the right code.")
-        }
+        alert('If you wish to delete your account, please reach out to us in the "Contact Us" section.')
+
+        // const mr = Math.random() * 1000000;
+        // const letters = ["L", "E", "S", "G", "T", "P", "Z", "Y", "B", "A"]
+        // const r = letters[(Math.floor(mr) % 10)] + letters[(Math.floor(mr / 10) % 10)] + (mr).toString().substring(0, 5);
+        // const s = prompt(
+        //     `WARNING: You're about to permanently delete your account and all your data. This action is NOT REVERSIBLE and your transactions WILL NOT be refunded. ${"\n\n"} If you still want to continue, enter "${r}" below.`,
+        // )
+        // if (s === r) {
+        //     fetchWithToken(usc, `tipper/`, 'DELETE').then(r => {
+        //         console.log("deleting acc...");
+        //         Logout(usc, undefined, true);
+        //     }).catch((e) => { alert(`Error: Problem deleting account: ${e}. Please try again later.`) })
+        // } else {
+        //     alert("Account not deleted. You didn't enter in the right code.")
+        // }
     }
 
     const handleBackClick = () => {
@@ -154,16 +156,10 @@ export default function Account() {
             <div style={styles}>
                 <div>
                     <div style={{ paddingBottom: padding / 2 }}>
-                        <ProfileTop title="Name" value={user.name} profilePic={user.image} email={user.email} />
+                        <ProfileTop title="Name" value={user.user.name} profilePic={user.user.image} email={user.user.email} />
 
                         {/* <span className="App-tertiarytitle">Your Information</span> */}
                     </div>
-                    <div style={{ paddingBottom: padding / 2 }}>
-                        <span className="App-tertiarytitle">Payments</span>
-                    </div>
-                    <CardDetails />
-                    <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails}></TZProfileComponent>
-                    <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span className="App-tertiarytitle">About</span>
                     </div>

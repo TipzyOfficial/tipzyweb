@@ -47,7 +47,7 @@ export default function SongSearch() {
     /**
      * user session data. when making any calls to the backend you will need to
      * reference this variable (I'll provide an example).
-     * feel free to check out all the other info that Consumer has in it under lib/user.ts
+     * feel free to check out all the other info that Business has in it under lib/user.ts
      */
     const user = userContext.user;
 

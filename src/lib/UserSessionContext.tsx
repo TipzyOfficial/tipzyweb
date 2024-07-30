@@ -1,5 +1,5 @@
 import { createContext, useEffect, useRef, useState } from 'react';
-import { Consumer, Users } from './user'
+import { Business, Users } from './user'
 import { SongRequestType, SongType } from './song';
 import { Logout, checkIfAccountExists, consumerFromJSON, fetchWithToken, rootGetRefreshToken, storeTokens } from '../index'
 import { BarType, LiveArtistType } from './bar';
@@ -8,11 +8,11 @@ import Cookies from 'universal-cookie';
 import { useLocation } from 'react-router-dom';
 import { getCookies, getStored } from './utils';
 import { fetchBarInfo } from '../pages/bar/Bar';
-import { fetchArtistInfo } from '../pages/artist/Artist';
+import _ from 'lodash';
 
-export const defaultConsumer: () => Consumer = () => {
+export const defaultConsumer: () => Business = () => {
     const cookies = getCookies();
-    return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "", -1)
+    return new Business(new Users(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, ""))
 }
 
 export type ArtistStateType = {
@@ -26,8 +26,8 @@ export type BarStateType = {
 }
 
 export type UserSessionContextType = {
-    user: Consumer,
-    setUser: (user: Consumer) => void; //do we even need this? or can i just load for asyncstorage
+    user: Business,
+    setUser: (user: Business) => void; //do we even need this? or can i just load for asyncstorage
     barState: BarStateType;
     artistState: ArtistStateType;
     abortController?: AbortController;
@@ -43,7 +43,7 @@ const initArtist = async (id?: number): Promise<LiveArtistType | undefined> => {
 }
 
 export const DefaultUserSessionContext: UserSessionContextType = {
-    user: new Consumer("", 0, "", -1),
+    user: new Business(new Users("", 0, "")),
     setUser: () => { },
     barState: {
         bar: undefined, setBar: () => { }
@@ -53,7 +53,7 @@ export const DefaultUserSessionContext: UserSessionContextType = {
     },
 }
 
-// export const getStartingUser = async (): Promise<Consumer> => {
+// export const getStartingUser = async (): Promise<Business> => {
 //     const cookies = getCookies();
 //     const rt = cookies.get("refresh_token");
 //     const dc = defaultConsumer();
@@ -94,69 +94,19 @@ export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boole
     return [p, ptc];
 }
 
-// const fetchTokenPendingData = async (user: Consumer) : Promise<[SongRequestType[], number, number]> => {
-//     let pr: SongRequestType[] = [];
-//     let tokens = 0;
-//     let ptokens = 0;
-
-//     await fetchWithToken(user, `get_tipper_account_tokens/`, 'GET').then((r: Response) => r.json()).then(json => {
-//       tokens += json.token_amount;
-//     }).catch((e: Error) => {console.log("problem getting tipzy tokens.", e);});
-
-//     // console.log("fetch acc tokens");
-
-//     //get the pending tokens
-//     await getPending(user).then(r => {
-//         ptokens = r[1];
-//         pr = r[0];
-//     })
-//     .catch((e: Error) => console.log("problem getting pending tokens.", e));
-
-//     // console.log("fetch pending tokens");
-
-//     return [pr, tokens, ptokens];
-// }
-
-// export const setTokenPendingData = async (context: UserSessionContextType) => {
-//     //get the real tokens
-
-//     console.log("fetching data...");
-
-//     const r = await fetchTokenPendingData(context.user);
-
-//     const user = context.user;
-//     // setPendingRequests(context, d[0]);
-
-//     if(user.token_count !== r[1] || user.pending_tokens !== r[2] || user.pending_requests.length !== r[0].length 
-//         || (JSON.stringify(user.pending_requests) !== JSON.stringify(r[0]))) {
-//         console.log("tc diff:", user.token_count, r[1], "ptc diff: ", user.pending_tokens, r[2], "prl diff: ", user.pending_requests.length, r[0].length,)
-//         context.setUser(new Consumer(
-//             user.access_token,
-//             user.expires_at,
-//             user.name,
-//             user.image,
-//             user.email,
-//             r[1],
-//             r[0],
-//             r[2],
-//         ));
-//     }
-//   }
-
-
 export function UserSessionContextProvider(props: { children: JSX.Element }) {
     const cookies = getCookies();
     const dc = defaultConsumer();
-    const [user, setUser] = useState<Consumer>(dc);
+    const [user, setUser] = useState<Business>(dc);
     const [bar, setBar] = useState<BarType | undefined>();
     const [artist, setArtist] = useState<LiveArtistType | undefined>();
     const [ready, setReady] = useState(false);
     const abortController = new AbortController();
     // const signal = abortController.signal;
 
-    const editUser = (user: Consumer) => {
+    const editUser = (user: Business) => {
         // console.log("usc edit to", user);
-        // storeTokens(user.access_token, cookies.get("refresh_token"), user.expires_at);
+        // storeTokens(user.user.access_token, cookies.get("refresh_token"), user.expires_at);
         setUser(user);
     }
 
@@ -173,16 +123,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
     //10s refresh token data
     // const refreshRate = 10000;
 
-    const refreshUserData = (user: Consumer) => {
-        const c = new Consumer(
-            user.access_token,
-            user.expires_at,
-            user.name,
-            user.id,
-            user.image,
-            user.email,
-        );
-
+    const refreshUserData = (user: Business) => {
+        const c = _.cloneDeep(user);
         editUser(c);
     }
 
@@ -214,7 +156,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
         }
 
         if (!getStored("refresh_token") || !getStored("access_token")) {
-            if (usc.user.access_token) {
+            if (usc.user.user.access_token) {
                 checkIfAccountExists(usc).then((r) => {
                     console.log("rdata", r.data)
                     refreshUserData(r.data)
