@@ -26,8 +26,10 @@ import { fetchNoToken } from "../../lib/serverinfo";
 import { getCookies } from "../../lib/utils";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
+import _ from "lodash"
+import { deepEqual } from "assert";
 
-const SongResultListMemo = memo(SongList, () => true);
+const SongResultListMemo = memo(SongList, (a, b) => JSON.stringify(a.songs) === JSON.stringify(b.songs));
 
 export default function SongSearch() {
     /**
@@ -71,14 +73,15 @@ export default function SongSearch() {
     const fdim = window.height && window.width ? Math.min(window.height * 0.9, window.width) : 1000;
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const limit = 50;
-    const timeoutInterval = 3000;
+    const timeoutInterval = 500;
     const androidTimeout = 100;
     const [androidStupid, setAndroidStupid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
     const loc = useLocation();
+    const [recentQuery, setRecentQuery] = useState(loc.state?.query ?? "");
     const [searchQuery, setSearchQuery] = useState(loc.state?.query ?? "");
     const [searching, setSearching] = useState(false);
-    let recentQuery = "";
+    // let recentQuery = "";
 
     const defaultResults = () => {
         if (!userContext.barState.bar) {
@@ -100,9 +103,12 @@ export default function SongSearch() {
 
         setSearching(true);
 
-        if (query.length === 0) {
+        if (!query || query.trim().length === 0) {
+            setSearching(false);
+            setRecentQuery(query);
             return defaultResults();
         }
+
         const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
         const songs: SongType[] = [];
@@ -111,8 +117,7 @@ export default function SongSearch() {
         });
 
         setSearching(false);
-
-        recentQuery = query;
+        setRecentQuery(query);
 
         return songs;
     }
@@ -149,8 +154,8 @@ export default function SongSearch() {
         // setSearchResults(defaultResults());
 
         const delayDebounceFn = setTimeout(() => {
-            if (recentQuery !== searchQuery)
-                getSearchResults(searchQuery, limit);
+            // if (recentQuery !== searchQuery)
+            getSearchResults(searchQuery, limit);
         }, timeoutInterval)
 
         return () => {
