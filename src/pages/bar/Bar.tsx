@@ -210,10 +210,14 @@ export default function Bar() {
             const np = json.data.now_playing;
             const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images.thumbnail, albumartbig: np.images.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
             const q: SongType[] = [];
+
             json.data.queue.forEach((e: any) => {
                 const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
                 q.push(song);
             });
+
+            console.log("NOWPLAYING", nowplaying, "QUEUE", q)
+
             return [nowplaying, q];
         });
     }
@@ -252,8 +256,6 @@ export default function Bar() {
 
         const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
             setTopRequest(parseRequest(json.data[0]));
-            console.log("allr", json)
-
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
