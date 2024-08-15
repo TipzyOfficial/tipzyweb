@@ -326,7 +326,7 @@ export default function Bar() {
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
             <div className="App-body-top" style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
-                {/* <DisableRequests show={!bar.allowingRequests || disableEverything} bar={bar} /> */}
+                <DisableRequests show={!bar.allowingRequests || disableEverything} bar={bar} />
                 <div ref={topBarRef}
                     style={{
                         flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
