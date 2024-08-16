@@ -127,7 +127,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     alert("This establishment isn't taking requests at the moment. Please come back later.");
                     break;
                 case 3:
-                    alert("This track has been accepted to be played recently. Please select another song or try requesting it later.");
+                    alert("You can't request that song right now. Please select another song or try requesting it later.");
                     break;
                 case 4:
                     alert("This establishment doesn't allow explicit songs to be requested at this time.");

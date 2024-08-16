@@ -19,7 +19,7 @@ import ProfileButton from "../../components/ProfileButton";
 import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
 import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json';
@@ -606,6 +606,13 @@ const DisableRequests = (props: { show: boolean, bar: BarType }) => {
             <div className="App-bluroverlay">
                 <span className="App-subtitle" style={{ color: Colors.primaryRegular, }}>{"Sorry!"}</span>
                 <span className="App-normaltext" style={{ textAlign: 'center', padding: padding }}>Unfortunately, {props.bar.name} isn't accepting requests at the moment.</span>
+                <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
+                    window.location.reload();
+                }}>
+                    <FontAwesomeIcon color={Colors.primaryRegular} icon={faArrowRotateRight}></FontAwesomeIcon>
+                    <span className="App-normaltext" style={{ color: Colors.primaryRegular, fontWeight: 'bold', paddingLeft: 5 }}>Reload page</span>
+                </div>
+                <div style={{ paddingBottom: padding }} />
                 <div style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: padding, borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, borderStyle: "solid", }} onClick={() => {
                     router.navigate("/code");
                 }}>
