@@ -101,37 +101,39 @@ function PaymentSetupInner(props: { handleSubmit?: () => void }) {
         }
     };
 
-    useEffect(() => {
-        if (stripe) {
-            const pr = stripe.paymentRequest({
-                country: 'US',
-                currency: 'usd',
-                total: {
-                    label: 'Demo total',
-                    amount: 1099,
-                },
-                requestPayerName: true,
-                requestPayerEmail: true,
-            });
+    // useEffect(() => {
+    //     if (stripe) {
+    //         const pr = stripe.paymentRequest({
+    //             country: 'US',
+    //             currency: 'usd',
+    //             total: {
+    //                 label: 'Demo total',
+    //                 amount: 1099,
+    //             },
+    //             requestPayerName: true,
+    //             requestPayerEmail: true,
+    //         });
 
-            pr.canMakePayment().then(result => {
-                if (result) {
-                    console.log("can make payment")
-                    setPaymentRequest(pr);
-                } else {
-                    console.log("cannot make payment")
-                }
-            });
-        }
-    }, [stripe])
+    //         pr.canMakePayment().then(result => {
+    //             if (result) {
+    //                 console.log("can make payment")
+    //                 setPaymentRequest(pr);
+    //             } else {
+    //                 console.log("cannot make payment")
+    //             }
+    //         });
+    //     }
+    // }, [stripe])
 
     return (
         <form onSubmit={handleSubmit}>
-            <PaymentElement options={{
-                wallets: {
-                    applePay: 'auto'
-                }
-            }} />
+            <PaymentElement
+                options={{
+                    paymentMethodOrder: ['apple_pay', 'google_pay', 'card', 'klarna'],
+                    wallets: {
+                        applePay: 'auto'
+                    }
+                }} />
             {/* {paymentRequest ?
                 <PaymentRequestButtonElement options={{ paymentRequest: paymentRequest }} />
                 : <></>} */}
