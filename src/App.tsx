@@ -37,17 +37,10 @@ function Redirect() {
   //reset refresh expiry time
   // if (loggedin) cookies.set("refresh_token", cookies.get("refresh_token"), { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
 
-  //if (window.location.pathname) //bar?id=66
   return (
     (session ? <Navigate to={`/bar?id=${session}`}></Navigate> : <Navigate to='/code'></Navigate>)
   )
 }
-
-function RerouteForTJs() {
-  if (window.location.search === "?id=66") return <Navigate to={`/artist?id=2`}></Navigate>
-  return (<Bar />)
-}
-
 
 export const router = createBrowserRouter([{
   // element: <Layout/>,
@@ -70,7 +63,7 @@ export const router = createBrowserRouter([{
     },
     {
       path: "/bar",
-      Component: RerouteForTJs
+      Component: Bar
     },
     {
       path: "/search",
