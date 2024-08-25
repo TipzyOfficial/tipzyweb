@@ -405,11 +405,11 @@ export default function Bar() {
                             justifyContent: current ? 'center' : 'flex-end',
                             zIndex: 10,
                         }}>
-                            {/* {current ? <div style={{
+                            {current ? <div style={{
                                 flex: 1, paddingBottom: padding, paddingLeft: padding, paddingRight: padding, paddingTop: padding, maxWidth: 800,
                             }}>
                                 <CurrentlyPlaying current={current} queue={queue} songDims={songDims} />
-                            </div> : <></>} */}
+                            </div> : <></>}
                         </div>
                     </>
 
