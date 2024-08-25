@@ -4,7 +4,6 @@ import Login from './pages/Login';
 import Register from './pages/Register'
 import {
   createBrowserRouter,
-  Outlet,
   RouterProvider,
 } from 'react-router-dom';
 import Bar from './pages/bar/Bar';
@@ -12,14 +11,9 @@ import EnterCode from './pages/bar/EnterCode';
 import { useContext } from 'react';
 import { Navigate } from 'react-router'
 // import { Cookies, useCookies } from 'react-cookie';
-import Cookies from 'universal-cookie';
 import { UserSessionContext, UserSessionContextProvider } from './lib/UserSessionContext';
 import SongSearch from './pages/bar/SongSearch';
-import { Elements, PaymentElement, } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { fetchPaymentSheetParams } from './lib/stripe';
-import { DisplayOrLoading } from './components/DisplayOrLoading';
-import Profile from './pages/profile/Profile';
 import ArtistInfo from './pages/bar/artist/ArtistInfo';
 import Account from './pages/profile/Account';
 import About from './pages/profile/About';
@@ -30,6 +24,7 @@ import { NotFoundPage } from './pages/bar/NotFoundPage';
 import Invoices from './pages/profile/Invoices';
 import { getCookies, getStored } from './lib/utils';
 import Artist from './pages/artist/Artist';
+import { Analytics } from "@vercel/analytics/react"
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -119,6 +114,7 @@ function App() {
             router={router} />
         </div>
       </UserSessionContextProvider>
+      <Analytics />
     </div>
   )
 }
