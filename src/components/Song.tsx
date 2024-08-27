@@ -123,7 +123,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                             setRequestedSong(item);
 
                             if (usc.user.access_token && usc.user.access_token.length > 0) {
-                                track("SongPressed", { user: `${usc.user.name}, ${usc.user.email}`, song: `${item.title} by ${item.artists.toString()}` });
+                                track("SongPressed", { user: `${usc.user.name}, id: ${usc.user.id}`, song: `${item.title} by ${item.artists.toString()}` });
                             } else {
                                 track("SongPressed", { user: "[GUEST USER]", song: `${item.title} by ${item.artists.toString()}` })
                             }
