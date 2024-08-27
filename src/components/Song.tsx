@@ -4,11 +4,14 @@ import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
 import { router } from "../App";
 import FlatList from "flatlist-react/lib";
-import { memo, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import RequestSongModal, { RequestPlayableModal } from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
 import { numberToPrice } from "../lib/utils";
+import { track } from '@vercel/analytics';
+import { UserSessionContext } from "../lib/UserSessionContext";
+
 
 export function artistsStringListToString(artists: string[]) {
     let out = "";
@@ -87,6 +90,7 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
 export function SongList(props: { songs: SongType[], dims: number, noImage?: boolean, numbered?: boolean, logoutData?: any, refreshRequests?: () => Promise<void> }) {
 
     const songDims = props.dims;
+    const usc = useContext(UserSessionContext);
 
     let initRQS = undefined;
 
@@ -117,6 +121,13 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                     <>
                         <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id + "_index" + index} noImage={props.noImage} onClick={() => {
                             setRequestedSong(item);
+
+                            if (usc.user.access_token) {
+                                track("SongPressed", { user: usc.user.name, email: usc.user.email });
+                            } else {
+                                track("SongPressed", { user: "[GUEST USER]", email: "N/A" })
+                            }
+
                             setRequestVisible(true);
                         }} />
                         <div style={{

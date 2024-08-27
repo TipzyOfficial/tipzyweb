@@ -92,6 +92,7 @@ const RequestsContent = (props: {
     return (
         <div style={{ justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ padding: padding }}>Have a request that got accepted but didn't play? Email us at <a href="mailto:help@tipzy.app">help@tipzy.app</a> and we'll sort it out.</span>
                 <ExpandHeader zI={4} height={height} loading={cload} text="Pending" onClick={() => setPendingVisible(!pendingVisible)} expanded={pendingVisible}></ExpandHeader>
                 {cload ? <></> : (pendingVisible ? <>
                     <FlatList
