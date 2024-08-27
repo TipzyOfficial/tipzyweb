@@ -122,10 +122,10 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                         <SongRenderItem song={item} dims={songDims} number={props.numbered ? parseInt(index) : undefined} key={item.id + "_index" + index} noImage={props.noImage} onClick={() => {
                             setRequestedSong(item);
 
-                            if (usc.user.access_token) {
-                                track("SongPressed", { user: `${usc.user.name}, ${usc.user.email}` });
+                            if (usc.user.access_token && usc.user.access_token.length > 0) {
+                                track("SongPressed", { user: `${usc.user.name}, ${usc.user.email}`, song: `${item.title} by ${item.artists.toString()}` });
                             } else {
-                                track("SongPressed", { user: "[GUEST USER]" })
+                                track("SongPressed", { user: "[GUEST USER]", song: `${item.title} by ${item.artists.toString()}` })
                             }
 
                             setRequestVisible(true);
