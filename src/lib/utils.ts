@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 import { Consumer } from "./user";
+import { UserSessionContextType } from "./UserSessionContext";
 
 function isMobile() {
     const o = typeof window.screen.orientation !== 'undefined';
@@ -78,6 +79,10 @@ export const getStored = (key: string): string | null => {
 
 export const setStored = (key: string, value: string): void => {
     return localStorage.setItem(key, value);
+}
+
+export const trackUser = (usc: UserSessionContextType): string => {
+    return `${usc.user.name}, id: ${usc.user.id}`;
 }
 
 export function useInterval(callback: () => any, delay: number, firstDelay?: number): void {

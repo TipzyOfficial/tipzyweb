@@ -8,7 +8,7 @@ import { memo, useContext, useEffect, useState } from "react";
 import RequestSongModal, { RequestPlayableModal } from "./RequestSongModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus, faMusic } from "@fortawesome/free-solid-svg-icons";
-import { numberToPrice } from "../lib/utils";
+import { numberToPrice, trackUser } from "../lib/utils";
 import { track } from '@vercel/analytics';
 import { UserSessionContext } from "../lib/UserSessionContext";
 
@@ -126,7 +126,7 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
 
                             if (usc.user.access_token && usc.user.access_token.length > 0) {
                                 track("SongPressed", {
-                                    user: `${usc.user.name}, id: ${usc.user.id}`, song: `${item.title} by ${item.artists.toString()}`,
+                                    user: trackUser(usc), song: `${item.title} by ${item.artists.toString()}`,
                                     business: usc.barState.bar ? `bar ${usc.barState.bar.id}` : usc.artistState.artist ? `artist ${usc.artistState.artist.id}` : "Unknown business"
                                 });
                             } else {

@@ -1,5 +1,5 @@
 import React, { memo, useContext, useEffect, useLayoutEffect, useState } from "react";
-import { UserSessionContext } from "../../lib/UserSessionContext";
+import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
 import '../../App.css'
 import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { Colors, padding, radius } from "../../lib/Constants";
@@ -8,26 +8,27 @@ import { router } from "../../App";
 import ProfileButton from "../../components/ProfileButton";
 import { BarType } from "../../lib/bar";
 import FlatList from "flatlist-react/lib";
-import { fetchWithToken } from "../..";
 import { fetchNoToken } from "../../lib/serverinfo";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import defaultBarBackground from "../../assets/default_background.png"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
-import { getCookies } from "../../lib/utils";
+import { getCookies, trackUser } from "../../lib/utils";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 // import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import FullLogo from '../../assets/Tipzy_Full_Orange.png';
 import defaultBackground from "../../assets/entercode_background.jpg"
+import { track } from '@vercel/analytics';
 
 
-const BarRenderItem = memo((props: { bar: BarType }) => {
+const BarRenderItem = memo((props: { usc: UserSessionContextType, bar: BarType }) => {
     const rand = Math.random();
     const bar = props.bar;
 
     return (
         <div style={{ cursor: 'pointer' }} onClick={() => {
-            router.navigate(`/bar?id=${bar.id}`)
+            router.navigate(`/bar?id=${bar.id}`);
+            track("BarPressed", { user: trackUser(props.usc), id: bar.id })
         }}>
             <div style={{ width: "100%", padding: padding, backgroundColor: "#8883", borderRadius: radius, display: 'flex', alignItems: 'center' }}>
                 <div style={{
@@ -89,8 +90,8 @@ function EnterCode() {
 
 
     const onClick = () => {
-        console.log("barid", barID)
-        router.navigate(`/bar?id=${barID}`)
+        console.log("barid", barID);
+        router.navigate(`/bar?id=${barID}`);
     }
 
     useEffect(() => {
@@ -133,7 +134,7 @@ function EnterCode() {
                                 list={bars}
                                 renderItem={(item, key) =>
                                     <div key={item.id + "k_" + key}>
-                                        <BarRenderItem bar={item} />
+                                        <BarRenderItem usc={userContext} bar={item} />
                                     </div>
                                 }
                             /> :
