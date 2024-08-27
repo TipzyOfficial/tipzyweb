@@ -92,6 +92,8 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     const songDims = props.dims;
     const usc = useContext(UserSessionContext);
 
+    console.log("usc", usc.user)
+
     let initRQS = undefined;
 
     try {
@@ -123,7 +125,10 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                             setRequestedSong(item);
 
                             if (usc.user.access_token && usc.user.access_token.length > 0) {
-                                track("SongPressed", { user: `${usc.user.name}, id: ${usc.user.id}`, song: `${item.title} by ${item.artists.toString()}` });
+                                track("SongPressed", {
+                                    user: `${usc.user.name}, id: ${usc.user.id}`, song: `${item.title} by ${item.artists.toString()}`,
+                                    business: usc.barState.bar ? `bar ${usc.barState.bar.id}` : usc.artistState.artist ? `artist ${usc.artistState.artist.id}` : "Unknown business"
+                                });
                             } else {
                                 track("SongPressed", { user: "[GUEST USER]", song: `${item.title} by ${item.artists.toString()}` })
                             }
