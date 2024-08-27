@@ -123,9 +123,9 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
                             setRequestedSong(item);
 
                             if (usc.user.access_token) {
-                                track("SongPressed", { user: usc.user.name, email: usc.user.email });
+                                track("SongPressed", { user: `${usc.user.name}, ${usc.user.email}` });
                             } else {
-                                track("SongPressed", { user: "[GUEST USER]", email: "N/A" })
+                                track("SongPressed", { user: "[GUEST USER]" })
                             }
 
                             setRequestVisible(true);
