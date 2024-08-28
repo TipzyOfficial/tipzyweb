@@ -27,7 +27,7 @@ import { ApplePayOption } from "@stripe/stripe-js/dist/stripe-js/elements/apple-
 // }
 
 
-export default function PaymentSetup(props: { handleSubmit?: () => void, update?: boolean }) {
+export default function PaymentSetup(props: { handleSubmit?: () => void, update?: boolean, submitText?: string }) {
     const [clientSecret, setClientSecret] = useState<string | undefined | null>(undefined);
     const usc = useContext(UserSessionContext);
 
@@ -54,7 +54,7 @@ export default function PaymentSetup(props: { handleSubmit?: () => void, update?
                     appearance: { theme: "night" }
                 }}
             >
-                <PaymentSetupInner handleSubmit={props.handleSubmit} />
+                <PaymentSetupInner handleSubmit={props.handleSubmit} submitText={props.submitText} />
             </Elements>
             :
             <div style={{ padding: 20, display: 'flex', justifyContent: 'center' }}>
@@ -63,7 +63,7 @@ export default function PaymentSetup(props: { handleSubmit?: () => void, update?
     )
 }
 
-function PaymentSetupInner(props: { handleSubmit?: () => void }) {
+function PaymentSetupInner(props: { handleSubmit?: () => void, submitText?: string }) {
     const [disabled, setDisabled] = useState(false);
     const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
 
@@ -138,7 +138,7 @@ function PaymentSetupInner(props: { handleSubmit?: () => void }) {
                 <PaymentRequestButtonElement options={{ paymentRequest: paymentRequest }} />
                 : <></>} */}
             <div style={{ paddingTop: padding }}>
-                <TZButton title={"Submit"} loading={disabled} />
+                <TZButton title={props.submitText ?? "Submit"} loading={disabled} />
             </div>
         </form>
     );

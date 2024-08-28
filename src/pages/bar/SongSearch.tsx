@@ -111,6 +111,8 @@ export default function SongSearch() {
 
         const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
+        console.log(json);
+
         const songs: SongType[] = [];
         json.data.forEach((item: any) => {
             songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images.thumbnail ?? "", albumartbig: item.images.teaser, id: item.id ?? -1, explicit: item.explicit });

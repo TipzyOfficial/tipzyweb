@@ -8,6 +8,11 @@ function isMobile() {
     return o;
 }
 
+//checks if a user is logged out
+export function noAccessToken(usc: UserSessionContextType): boolean {
+    return !usc.user.access_token || usc.user.access_token.length === 0;
+}
+
 export function numberToPrice(n: number): string {
     return `${(n / 100).toFixed(2)}`;
 }
@@ -82,7 +87,7 @@ export const setStored = (key: string, value: string): void => {
 }
 
 export const trackUser = (usc: UserSessionContextType): string => {
-    if (!usc.user.access_token || usc.user.access_token.length === 0) return "[GUEST USER]"
+    if (noAccessToken(usc)) return "[GUEST USER]"
     return `${usc.user.name}, id: ${usc.user.id}`;
 }
 

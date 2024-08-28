@@ -9,11 +9,12 @@ import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
 import { consumerFromJSON, fetchWithToken, getTipper, Logout } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
-import { getCookies, numberToPrice, useInterval } from "../lib/utils";
+import { getCookies, noAccessToken, numberToPrice, useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
 import '../App.css'
+import Login from "../pages/Login";
 
 export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     // const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
@@ -103,7 +104,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<number>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
     const fdim = useFdim();
     const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
-    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
+    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);
@@ -111,6 +112,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const [disabled, setDisabled] = useState(false);
     const usc = useContext(UserSessionContext);
     const [isFreeRequest, setIsFreeRequest] = useState(false);
+    const [loginScreenVisible, setLoginScreenVisible] = useState(noAccessToken(usc));
 
     // console.log(masterPrice);
 
@@ -161,7 +163,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Container fluid>
                         <Row className="justify-content-md-center">
                             <Col>
-                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later. {"\n"}<span style={{ fontWeight: "bold" }}>Your charge: ${masterPrice !== undefined ? (masterPrice / 100).toFixed(2) : "undefined"}</span></Modal.Body>
+                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Last step! Please set up payment–this is a {"\n"}<span style={{ fontWeight: "bold" }}>one-time process.</span> Your charge: ${masterPrice !== undefined ? (masterPrice / 100).toFixed(2) : "undefined"}
+                                </Modal.Body>
                                 {success === true ?
                                     <>
                                         <div style={{ paddingTop: padding }}></div>
@@ -174,7 +177,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     </>
 
                                     :
-                                    <PaymentSetup handleSubmit={() => sendRequestClose(masterPrice)} />
+                                    <PaymentSetup submitText="Request your song!" handleSubmit={() => sendRequestClose(masterPrice)} />
                                 }
                             </Col>
                         </Row>
@@ -202,7 +205,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
-            if ((!usc.user.access_token || usc.user.access_token.length === 0)) {
+            if (noAccessToken(usc)) {
                 Logout(usc, data);
             } else {
                 if (isFreeRequest) {
@@ -283,7 +286,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     fontSize={Math.min(30, dims / 7)}
                                     loading={disabled || price === undefined}
                                     completed={success}
-                                    title={(!usc.user.access_token || usc.user.access_token.length === 0) ? "Request a song!" : (price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : "")}
+                                    title={noAccessToken(usc) ? "Request a song!" : (price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : "")}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick(price)} />
                             }
@@ -370,6 +373,25 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         );
     }
 
+    function LoginScreen() {
+        return (
+            <>
+                {/* <Modal.Header closeButton>
+                    <Modal.Title style={{ color: 'white' }}>Login u bozo</Modal.Title>
+                </Modal.Header> */}
+                <Modal.Body data-bs-theme="light">
+                    <Container fluid>
+                        <Row className="justify-content-md-center">
+                            <Col>
+                                <Login small nextPage={() => setLoginScreenVisible(false)} />
+                            </Col>
+                        </Row>
+                    </Container>
+                </Modal.Body>
+            </>
+        )
+    }
+
     const priceWords = (minPrice: number | undefined, contributed: number | undefined, price: number | undefined) => {
         if (minPrice === undefined || price === undefined || contributed === undefined) return "Something went wrong.";
         if (minPrice <= contributed) return `We reached the goal–add another $${numberToPrice(price)}!`;
@@ -432,7 +454,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
-            {paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
+            {loginScreenVisible ? <LoginScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );
 }

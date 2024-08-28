@@ -13,6 +13,15 @@
   color: white;
 }
 
+.App-body-small {
+  background-color: #17171E;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
 .App-body-top {
   background-color: #17171E;
   min-height: 100dvh;
@@ -96,6 +105,15 @@
 .App-logintitle {
   font-size: calc(25px + 4vmin);
   line-height: calc(25px + 4vmin);
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.App-logintitle-small {
+  font-size: calc(15px + 4vmin);
+  line-height: calc(15px + 4vmin);
   font-weight: bold;
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;

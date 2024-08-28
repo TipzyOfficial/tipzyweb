@@ -34,7 +34,7 @@ type AppleReturnType = {
     email: string,
 }
 
-function Login(props: { back?: boolean }) {
+function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }) {
     const [globalDisable, setGlobalDisable] = useState(false);
     const [loginPage, setLoginPage] = useState(true);
     const [username, setUsername] = useState("");
@@ -45,16 +45,21 @@ function Login(props: { back?: boolean }) {
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
     const [usernameShowing, setUsernameShowing] = useState(false);
+    const small = props.small;
 
     const nextPage = () => {
-        const ret = localStorage.getItem("ret");
-
-        if (ret) {
-            const retDecoded: ReturnLinkType = JSON.parse(atob(ret));
-            router.navigate(retDecoded.url, { state: { fromLogin: true, ...retDecoded.data } })
+        if (props.nextPage) {
+            props.nextPage();
         } else {
-            console.log("going barid")
-            router.navigate(barID ? `/bar?id=${barID}` : '/code');
+            const ret = localStorage.getItem("ret");
+
+            if (ret) {
+                const retDecoded: ReturnLinkType = JSON.parse(atob(ret));
+                router.navigate(retDecoded.url, { state: { fromLogin: true, ...retDecoded.data } })
+            } else {
+                console.log("going barid")
+                router.navigate(barID ? `/bar?id=${barID}` : '/code');
+            }
         }
     }
 
@@ -334,7 +339,7 @@ function Login(props: { back?: boolean }) {
         }
 
         return (
-            <div className="App-body" style={{ width: "100%", justifyContent: 'flex-end' }}>
+            <div className={small ? "App-body-small" : "App-body"} style={{ width: "100%", justifyContent: 'flex-end' }}>
                 <div style={{
                     zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
                     width: "100%",
@@ -389,10 +394,11 @@ function Login(props: { back?: boolean }) {
     // }
 
     return (
-        <div className="App-body" style={{ width: "100%" }}>
+        <div className={small ? "App-body-small" : "App-body"} style={{ width: "100%" }}>
             {/* <img src={require('../assets/rave.gif')} style={{ objectFit: 'fill' }}></img> */}
             <div
-                style={{
+
+                style={small ? undefined : {
                     zIndex: 0,
                     position: 'fixed',
                     right: 0,
@@ -433,17 +439,33 @@ function Login(props: { back?: boolean }) {
                         </div>
                     </div> : <></>}
                     <div style={{
-                        zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: "100%", padding: padding,
+                        zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: "100%",
                         maxWidth: 500,
                     }}>
                         <div>
-                            <img src={FullLogo} style={{ width: "30%", minWidth: 100, maxWidth: 180, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
-                            <br></br>
-                            <span className='App-logintitle' style={{ whiteSpace: 'pre-line' }}>
-                                YOUR TUNES,{"\n"}
-                                YOUR CALL,{"\n"}
-                                YOUR VIBE.
-                            </span>
+
+                            {
+                                small ?
+                                    <div style={{ display: "flex", flexDirection: 'column', justifyContent: 'center' }}>
+                                        <span className='App-logintitle-small' style={{ whiteSpace: 'pre-line', }}>
+                                            YOU'RE SO CLOSE TO
+                                            HEARING YOUR FAVORITE SONG!
+                                        </span>
+                                        <span className='App-tertiarytitle' style={{ whiteSpace: 'pre-line', textAlign: 'center' }}>
+                                            {"\n"}Please sign in:
+                                        </span>
+                                    </div>
+                                    :
+                                    <>
+                                        <img src={FullLogo} style={{ width: "30%", minWidth: 100, maxWidth: 180, objectFit: 'contain', paddingBottom: padding }} alt={"tipzy full logo"}></img>
+                                        <br></br>
+                                        <span className='App-logintitle' style={{ whiteSpace: 'pre-line' }}>
+                                            YOUR TUNES,{"\n"}
+                                            YOUR CALL,{"\n"}
+                                            YOUR VIBE.
+                                        </span>
+                                    </>
+                            }
                             {/* <img src={FullLogo} style={{ minWidth: 100, maxWidth: 200, objectFit: 'contain' }} alt={"tipzy full logo"}></img> */}
                         </div>
                     </div>
@@ -499,9 +521,9 @@ function Login(props: { back?: boolean }) {
                                 :
                                 <TZButton onClick={() => setUsernameShowing(true)} backgroundColor="#8885" fontSize={20} color="white" title="Sign in with Username" />
                         }
-                        <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                        {small ? <></> : <div style={{ paddingTop: 10, textAlign: 'center' }}>
                             Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
-                        </div>
+                        </div>}
                         <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
                             By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                             <br></br>

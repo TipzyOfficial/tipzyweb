@@ -8,6 +8,7 @@ import useWindowDimensions from "../lib/useWindowDimensions";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { useContext } from "react";
 import { Logout } from "..";
+import { noAccessToken } from "../lib/utils";
 
 export default function ProfileButton(props: { position?: "fixed" | "relative" | "sticky", disabled?: boolean, style?: React.CSSProperties }) {
     // const fs = 25
@@ -27,7 +28,7 @@ export default function ProfileButton(props: { position?: "fixed" | "relative" |
         }}>
             <button
                 onClick={() => {
-                    if (!usc.user.access_token) {
+                    if (noAccessToken(usc)) {
                         Logout(usc);
                         return;
                     }
