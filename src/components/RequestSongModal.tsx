@@ -206,7 +206,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             if (noAccessToken(usc)) {
                 Logout(usc, data);
             } else {
-                if (isFreeRequest) {
+                if (isFreeRequest || price === 0) {
                     setDisabled(true);
                     sendRequestClose(0);
                 } else {

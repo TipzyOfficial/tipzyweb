@@ -522,7 +522,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                         <div style={{ paddingBottom: padding }}></div>
                         <TZButton leftComponent={
                             <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
-                        } onClick={googleLogin} backgroundColor="#white" fontSize={20} color="black" title="Continue With Google" />
+                        } onClick={googleLogin} backgroundColor="white" fontSize={20} color="black" title="Continue With Google" />
                         <div style={{ paddingBottom: padding }}></div>
                         {
                             usernameShowing ?
