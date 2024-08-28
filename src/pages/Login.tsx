@@ -16,7 +16,7 @@ import { getCookies } from '../lib/utils';
 import AppleLogin from 'react-apple-login'
 import { useLocation, useNavigation, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAppleAlt, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faAppleAlt, faArrowLeft, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faApple } from '@fortawesome/free-brands-svg-icons';
 import GoogleLogo from '../assets/google_logo_clear.svg';
 // import raveVideo from "../assets/TipzyHomePageVideo.mp4";
@@ -340,20 +340,39 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
 
         return (
             <div className={small ? "App-body-small" : "App-body"} style={{ width: "100%", justifyContent: 'flex-end' }}>
-                <div style={{
-                    zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
-                    width: "100%",
-                    maxWidth: 500,
-                    padding: padding,
-                    borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
-                }}>
+                <div
+
+                    style={
+                        small ? undefined :
+                            {
+                                zIndex: 1, justifyContent: 'flex-end', alignItems: 'center', display: 'flex', flexDirection: 'column', flex: 0,
+                                width: "100%",
+                                maxWidth: 500,
+                                padding: padding,
+                                borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
+                            }
+                    }>
                     <div style={styles.header}>
-                        <div style={{ width: "100%", display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: 0 }}>
-                            <div style={{ cursor: 'pointer' }} onClick={() => setLoginPage(true)}><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
-                        </div>
-                        <div style={{ width: "100%", justifyContent: 'center', display: 'flex' }}>
-                            <span className='App-subtitle' style={{ textAlign: 'center' }}>Sign Up</span>
-                        </div>
+                        {
+                            small ?
+                                <>
+                                    <div style={{ width: "100%", display: 'flex', flexDirection: 'row', alignItems: 'center', paddingBottom: 0 }}>
+                                        <div style={{ cursor: 'pointer' }} onClick={() => setLoginPage(true)}><FontAwesomeIcon icon={faArrowLeft}></FontAwesomeIcon></div>
+                                    </div>
+                                    <div style={{ width: "100%", justifyContent: 'center', display: 'flex' }}>
+                                        <span className='App-subtitle' style={{ textAlign: 'center' }}>Sign Up</span>
+                                    </div>
+                                </>
+                                :
+                                <>
+                                    <div style={{ width: "100%", display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: 0 }}>
+                                        <div style={{ cursor: 'pointer' }} onClick={() => setLoginPage(true)}><FontAwesomeIcon icon={faXmark}></FontAwesomeIcon></div>
+                                    </div>
+                                    <div style={{ width: "100%", justifyContent: 'center', display: 'flex' }}>
+                                        <span className='App-subtitle' style={{ textAlign: 'center' }}>Sign Up</span>
+                                    </div>
+                                </>
+                        }
                     </div>
                     <div style={{ paddingBottom: 10, width: "100%" }}>
                         <input className='input' placeholder='First name' value={firstName} onChange={(e) => setFirstName(e.target.value)} />
@@ -376,12 +395,16 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
                         <ConfirmPasswordRule />
                     </div>
                     <TZButton onClick={onRegister} disabled={false} title="Sign up"></TZButton>
-                    <div style={{ paddingTop: 10, width: "100%", textAlign: 'center' }}>
-                        Have an account? <a href={"#"} onClick={() => { if (!registerPressed) setLoginPage(true) }}>Sign In</a>
-                    </div>
-                    <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
-                        By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
-                    </div>
+                    {small ? <></> :
+                        <>
+                            <div style={{ paddingTop: 10, width: "100%", textAlign: 'center' }}>
+                                Have an account? <a href={"#"} onClick={() => { if (!registerPressed) setLoginPage(true) }}>Sign In</a>
+                            </div>
+                            <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center' }}>
+                                By logging in or creating an account you agree to our <a href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
+                            </div>
+                        </>
+                    }
                 </div>
             </div>
         )
@@ -521,9 +544,11 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
                                 :
                                 <TZButton onClick={() => setUsernameShowing(true)} backgroundColor="#8885" fontSize={20} color="white" title="Sign in with Username" />
                         }
-                        {small ? <></> : <div style={{ paddingTop: 10, textAlign: 'center' }}>
-                            Don't have an account? <a href={"#"} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</a>
-                        </div>}
+                        {/* {small ? <></> :  */}
+                        <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                            Don't have an account? <span style={{ color: Colors.primaryRegular }} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</span>
+                        </div>
+                        {/* } */}
                         <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
                             By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                             <br></br>
