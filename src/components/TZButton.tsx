@@ -4,11 +4,12 @@ import { Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle as faSuccess, faXmarkCircle as faFailure } from '@fortawesome/free-solid-svg-icons';
 
-function TZButton(props: { onClick?: () => void; title?: string, backgroundColor?: string, width?: number | string, disabled?: boolean, fontSize?: number, color?: string, loading?: boolean, completed?: boolean, leftComponent?: JSX.Element }) {
+function TZButton(props: { onClick?: () => void; title?: string, backgroundColor?: string, width?: number | string, disabled?: boolean, fontSize?: number, color?: string, loading?: boolean, completed?: boolean, leftComponent?: JSX.Element, animateglow?: boolean }) {
     const [opacity, setOpacity] = useState(1);
 
     return (
         <button
+            className={props.animateglow ? 'App-animated-gradient-fast-light' : undefined}
             disabled={props.disabled || props.loading || props.completed}
             onClick={() => { if (!props.disabled && props.onClick) props.onClick() }}
             onPointerLeave={() => {
@@ -34,7 +35,8 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
                 WebkitBoxSizing: "border-box",
                 MozBoxSizing: "border-box",
                 opacity: props.disabled ? 0.5 : props.completed || props.loading ? 1 : opacity,
-                border: 'none'
+                border: 'none',
+                boxShadow: props.animateglow ? '0px 0px 5px white' : undefined,
             }}>
             {props.completed !== undefined ?
                 <FontAwesomeIcon icon={props.completed ? faSuccess : faFailure} fontSize={props.fontSize} color={props.color ?? "white"}></FontAwesomeIcon>

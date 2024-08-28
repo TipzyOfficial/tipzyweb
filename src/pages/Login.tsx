@@ -22,7 +22,7 @@ import GoogleLogo from '../assets/google_logo_clear.svg';
 // import raveVideo from "../assets/TipzyHomePageVideo.mp4";
 import FullLogo from '../assets/Tipzy_Full_Orange.png';
 import rave from '../assets/rave.png';
-
+import { isIOS } from 'react-device-detect';
 
 
 const formatBirthday = (birthday: Date) => {
@@ -514,9 +514,11 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                             // responseType='id_token'
                             responseMode="query"
                             render={renderProps => (  //Custom Apple Sign in Button
-                                <TZButton leftComponent={
-                                    <><FontAwesomeIcon fontSize={18} icon={faApple} color={"black"} /> <div style={{ paddingRight: 5 }} /></>
-                                } onClick={renderProps.onClick} backgroundColor="white" fontSize={20} color="black" title="Continue With Apple" />
+                                <TZButton
+                                    animateglow={isIOS}
+                                    leftComponent={
+                                        <><FontAwesomeIcon fontSize={18} icon={faApple} color={"black"} /> <div style={{ paddingRight: 5 }} /></>
+                                    } onClick={renderProps.onClick} backgroundColor="white" fontSize={20} color="black" title="Continue With Apple" />
                             )}
                         />
                         <div style={{ paddingBottom: padding }}></div>
