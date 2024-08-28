@@ -23,6 +23,8 @@ const LoadingScreen = () =>
     <span>Loading artist information...</span>
   </div>;
 
+const TSMemo = memo(SongList, () => true);
+
 export default function ArtistInfo() {
   const usc = useContext(UserSessionContext);
 
@@ -44,8 +46,6 @@ export default function ArtistInfo() {
   const albumDims = fdim ? Math.max(Math.min(fdim / 2.9, 200), 50) : 120;
 
   // console.log("idname", artistID, artistName);
-
-  const TSMemo = memo(SongList, () => true);
 
   async function fetchArtist(id: string): Promise<ArtistType | undefined> {
     if (!barID) return;
