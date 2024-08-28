@@ -97,15 +97,13 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
     useEffect(() => {
         try {
             const ret = localStorage.getItem("ret");
+
             // console.log("ret", ret);
             const parsed = ret ? JSON.parse(atob(ret)) : undefined;
             // console.log("parsed", parsed);
             const initRQS = parsed ? parsed.data?.selectedSong : undefined;
             // console.log("initRQS", initRQS);
-            if (ret) {
-                localStorage.removeItem("ret");
-                console.log("removing ret from song")
-            }
+
 
             setRequestedSong(initRQS);
             setRequestVisible(initRQS !== undefined);
@@ -118,7 +116,18 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
 
 
     const [requestedSong, setRequestedSong] = useState<SongType | undefined>(undefined);
-    const [requestVisible, setRequestVisible] = useState(false);
+    const [requestVisible, setRequestVisibleIn] = useState(false);
+
+    const setRequestVisible = (b: boolean) => {
+        if (!b) {
+            const ret = localStorage.getItem("ret");
+            if (ret) {
+                localStorage.removeItem("ret");
+                console.log("removing ret from song")
+            }
+        }
+        setRequestVisibleIn(b);
+    }
 
     return (
         <>
