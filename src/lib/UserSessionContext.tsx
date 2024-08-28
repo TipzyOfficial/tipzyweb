@@ -181,6 +181,8 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
             user.id,
             user.image,
             user.email,
+            user.requests,
+            user.freeRequests,
         );
 
         editUser(c);

@@ -7,9 +7,9 @@ import Song, { artistsStringListToString } from "./Song";
 import PaymentSetup from "./PaymentSetup";
 import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
-import { fetchWithToken } from "..";
+import { consumerFromJSON, fetchWithToken, getTipper } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
-import { numberToPrice, useInterval } from "../lib/utils";
+import { getCookies, numberToPrice, useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
@@ -24,13 +24,12 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
 
     const p = minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100;
 
-    const getPrice = async () => { };
-
-    const sendRequest = async (price: number): Promise<number> => {
+    const sendRequest = async (price: number, free: boolean): Promise<number> => {
         if (!props.playable) return 0;
 
         return await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
-            price: price
+            price: price,
+            free: false,
         }), props.data).then(response => response.json()).then(json => {
             console.log("json: ", json)
             if (json.status === 200) return 1;
@@ -48,7 +47,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
         });
     }
 
-    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={{ selectedPlayable: props.playable }} price={p} getPrice={getPrice} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
+    return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={{ selectedPlayable: props.playable }} price={p} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
 }
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
@@ -70,8 +69,10 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     // }
 
 
-    const sendRequest = async (price: number): Promise<number> => {
+    const sendRequest = async (price: number, free: boolean): Promise<number> => {
         if (!userContext.barState.bar) return 0;
+
+        console.log("is free?", free)
 
         return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
             track_id: song?.id ?? "",
@@ -81,24 +82,25 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             price: price,
             token_count: 0,
             explicit: song.explicit,
+            free: free,
         })).then(response => response.json()).then(json => {
             // console.log("json: ", json)
             if (json.status === 200) return 1;
             else if (json.status === 433) return 2;
             else if (json.status === 444) return 3;
             else if (json.status === 469) return 4;
-            else throw new Error("Error: " + json.detail)
+            else console.log("error: ", json.detail);
+            return 0;
             // console.log("re", response) 
         }).catch((e: Error) => {
-            console.log("error: ", e)
+            console.log("error: ", e);
             return 0;
         });
     }
-    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={undefined} getPrice={async () => { }} refreshRequests={props.refreshRequests} />
+    return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={undefined} refreshRequests={props.refreshRequests} />
 }
 
-function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number) => Promise<number>, price: number | undefined, getPrice: () => Promise<void>, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
-
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<number>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
     const fdim = useFdim();
     const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false }
@@ -107,14 +109,16 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const userContext = useContext(UserSessionContext);
     const [masterPrice, setMasterPrice] = useState(props.price);
     const [disabled, setDisabled] = useState(false);
+    const usc = useContext(UserSessionContext);
+    const [isFreeRequest, setIsFreeRequest] = useState(false);
 
     // console.log(masterPrice);
 
     const data = props.playable ? props.data : { selectedSong: song, ...props.data }
 
     const sendRequestClose = async (price: number | undefined) => {
-        if (!price) return;
-        const r = await props.sendRequest(price);
+        if (price === undefined) return;
+        const r = await props.sendRequest(price, isFreeRequest);
         if (r === 1) {
             setSuccess(true);
             if (props.refreshRequests)
@@ -139,6 +143,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             }
         }
 
+        await checkIsFree();
+
         // alert("Your request was sent! Thank you for using Tipzy :)");
         // useInterval(() => props.handleClose(), 500);
         setTimeout(() => props.handleClose(), 500);
@@ -154,14 +160,14 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Container fluid>
                         <Row className="justify-content-md-center">
                             <Col>
-                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later. {"\n"}<span style={{ fontWeight: "bold" }}>Your charge: ${masterPrice ? (masterPrice / 100).toFixed(2) : "undefined"}</span></Modal.Body>
+                                <Modal.Body style={{ textAlign: "center", padding: 0, color: 'white' }}>Please set up your payment info–we'll keep it on file for later. {"\n"}<span style={{ fontWeight: "bold" }}>Your charge: ${masterPrice !== undefined ? (masterPrice / 100).toFixed(2) : "undefined"}</span></Modal.Body>
                                 {success === true ?
                                     <>
                                         <div style={{ paddingTop: padding }}></div>
                                         <TZButton
                                             fontSize={Math.min(30, dims / 7)}
                                             completed={success}
-                                            title={masterPrice ? `$${(masterPrice / 100).toFixed(2)}` : ""}
+                                            title={masterPrice !== undefined ? `$${(masterPrice / 100).toFixed(2)}` : ""}
                                             backgroundColor={success ? Colors.green : success === false ? Colors.red : undefined}
                                         />
                                     </>
@@ -195,18 +201,23 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
-
-            console.log("setting disabled true");
-            if (disabled) return;
-            setDisabled(true);
-            setMasterPrice(price);
-            const hasStripe = await checkStripe();
-            if (hasStripe === null) {
-                console.log("Error getting Stripe. Are you sure you're logged in?")
-            }
-            else if (!hasStripe) setPaymentScreenVisible(true);
-            else {
-                sendRequestClose(price);
+            if (isFreeRequest) {
+                setDisabled(true);
+                sendRequestClose(0);
+            } else {
+                console.log("setting disabled true");
+                if (disabled) return;
+                setDisabled(true);
+                setMasterPrice(price);
+                const hasStripe = await checkStripe();
+                if (hasStripe === null) {
+                    alert("Error getting payment information. Are you sure you've connected with Stripe?");
+                    setDisabled(false);
+                }
+                else if (!hasStripe) setPaymentScreenVisible(true);
+                else {
+                    sendRequestClose(price);
+                }
             }
         }
 
@@ -267,7 +278,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     fontSize={Math.min(30, dims / 7)}
                                     loading={disabled || price === undefined}
                                     completed={success}
-                                    title={price ? `$${(price / 100).toFixed(2)}` : ""}
+                                    title={price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : ""}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick(price)} />
                             }
@@ -310,7 +321,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                                 <TZButton
                                                     width={"100%"}
                                                     // fontSize={Math.min(30, dims / 7)}
-                                                    title={price ? `Add $${(price / 100).toFixed(2)}` : ""}
+                                                    title={price !== undefined ? `Add $${(price / 100).toFixed(2)}` : ""}
                                                     loading={disabled || price === undefined}
                                                     completed={success}
                                                     color={success ? Colors.green : success === false ? Colors.red : Colors.background}
@@ -363,6 +374,14 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         if (diff > 0) return `$${numberToPrice((diff))} left to reach the goal...`
     }
 
+    const checkIsFree = async () => {
+        const d = await getTipper(usc, getCookies());
+        // console.log("gettipper", d.data);
+        const consumer = consumerFromJSON(usc.user, d.data);
+        usc.setUser(consumer);
+        return consumer;
+    }
+
     const getPrice = async () => {
         if (props.playable) {
             setMasterPrice(props.price);
@@ -370,13 +389,23 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         else {
             setMasterPrice(undefined);
 
-            const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-                business_id: userContext.barState.bar?.id
-            })).catch(e => { throw e });
+            if (usc.user.access_token) {
+                const consumer = await checkIsFree();
+                const isFree = !(props.playable) && consumer.freeRequests > 0;
+                setIsFreeRequest(isFree);
 
-            const json = await response.json();
+                if (!isFree) {
+                    const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+                        business_id: userContext.barState.bar?.id
+                    })).catch(e => { throw e });
 
-            setMasterPrice(json.Dynamic_price);
+                    const json = await response.json();
+
+                    setMasterPrice(json.Dynamic_price);
+                } else {
+                    setMasterPrice(0);
+                }
+            }
         }
     }
 

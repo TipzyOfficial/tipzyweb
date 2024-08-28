@@ -4,7 +4,7 @@ import { Colors, padding as basePadding, padding, radius, useFdim } from "../../
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BarType } from "../../lib/bar";
-import { fetchWithToken } from "../..";
+import { consumerFromJSON, fetchWithToken, getTipper } from "../..";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
 import { getCookies, shuffle, shuffleWithUserID, useCallbackRef, useInterval } from "../../lib/utils";
 import TZSearchButton from "../../components/TZSearchButton";
@@ -32,6 +32,7 @@ import { fetchNoToken } from "../../lib/serverinfo";
 import defaultBackground from "../../assets/default_background.png"
 import TZButton from "../../components/TZButton";
 import TopBar from "../../components/TopBar";
+import { styles } from "../Login";
 
 const utf8Encode = new TextEncoder();
 
@@ -289,6 +290,14 @@ export default function Bar() {
         }
 
         setCload(false);
+
+        //refresh free reqs
+        const tipper = await getTipper(usc, cookies);
+        const data = tipper.data;
+        if (data.free_request_allowance !== usc.user.freeRequests) {
+            const consumer = consumerFromJSON(usc.user, data);
+            usc.setUser(consumer);
+        }
     }
 
     const allRefresh = (indicator: boolean) => {
@@ -336,7 +345,6 @@ export default function Bar() {
                         backdropFilter: 'blur(5px)',
                     }}>
                     <TopBar />
-
                 </div>
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                     <div style={{
@@ -374,6 +382,7 @@ export default function Bar() {
                         paddingBottom: padding / 2,
                         backgroundColor: topBarColor,
                         display: 'flex',
+                        flexDirection: 'column',
                         justifyContent: 'center',
                         WebkitBackdropFilter: 'blur(5px)',
                         backdropFilter: 'blur(5px)',
@@ -385,6 +394,13 @@ export default function Bar() {
                                 <TZSearchButton dims={searchDims} onClick={() => { router.navigate(`/search`) }} />
                             </div>
                         </div>
+                        {
+                            usc.user.freeRequests > 0 ?
+                                <div style={{ padding: 5, width: "100%", display: 'flex' }}>
+                                    <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: "center", }}>
+                                        Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.user.freeRequests} free request{usc.user.freeRequests === 1 ? "" : "s"}!</span></span>
+                                </div> : <></>
+                        }
                     </div>
 
 

@@ -164,10 +164,11 @@ function Login(props: { back?: boolean }) {
                 body: JSON.stringify({
                     birthday: formatBirthday(new Date()),
                 })
-            }).catch((e: Error) => {
-                alert(`Error creating new account. Please try again later: ${e.message}`);
-                return null;
-            })
+            }).then((r) => r.json()).then((json) => console.log("new acc", json))
+                .catch((e: Error) => {
+                    alert(`Error creating new account. Please try again later: ${e.message}`);
+                    return null;
+                })
         else
             return customName ?
                 fetch(`${ServerInfo.baseurl}tipper/?first_name=${customName.name.firstName}&last_name=${customName.name.lastName}&email=${customName.email}`, {
@@ -216,62 +217,59 @@ function Login(props: { back?: boolean }) {
         // console.log("login", user);
         // console.log(user.name);
         // console.log("usc user", usc.user);
-        await checkIfAccountExists({
+        const result = await checkIfAccountExists({
             user: user,
             setUser: () => { },
             barState: { setBar: () => { } },
             artistState: { setArtist: () => { } }
-        }).then((result) => {
-            if (result.result) {
-                storeAll({
-                    user: result.data,
-                    setUser: usc.setUser,
-                    barState: usc.barState,
-                    artistState: usc.artistState
-                }, refreshToken).then((user) => {
-                    // console.log("resulting user", user);
-                    usc.setUser(user);
-                    if (props.back) router.navigate(-1);
-                    else nextPage();
-                });
-
-            } else {
-                createAccount(user, isApple, customName).then((r) => {
-                    console.log("creating account.", usc);
-                    checkIfAccountExists({
-                        user: user,
-                        setUser: () => { },
-                        barState: { setBar: () => { } },
-                        artistState: { setArtist: () => { } }
-                    }).then(r => {
-                        if (!r.result) return undefined
-                        return r.data;
-                    }).then(newUser => {
-                        if (!newUser) {
-                            alert("Problem verifying account exists. Try again later.")
-                            return;
-                        }
-                        usc.setUser(newUser);
-                        // console.log(newUser);
-                        storeAll({
-                            user: newUser,
-                            setUser: usc.setUser,
-                            barState: usc.barState,
-                            artistState: { setArtist: () => { } }
-                        }, refreshToken).then((u) => {
-                            nextPage();
-                        });
-                    })
-                }).catch(e => console.log(e));;
-                // props.navigation.replace('CreateAccount', {
-                //     refreshToken: refreshToken,
-                //     user: user
-                // });
-            }
         }).catch((e: Error) => {
             alert(`Can't check if account exists: ${e.message}`);
             setLoginPressed(false);
+            return { result: false, data: undefined };
         })
+
+        if (result.result && result.data) {
+            storeAll({
+                user: result.data,
+                setUser: usc.setUser,
+                barState: usc.barState,
+                artistState: usc.artistState
+            }, refreshToken).then((user) => {
+                // console.log("resulting user", user);
+                usc.setUser(user);
+                if (props.back) router.navigate(-1);
+                else nextPage();
+            });
+        } else {
+            await createAccount(user, isApple, customName).catch(e => console.log(e));
+            const newUser = await checkIfAccountExists({
+                user: user,
+                setUser: () => { },
+                barState: { setBar: () => { } },
+                artistState: { setArtist: () => { } }
+            }).then(r => {
+                if (!r.result) return undefined
+                return r.data;
+            });
+
+            if (!newUser) {
+                throw new Error("Problem verifying account exists. Try again later.")
+            }
+            usc.setUser(newUser);
+            // console.log(newUser);
+            storeAll({
+                user: newUser,
+                setUser: usc.setUser,
+                barState: usc.barState,
+                artistState: { setArtist: () => { } }
+            }, refreshToken).then((u) => {
+                nextPage();
+            });
+            // props.navigation.replace('CreateAccount', {
+            //     refreshToken: refreshToken,
+            //     user: user
+            // });
+        }
     }
 
     function Register() {
