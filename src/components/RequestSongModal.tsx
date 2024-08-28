@@ -283,7 +283,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     fontSize={Math.min(30, dims / 7)}
                                     loading={disabled || price === undefined}
                                     completed={success}
-                                    title={noAccessToken(usc) ? "Request a song!" : (price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : "")}
+                                    title={noAccessToken(usc) ? "Request a song!" : (price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : (price > 0 ? `$${numberToPrice(price)}` : "Request for free!")) : "")}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick(price)} />
                             }
