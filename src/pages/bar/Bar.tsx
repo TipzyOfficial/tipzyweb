@@ -98,7 +98,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
         const artists: ArtistType[] = [];
 
         artistData.forEach((e: any) => {
-            const artist: ArtistType = { name: e.name, image: e.images.teaser, id: e.id }
+            const artist: ArtistType = { name: e.name, image: e.images?.teaser, id: e.id }
             artists.push(artist);
         })
 
@@ -209,11 +209,11 @@ export default function Bar() {
         }).then(json => {
             if (json.data === undefined) return undefined;
             const np = json.data.now_playing;
-            const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images.thumbnail, albumartbig: np.images.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
+            const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images?.thumbnail, albumartbig: np.images?.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
             const q: SongType[] = [];
 
             json.data.queue.forEach((e: any) => {
-                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images.thumbnail, albumartbig: e.images.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
+                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images?.thumbnail, albumartbig: e.images?.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
                 q.push(song);
             });
 
