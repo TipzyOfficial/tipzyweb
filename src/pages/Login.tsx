@@ -8,7 +8,7 @@ import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAc
 import { Consumer } from '../lib/user';
 import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from '../index';
 import { ReturnLinkType, router } from '../App';
-import { UserSessionContext } from '../lib/UserSessionContext';
+import { UserSessionContext, UserSessionContextType } from '../lib/UserSessionContext';
 import Register from './Register';
 import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
@@ -34,7 +34,7 @@ type AppleReturnType = {
     email: string,
 }
 
-function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }) {
+function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer) => void }) {
     const [globalDisable, setGlobalDisable] = useState(false);
     const [loginPage, setLoginPage] = useState(true);
     const [username, setUsername] = useState("");
@@ -42,14 +42,15 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
     const [loginPressed, setLoginPressed] = useState(false);
     const [loginPrompt, setLoginPrompt] = useState(false);
     const usc = useContext(UserSessionContext);
+
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
     const [usernameShowing, setUsernameShowing] = useState(false);
     const small = props.small;
 
-    const nextPage = () => {
-        if (props.nextPage) {
-            props.nextPage();
+    const nextPage = (u?: Consumer) => {
+        if (props.nextPage && u) {
+            props.nextPage(u ?? usc.user);
         } else {
             const ret = localStorage.getItem("ret");
 
@@ -243,7 +244,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
                 // console.log("resulting user", user);
                 usc.setUser(user);
                 if (props.back) router.navigate(-1);
-                else nextPage();
+                else nextPage(user);
             });
         } else {
             await createAccount(user, isApple, customName).catch(e => console.log(e));
@@ -268,7 +269,8 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: () => void }
                 barState: usc.barState,
                 artistState: { setArtist: () => { } }
             }, refreshToken).then((u) => {
-                nextPage();
+                console.log("newuser", newUser, "u", u);
+                nextPage(u);
             });
             // props.navigation.replace('CreateAccount', {
             //     refreshToken: refreshToken,

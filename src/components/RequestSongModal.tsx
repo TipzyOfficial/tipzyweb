@@ -8,13 +8,14 @@ import PaymentSetup from "./PaymentSetup";
 import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
 import { consumerFromJSON, fetchWithToken, getTipper, Logout } from "..";
-import { UserSessionContext } from "../lib/UserSessionContext";
+import { UserSessionContext, UserSessionContextType } from "../lib/UserSessionContext";
 import { getCookies, noAccessToken, numberToPrice, useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic } from "@fortawesome/free-solid-svg-icons";
 import '../App.css'
 import Login from "../pages/Login";
+import { Consumer } from "../lib/user";
 
 export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     // const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
@@ -73,8 +74,6 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const sendRequest = async (price: number, free: boolean): Promise<number> => {
         if (!userContext.barState.bar) return 0;
 
-        console.log("is free?", free)
-
         return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
             track_id: song?.id ?? "",
             track_name: song?.title ?? "No title",
@@ -117,7 +116,6 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     // console.log(masterPrice);
 
     const data = props.playable ? props.data : { selectedSong: song, ...props.data }
-    console.log("data", data);
 
     const sendRequestClose = async (price: number | undefined) => {
         if (price === undefined) return;
@@ -146,7 +144,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             }
         }
 
-        await checkIsFree();
+        await checkIsFree(usc);
 
         // alert("Your request was sent! Thank you for using Tipzy :)");
         // useInterval(() => props.handleClose(), 500);
@@ -190,9 +188,9 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     function RequestScreen() {
         const [price, setPrice] = useState(masterPrice);
 
-        useEffect(() => {
-            console.log("modal rerendered. disabled: ", disabled);
-        })
+        // useEffect(() => {
+        //     console.log("modal rerendered. disabled: ", disabled);
+        // })
 
         const checkStripe = async (): Promise<boolean | null> => {
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
@@ -212,7 +210,6 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     setDisabled(true);
                     sendRequestClose(0);
                 } else {
-                    console.log("setting disabled true");
                     if (disabled) return;
                     setDisabled(true);
                     setMasterPrice(price);
@@ -383,7 +380,13 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                     <Container fluid>
                         <Row className="justify-content-md-center">
                             <Col>
-                                <Login small nextPage={() => setLoginScreenVisible(false)} />
+                                <Login small nextPage={async (consumer: Consumer) => {
+                                    // const consumer = await checkIsFree(usc);
+                                    console.log("np consumer", consumer)
+                                    const isFree = !(props.playable) && consumer.freeRequests > 0;
+                                    setIsFreeRequest(isFree);
+                                    setLoginScreenVisible(false);
+                                }} />
                             </Col>
                         </Row>
                     </Container>
@@ -401,15 +404,9 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         if (diff > 0) return `$${numberToPrice((diff))} left to reach the goal...`
     }
 
-    const checkIsFree = async () => {
-        const d = await getTipper(usc, getCookies());
-        // console.log("gettipper", d.data);
-        const consumer = consumerFromJSON(usc.user, d.data);
-        usc.setUser(consumer);
-        return consumer;
-    }
-
     const getPrice = async () => {
+        console.log("usc gp", usc);
+
         if (props.playable) {
             setMasterPrice(props.price);
         }
@@ -417,7 +414,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             setMasterPrice(undefined);
 
             if (usc.user.access_token) {
-                const consumer = await checkIsFree();
+                const consumer = await checkIsFree(usc);
                 const isFree = !(props.playable) && consumer.freeRequests > 0;
                 setIsFreeRequest(isFree);
 
@@ -450,11 +447,19 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
             show={props.show} onShow={() => {
                 setDisabled(false);
                 getPrice();
-                console.log(props.song)
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {loginScreenVisible ? <LoginScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );
+}
+
+const checkIsFree = async (usc: UserSessionContextType) => {
+    const d = await getTipper(usc, getCookies());
+    // console.log("gettipper", d.data);
+    const consumer = consumerFromJSON(usc.user, d.data);
+    console.log("prev user", usc.user, "consumer cif", consumer);
+    usc.setUser(consumer);
+    return consumer;
 }
