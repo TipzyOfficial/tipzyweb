@@ -7,7 +7,7 @@ import Song, { artistsStringListToString } from "./Song";
 import PaymentSetup from "./PaymentSetup";
 import { useContext, useEffect, useState } from "react";
 import TZButton from "./TZButton";
-import { consumerFromJSON, fetchWithToken, getTipper } from "..";
+import { consumerFromJSON, fetchWithToken, getTipper, Logout } from "..";
 import { UserSessionContext } from "../lib/UserSessionContext";
 import { getCookies, numberToPrice, useInterval } from "../lib/utils";
 import { fetchNoToken } from "../lib/serverinfo";
@@ -201,6 +201,12 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
+            if ((usc.user.access_token || usc.user.access_token.length === 0)) {
+                Logout(usc, data, false);
+                return;
+            }
+
+
             if (isFreeRequest) {
                 setDisabled(true);
                 sendRequestClose(0);
@@ -210,7 +216,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setDisabled(true);
                 setMasterPrice(price);
                 const hasStripe = await checkStripe();
-                if (hasStripe === null && !(usc.user.access_token || usc.user.access_token.length === 0)) {
+                if (hasStripe === null) {
                     alert("Error getting payment information. Are you sure you've connected with Stripe?");
                     setDisabled(false);
                 }
