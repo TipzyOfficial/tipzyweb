@@ -202,7 +202,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
 
         async function onRequestClick(price: number | undefined) {
-            if ((usc.user.access_token || usc.user.access_token.length === 0)) {
+            if ((!usc.user.access_token || usc.user.access_token.length === 0)) {
                 Logout(usc, data);
             } else {
                 if (isFreeRequest) {
