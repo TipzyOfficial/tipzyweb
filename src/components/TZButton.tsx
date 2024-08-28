@@ -9,7 +9,7 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
 
     return (
         <button
-            className={props.animateglow ? 'App-animated-gradient-fast-light' : undefined}
+            // className={props.animateglow ? 'App-animated-gradient-fast' : undefined}
             disabled={props.disabled || props.loading || props.completed}
             onClick={() => { if (!props.disabled && props.onClick) props.onClick() }}
             onPointerLeave={() => {
@@ -36,7 +36,7 @@ function TZButton(props: { onClick?: () => void; title?: string, backgroundColor
                 MozBoxSizing: "border-box",
                 opacity: props.disabled ? 0.5 : props.completed || props.loading ? 1 : opacity,
                 border: 'none',
-                boxShadow: props.animateglow ? '0px 0px 5px white' : undefined,
+                boxShadow: props.animateglow ? '0px 0px 10px white' : undefined,
             }}>
             {props.completed !== undefined ?
                 <FontAwesomeIcon icon={props.completed ? faSuccess : faFailure} fontSize={props.fontSize} color={props.color ?? "white"}></FontAwesomeIcon>
