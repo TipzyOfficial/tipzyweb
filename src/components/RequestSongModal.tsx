@@ -210,7 +210,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setDisabled(true);
                 setMasterPrice(price);
                 const hasStripe = await checkStripe();
-                if (hasStripe === null && !(usc.user.access_token || usc.user.access_token.length === 0)) {
+                if (hasStripe === null) {
                     alert("Error getting payment information. Are you sure you've connected with Stripe?");
                     setDisabled(false);
                 }
@@ -278,7 +278,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                     fontSize={Math.min(30, dims / 7)}
                                     loading={disabled || price === undefined}
                                     completed={success}
-                                    title={(!usc.user.access_token || usc.user.access_token.length === 0) ? "Request a song!" : (price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : "")}
+                                    title={price !== undefined ? (isFreeRequest ? `Free! (${usc.user.freeRequests} left)` : `$${(price / 100).toFixed(2)}`) : ""}
                                     backgroundColor={success === true ? Colors.green : success === false ? Colors.red : undefined}
                                     onClick={() => onRequestClick(price)} />
                             }
@@ -405,14 +405,6 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 } else {
                     setMasterPrice(0);
                 }
-            } else {
-                const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-                    business_id: userContext.barState.bar?.id
-                })).catch(e => { throw e });
-
-                const json = await response.json();
-
-                setMasterPrice(json.Dynamic_price);
             }
         }
     }
