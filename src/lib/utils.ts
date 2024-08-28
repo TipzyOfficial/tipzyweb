@@ -82,6 +82,7 @@ export const setStored = (key: string, value: string): void => {
 }
 
 export const trackUser = (usc: UserSessionContextType): string => {
+    if (!usc.user.access_token || usc.user.access_token.length === 0) return "[GUEST USER]"
     return `${usc.user.name}, id: ${usc.user.id}`;
 }
 
