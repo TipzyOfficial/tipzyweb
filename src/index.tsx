@@ -32,7 +32,6 @@ root.render(
 export function Logout(usc: UserSessionContextType, data?: any, defaultToBar?: boolean) {
   usc.abortController?.abort();
   usc.setUser(new Consumer("", 0, "", -1));
-
   clearData();
   googleLogout();
   console.log("going to login")

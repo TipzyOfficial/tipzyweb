@@ -94,25 +94,31 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
 
     console.log("usc", usc.user)
 
-    let initRQS = undefined;
+    useEffect(() => {
+        try {
+            const ret = localStorage.getItem("ret");
+            // console.log("ret", ret);
+            const parsed = ret ? JSON.parse(atob(ret)) : undefined;
+            // console.log("parsed", parsed);
+            const initRQS = parsed ? parsed.data?.selectedSong : undefined;
+            // console.log("initRQS", initRQS);
+            if (ret) {
+                localStorage.removeItem("ret");
+                console.log("removing ret from song")
+            }
 
-    try {
-        const ret = localStorage.getItem("ret");
-        // console.log("ret", ret);
-        const parsed = ret ? JSON.parse(atob(ret)) : undefined;
-        // console.log("parsed", parsed);
-        initRQS = parsed ? parsed.data?.selectedSong : undefined;
-        // console.log("initRQS", initRQS);
-        if (ret) {
+            setRequestedSong(initRQS);
+            setRequestVisible(initRQS !== undefined);
+        } catch (e) {
+            console.log("Problem loading previous state:", e)
             localStorage.removeItem("ret");
         }
-    } catch (e) {
-        console.log("Problem loading previous state:", e)
-        localStorage.removeItem("ret");
-    }
 
-    const [requestedSong, setRequestedSong] = useState<SongType | undefined>(initRQS);
-    const [requestVisible, setRequestVisible] = useState(initRQS !== undefined);
+    }, []);
+
+
+    const [requestedSong, setRequestedSong] = useState<SongType | undefined>(undefined);
+    const [requestVisible, setRequestVisible] = useState(false);
 
     return (
         <>

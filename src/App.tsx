@@ -138,9 +138,11 @@ export type ReturnLinkType = {
 }
 
 export function goToLogin(data?: any, defaultToBar?: boolean) {
+  console.log("gtl data", data, "gtl dfb", defaultToBar)
 
   if (defaultToBar) {
-    localStorage.removeItem("ret")
+    localStorage.removeItem("ret");
+    console.log("removing dfb");
   }
 
   else {
@@ -153,17 +155,10 @@ export function goToLogin(data?: any, defaultToBar?: boolean) {
     localStorage.setItem("ret", btoa(JSON.stringify(returnLink)))
   }
 
-  // window.location.replace(
-  //   `${window.location.origin}/login?prev=${urlbtoa}`
-  // )
-
   window.location.replace(
     `${window.location.origin}/login`//?prev=true`
   )
 
-  // router.navigate(`/login?prev=${urlbtoa}`).then(() => {
-  //   window.location.reload
-  // });
 }
 
 export default App;

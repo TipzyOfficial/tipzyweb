@@ -115,6 +115,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     // console.log(masterPrice);
 
     const data = props.playable ? props.data : { selectedSong: song, ...props.data }
+    console.log("data", data);
 
     const sendRequestClose = async (price: number | undefined) => {
         if (price === undefined) return;
@@ -202,27 +203,25 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
         async function onRequestClick(price: number | undefined) {
             if ((usc.user.access_token || usc.user.access_token.length === 0)) {
-                Logout(usc, data, false);
-                return;
-            }
-
-
-            if (isFreeRequest) {
-                setDisabled(true);
-                sendRequestClose(0);
+                Logout(usc, data);
             } else {
-                console.log("setting disabled true");
-                if (disabled) return;
-                setDisabled(true);
-                setMasterPrice(price);
-                const hasStripe = await checkStripe();
-                if (hasStripe === null) {
-                    alert("Error getting payment information. Are you sure you've connected with Stripe?");
-                    setDisabled(false);
-                }
-                else if (!hasStripe) setPaymentScreenVisible(true);
-                else {
-                    sendRequestClose(price);
+                if (isFreeRequest) {
+                    setDisabled(true);
+                    sendRequestClose(0);
+                } else {
+                    console.log("setting disabled true");
+                    if (disabled) return;
+                    setDisabled(true);
+                    setMasterPrice(price);
+                    const hasStripe = await checkStripe();
+                    if (hasStripe === null) {
+                        alert("Error getting payment information. Are you sure you've connected with Stripe?");
+                        setDisabled(false);
+                    }
+                    else if (!hasStripe) setPaymentScreenVisible(true);
+                    else {
+                        sendRequestClose(price);
+                    }
                 }
             }
         }
