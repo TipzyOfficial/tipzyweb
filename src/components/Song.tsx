@@ -104,7 +104,6 @@ export function SongList(props: { songs: SongType[], dims: number, noImage?: boo
             const initRQS = parsed ? parsed.data?.selectedSong : undefined;
             // console.log("initRQS", initRQS);
 
-
             setRequestedSong(initRQS);
             setRequestVisible(initRQS !== undefined);
         } catch (e) {
