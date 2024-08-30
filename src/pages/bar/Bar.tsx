@@ -161,6 +161,7 @@ export default function Bar() {
     const [queue, setQueueUn] = useState<SongType[]>([]);
     const [topRequest, setTopRequest] = useState<SongRequestType | undefined>();
     const [disableEverything, setDisableEverything] = useState(false);
+    const [hideFreeReqs, setHideFreeReqs] = useState(true);
     const topBarColor = Colors.background + "bc";
 
 
@@ -207,6 +208,8 @@ export default function Bar() {
             if (!response.ok) throw new Error("Bad response:" + response.status);
             return response.json();
         }).then(json => {
+            console.log("queue json", json);
+
             if (json.data === undefined) return undefined;
             const np = json.data.now_playing;
             const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images?.thumbnail, albumartbig: np.images?.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
@@ -312,13 +315,25 @@ export default function Bar() {
     // useEffect(() => console.log("rerendered everything"), [])
     useInterval(() => allRefresh(false), timeout, 500);
 
+    const checkIfFree = async () => {
+        const pr = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+            business_id: id
+        })).catch(e => { throw e });
+
+        const json = await pr.json();
+
+        setHideFreeReqs(json.Dynamic_price === 0);
+    }
+
     useEffect(() => {
         getCookies().remove("artist_session");
-
         if (!id) {
             router.navigate("/code");
             return;
         }
+
+        checkIfFree();
+
         if (usc.barState.bar && id === usc.barState.bar.id.toString() && usc.barState.bar.allowingRequests) {
             setReady(true);
             fetchBarInfo(usc, id);
@@ -326,7 +341,7 @@ export default function Bar() {
         }
         fetchBarInfo(usc, id).then(() => setReady(true))
             .catch(e => {
-                usc.barState.setBar(undefined)
+                usc.barState.setBar(undefined);
                 setReady(true);
             });
         allRefresh(true);
@@ -398,7 +413,7 @@ export default function Bar() {
                             </div>
                         </div>
                         {
-                            usc.user.freeRequests > 0 ?
+                            usc.user.freeRequests > 0 && !hideFreeReqs ?
                                 <div style={{ padding: 5, width: "100%", display: 'flex' }}>
                                     <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: "center", }}>
                                         Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.user.freeRequests} free request{usc.user.freeRequests === 1 ? "" : "s"}!</span></span>

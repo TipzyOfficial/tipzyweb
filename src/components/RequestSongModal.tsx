@@ -419,21 +419,13 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
             const json = await response.json();
 
-            setMasterPrice(json.Dynamic_price);
-
             if (usc.user.access_token) {
                 const consumer = await checkIsFree(usc);
                 const isFree = !(props.playable) && consumer.freeRequests > 0 && json.Dynamic_price > 0;
                 setIsFreeRequest(isFree);
-                // const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-                //     business_id: userContext.barState.bar?.id
-                // })).catch(e => { throw e });
-
-                // const json = await response.json();
-
-                // setMasterPrice(json.Dynamic_price);
-
             }
+
+            setMasterPrice(json.Dynamic_price);
 
             // else {
             //     const response = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
