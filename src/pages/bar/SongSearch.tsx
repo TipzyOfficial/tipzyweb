@@ -21,7 +21,7 @@ import { useLocation } from "react-router-dom";
  * put anything. you can check out the code in components/Song.tsx
  */
 import Song, { SongList, SongRenderItem } from "../../components/Song";
-import { Colors, padding } from "../../lib/Constants";
+import { Colors, padding, radius } from "../../lib/Constants";
 import { fetchNoToken } from "../../lib/serverinfo";
 import { getCookies, onlyAlphanumeric, onlyAlphanumericSpaces } from "../../lib/utils";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
@@ -46,8 +46,22 @@ const badWords = new Set([
     "(live",
     "(live)",
     "instrumental",
-    "cover",
-    "lofi"
+    "(instrumental",
+    "(instrumental)",
+    "instrumental)",
+    "(cover",
+    "(cover)",
+    "cover)",
+    "(lofi",
+    "(lofi)",
+    "lofi)",
+    "parody",
+    "(parody",
+    "(parody)",
+    "parody)",
+    "(by",
+    "(acoustic",
+    "(acoustic)"
 ])
 
 const badArtists = new Set([
@@ -66,47 +80,57 @@ const compareWords = (a: string, b: string) => {
 }
 
 const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => {
-    const artistFactor = 15;
-    const titleFactor = 10;
+    const artistFactor = 10;
+    const titleFactor = 12;
     const topArtistFactor = 10;
-
-    // if (r.recognizability === 0) return 0;
-
-    // console.log(r);
 
     let score = r.recognizability / 20;
 
-    const title = onlyAlphanumericSpaces(r.song.title.toLowerCase());
-    const titleWords = title.split(" ");
+    const title = r.song.title.toLowerCase();
+    const titleWords = title.split(" ").filter(v => v.length > 0 || v === "-");;
 
     const query = q.toLowerCase();
-    const queryWords = query.split(" ");
+    const queryWords = query.split(" ").filter(v => v.length > 0 || v === "-");;
 
-    const artists = new Set(r.song.artists.map(v => onlyAlphanumericSpaces(v.toLowerCase())));
+    const artists = new Set(r.song.artists.map(v => v.toLowerCase()));
 
     for (const artist of artists) {
         if (badArtists.has(artist)) return 0;
         if (topArtists.has(artist)) score += topArtistFactor;
-        const artistWords = artist.split(" ");
+        const artistWords = artist.trim().split(" ").filter(v =>
+            v.length > 0
+        );
         // console.log(artistWords);
 
         if (!artistWords[0]) break; //no artist (for some reason?)
 
         const artistPos = queryWords.indexOf(artistWords[0]); //search query string for that specific artist
         if (artistPos !== -1) {
+            let count = 0;
             for (let i = artistPos; i < queryWords.length; i++) { //traverse string to find rest of artist name 
-                if (compareWords(artistWords[i - artistPos], queryWords[i])) {
-                    score += artistFactor + (i - artistPos);
+                if (compareWords(artistWords[count], queryWords[i])) {
+                    const increase = artistFactor / ((count) * 4 + 1);
+                    score += increase;
+                    console.log("found", artistWords[count], increase, queryWords);
+                    count++;
+                } else {
+                    break;
                 }
             }
+            queryWords.splice(artistPos, count);
+            console.log("qw", queryWords, count)
         }
     }
+
+    console.log(queryWords);
 
     let beginningIndex = -1;
 
     for (let i = 0; i < titleWords.length; i++) {
         //second part gives exceptions to if the bad keyword is EXPLICITLY in the string
-        if (badWords.has(titleWords[i]) && !onlyAlphanumeric(query).includes(onlyAlphanumeric(titleWords[i]))) return 0;
+        console.log("badword?", titleWords[i], badWords.has(titleWords[i]));
+
+        if (badWords.has(titleWords[i]) && !query.includes(titleWords[i])) return 0;
 
         if (beginningIndex === -1) {
             if (compareWords(titleWords[0], queryWords[i])) {
@@ -274,11 +298,11 @@ export default function SongSearch() {
 
         const results: QueryResultScoreType[] = [];
         //reversing the array since it seems like the explicit songs always appear last in soundtrack?
-        const reversed: any[] = json.data.reverse();
+        const data: any[] = json.data//.reverse();
         const originals: Map<string, number> = new Map();
 
 
-        for (const item of reversed) {
+        for (const item of data) {
             const song =
             {
                 title: item.name.trim() ?? "Default",
@@ -299,13 +323,25 @@ export default function SongSearch() {
 
                 const score = resultScore({ song: song, recognizability: item.recognizability }, query, topArtistSet)
 
+                // const song2 =
+                // {
+                //     title: `${item.name} ${score}` ?? "Default",
+                //     artists: item.artist ?? ["Default"],
+                //     albumart: item.images.thumbnail ?? "",
+                //     albumartbig: item.images.teaser,
+                //     id: item.id ?? -1,
+                //     explicit: item.explicit
+                // };
+
                 results.push({ song: song, recognizability: item.recognizability, score: score })
-            } else {
-                // console.log(songShortened, originalIndex, results)
-                const originalSong = results[originalIndex];
-                originalSong.song.albumart = item.images.thumbnail ?? "";
-                originalSong.song.albumart = item.images.teaser;
+
             }
+            // else {
+            //     // console.log(songShortened, originalIndex, results)
+            //     const originalSong = results[originalIndex];
+            //     originalSong.song.albumart = item.images.thumbnail ?? "";
+            //     originalSong.song.albumartbig = item.images.teaser;
+            // }
         }
 
         results.sort((a, b) => {
@@ -323,7 +359,7 @@ export default function SongSearch() {
     }
 
     async function getSearchResults(query: string, limit: number) {
-        const q = query.replace(/["'`]+/gi, "").replace("; ", " ")
+        const q = query.replace(/["'`]+/gi, "").replace("; ", " ").replace("feat. ", " ")
 
         //.replace(" - ", "")//.replace(" & ", "");
 
@@ -409,9 +445,11 @@ export default function SongSearch() {
                 </form>
                 {suggestion ?
                     <div style={{ paddingTop: padding }}>
-                        <span>
-                            Can't find your result? <span style={{ fontWeight: "bold", color: Colors.primaryRegular, cursor: 'pointer' }} onClick={() => { setSearchQuery(suggestion) }}>Try {suggestion}</span>
-                        </span>
+                        <div style={{ padding: padding, borderStyle: 'solid', borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, cursor: 'pointer', }} onClick={() => { setSearchQuery(suggestion) }}>
+                            <span>
+                                Can't find your result? <span style={{ fontWeight: "bold", color: Colors.primaryRegular }}>Try {suggestion}</span>
+                            </span>
+                        </div>
                     </div> : <></>
                 }
             </div>
