@@ -299,17 +299,7 @@ export default function SongSearch() {
 
                 const score = resultScore({ song: song, recognizability: item.recognizability }, query, topArtistSet)
 
-                const song2 =
-                {
-                    title: `${item.name} ${score}` ?? "Default",
-                    artists: item.artist ?? ["Default"],
-                    albumart: item.images.thumbnail ?? "",
-                    albumartbig: item.images.teaser,
-                    id: item.id ?? -1,
-                    explicit: item.explicit
-                };
-
-                results.push({ song: song2, recognizability: item.recognizability, score: score })
+                results.push({ song: song, recognizability: item.recognizability, score: score })
             } else {
                 // console.log(songShortened, originalIndex, results)
                 const originalSong = results[originalIndex];
