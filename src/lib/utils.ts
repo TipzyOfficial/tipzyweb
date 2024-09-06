@@ -78,6 +78,14 @@ export const clearData = () => {
     localStorage.clear();
 }
 
+export const onlyAlphanumeric = (str: string): string => {
+    return str.replace(/[^0-9A-Z]+/gi, "");
+}
+
+export const onlyAlphanumericSpaces = (str: string): string => {
+    return str.replace(/[^0-9A-Z ]+/gi, "");
+}
+
 export const getStored = (key: string): string | null => {
     return localStorage.getItem(key);
 }

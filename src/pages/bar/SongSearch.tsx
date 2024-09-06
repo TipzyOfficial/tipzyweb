@@ -10,7 +10,7 @@ import { memo, useContext, useEffect, useRef, useState } from "react";
 import { UserSessionContext } from "../../lib/UserSessionContext";
 import useWindowDimensions from "../../lib/useWindowDimensions";
 import { router } from "../../App";
-import { SongType } from "../../lib/song";
+import { ArtistType, SongType } from "../../lib/song";
 import { isAndroid } from 'react-device-detect';
 import { useLocation } from "react-router-dom";
 
@@ -23,13 +23,167 @@ import { useLocation } from "react-router-dom";
 import Song, { SongList, SongRenderItem } from "../../components/Song";
 import { Colors, padding } from "../../lib/Constants";
 import { fetchNoToken } from "../../lib/serverinfo";
-import { getCookies } from "../../lib/utils";
+import { getCookies, onlyAlphanumeric, onlyAlphanumericSpaces } from "../../lib/utils";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
 import { Spinner } from "react-bootstrap";
-import _ from "lodash"
+import _, { result } from "lodash"
 import { deepEqual } from "assert";
 
+type QueryResultType = {
+    recognizability: number,
+    song: SongType
+}
+
+type QueryResultScoreType = {
+    recognizability: number,
+    song: SongType,
+    score: number,
+}
+
 const SongResultListMemo = memo(SongList, (a, b) => JSON.stringify(a.songs) === JSON.stringify(b.songs));
+
+const badWords = new Set([
+    "(live",
+    "(live)",
+    "instrumental",
+    "cover",
+    "lofi"
+])
+
+const badArtists = new Set([
+    "party song instrumentals",
+    "kidz bop kids",
+    "kids bop",
+    "mini pop kids",
+    "rockabye baby!",
+    "lofi fruits music"
+])
+
+const compareWords = (a: string, b: string) => {
+    if (!a && !b) return true;
+    if (!a || !b) return false;
+    return onlyAlphanumeric(a) === onlyAlphanumeric(b);
+}
+
+const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => {
+    const artistFactor = 15;
+    const titleFactor = 10;
+    const topArtistFactor = 10;
+
+    // if (r.recognizability === 0) return 0;
+
+    // console.log(r);
+
+    let score = r.recognizability / 20;
+
+    const title = onlyAlphanumericSpaces(r.song.title.toLowerCase());
+    const titleWords = title.split(" ");
+
+    const query = q.toLowerCase();
+    const queryWords = query.split(" ");
+
+    const artists = new Set(r.song.artists.map(v => onlyAlphanumericSpaces(v.toLowerCase())));
+
+    for (const artist of artists) {
+        if (badArtists.has(artist)) return 0;
+        if (topArtists.has(artist)) score += topArtistFactor;
+        const artistWords = artist.split(" ");
+        // console.log(artistWords);
+
+        if (!artistWords[0]) break; //no artist (for some reason?)
+
+        const artistPos = queryWords.indexOf(artistWords[0]); //search query string for that specific artist
+        if (artistPos !== -1) {
+            for (let i = artistPos; i < queryWords.length; i++) { //traverse string to find rest of artist name 
+                if (compareWords(artistWords[i - artistPos], queryWords[i])) {
+                    score += artistFactor + (i - artistPos);
+                }
+            }
+        }
+    }
+
+    let beginningIndex = -1;
+
+    for (let i = 0; i < titleWords.length; i++) {
+        //second part gives exceptions to if the bad keyword is EXPLICITLY in the string
+        if (badWords.has(titleWords[i]) && !onlyAlphanumeric(query).includes(onlyAlphanumeric(titleWords[i]))) return 0;
+
+        if (beginningIndex === -1) {
+            if (compareWords(titleWords[0], queryWords[i])) {
+                beginningIndex = i;
+                score += titleFactor;
+            }
+        } else {
+            if (compareWords(titleWords[i - beginningIndex], queryWords[i])) {
+                score += titleFactor + (i - beginningIndex);
+
+                // console.log("word: ", titleWords[i - beginningIndex], i - beginningIndex, titleWords)
+            }
+        }
+    }
+
+    return score;
+}
+
+//https://en.wikipedia.org/wiki/List_of_most-streamed_artists_on_Spotify
+const WHITELISTED_ARTISTS = new Set([
+    "billie eilish",
+    "the weeknd",
+    "bruno mars",
+    "taylor swift",
+    "coldplay",
+    "rihanna",
+    "post malone",
+    "lady gaga",
+    "sabrina carpenter",
+    "david guetta",
+    "ariana grande",
+    "drake",
+    "eminem",
+    "justin bieber",
+    "calvin harris",
+    "dua lipa",
+    "kendrick lamar",
+    "travis scott",
+    "kanye west",
+    "ed sheeran",
+    "sza",
+    "bad bunny",
+    "shakira",
+    "maroon 5",
+    "karol g",
+    "lana del rey",
+    "marshmello",
+    "adele",
+    "imagine dragons",
+    "katy perry",
+    "onerepublic",
+    "j balvin",
+    "future",
+    "beyoncé",
+    "miley cyrus",
+    "sia",
+    "khalid",
+    "metro boomin",
+    "daddy yankee",
+    "hozier",
+    "benson boone",
+    "sam smith",
+    "21 savage",
+    "queen",
+    "arctic monkeys",
+    "doja cat",
+    "harry styles",
+    "elton john",
+    "peso pluma",
+    "rauw alejandro",
+    "bts",
+    "xxxtentacion",
+    "olivia rodrigo",
+    "nicki minaj",
+    "harry styles",
+    "cardi b",
+])
 
 export default function SongSearch() {
     /**
@@ -81,6 +235,11 @@ export default function SongSearch() {
     const [recentQuery, setRecentQuery] = useState(loc.state?.query ?? "");
     const [searchQuery, setSearchQuery] = useState(loc.state?.query ?? "");
     const [searching, setSearching] = useState(false);
+    const [suggestion, setSuggestion] = useState<string | undefined>(undefined);
+
+    const barTopArtistSet = new Set((bar?.topArtists?.map(v => v.name) ?? [""]));
+    const topArtistSet = new Set([...barTopArtistSet, ...WHITELISTED_ARTISTS])
+
     // let recentQuery = "";
 
     const defaultResults = () => {
@@ -111,12 +270,61 @@ export default function SongSearch() {
 
         const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
-        console.log(json);
+        // console.log(json);
 
-        const songs: SongType[] = [];
-        json.data.forEach((item: any) => {
-            songs.push({ title: item.name ?? "Default", artists: item.artist ?? ["Default"], albumart: item.images.thumbnail ?? "", albumartbig: item.images.teaser, id: item.id ?? -1, explicit: item.explicit });
+        const results: QueryResultScoreType[] = [];
+        //reversing the array since it seems like the explicit songs always appear last in soundtrack?
+        const reversed: any[] = json.data.reverse();
+        const originals: Map<string, number> = new Map();
+
+
+        for (const item of reversed) {
+            const song =
+            {
+                title: item.name.trim() ?? "Default",
+                artists: item.artist ?? ["Default"],
+                albumart: item.images.thumbnail ?? "",
+                albumartbig: item.images.teaser,
+                id: item.id ?? -1,
+                explicit: item.explicit
+            };
+
+            const songShortened = JSON.stringify({ title: item.name.trim() ?? "Default", artists: item.artist ?? ["Default"] });
+
+            const originalIndex = originals.get(songShortened);
+
+            if (originalIndex === undefined) {
+                originals.set(songShortened, results.length);
+                console.log(songShortened, originals);
+
+                const score = resultScore({ song: song, recognizability: item.recognizability }, query, topArtistSet)
+
+                const song2 =
+                {
+                    title: `${item.name} ${score}` ?? "Default",
+                    artists: item.artist ?? ["Default"],
+                    albumart: item.images.thumbnail ?? "",
+                    albumartbig: item.images.teaser,
+                    id: item.id ?? -1,
+                    explicit: item.explicit
+                };
+
+                results.push({ song: song2, recognizability: item.recognizability, score: score })
+            } else {
+                // console.log(songShortened, originalIndex, results)
+                const originalSong = results[originalIndex];
+                originalSong.song.albumart = item.images.thumbnail ?? "";
+                originalSong.song.albumart = item.images.teaser;
+            }
+        }
+
+        results.sort((a, b) => {
+            return b.score - a.score;
         });
+
+        // results.filter(a.)
+
+        const songs = results.map(v => v.song);
 
         setSearching(false);
         setRecentQuery(query);
@@ -125,12 +333,25 @@ export default function SongSearch() {
     }
 
     async function getSearchResults(query: string, limit: number) {
-        const response = await searchForSongs(query, limit).catch((e) => {
+        const q = query.replace(/["'`]+/gi, "").replace("; ", " ")
+
+        //.replace(" - ", "")//.replace(" & ", "");
+
+        const response = await searchForSongs(q, limit).catch((e) => {
             if (e.message === "no bar") return [];
             console.log("can't get response,", e);
             return [];
         });
         setSearchResults(response);
+    }
+
+    async function getSuggestion(query: string) {
+        if (query.length === 0) { setSuggestion(undefined); return; }
+        const json = await fetchNoToken(`search/autocomplete/?string=${query}`).then(r => r.json()).catch((e) => { throw new Error(e) });
+        console.log("suggestion json", suggestion)
+        if (json.status === 200)
+            setSuggestion(json.data);
+        else throw new Error("Bad status: ", json);
     }
 
 
@@ -149,7 +370,9 @@ export default function SongSearch() {
         return () => {
             clearTimeout(androidIsDumb)
         }
-    }, [])
+    }, []);
+
+
 
     useEffect(() => {
         // if(searchQuery === "") setSearchResults(defaultResults());
@@ -157,7 +380,9 @@ export default function SongSearch() {
 
         const delayDebounceFn = setTimeout(() => {
             // if (recentQuery !== searchQuery)
+            setSuggestion(undefined);
             getSearchResults(searchQuery, limit);
+            getSuggestion(searchQuery);
         }, timeoutInterval)
 
         return () => {
@@ -168,29 +393,38 @@ export default function SongSearch() {
     return (
         <div className="App-body-top">
             {isAndroid ? (!androidStupid ? <div></div> : <div style={{ width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex" }}></div>) : <></>}
-            <form style={{ padding: padding, width: '100%', flexDirection: 'row', display: 'flex', position: 'sticky', top: 0, backgroundColor: Colors.background }}
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    getSearchResults(searchQuery, limit);
-                }}
-            >
-                <input type="submit"
-                    style={{ display: 'none' }}
-                ></input>
-                <input
-                    ref={inputRef}
-                    className='input'
-                    placeholder="Request any song..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                // onSubmit={() => searchForSongs(searchQuery, limit)}
-                />
-                <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => {
-                    if (!isAndroid || (isAndroid && !androidStupid)) router.navigate("/bar");
-                }}>
-                    <span className="text">Cancel</span>
-                </div>
-            </form>
+            <div style={{ padding: padding, position: 'sticky', top: 0, display: 'flex', flexDirection: 'column', width: "100%", backgroundColor: Colors.background }}>
+                <form style={{ width: '100%', flexDirection: 'row', display: 'flex' }}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        getSearchResults(searchQuery, limit);
+                    }}
+                >
+                    <input type="submit"
+                        style={{ display: 'none' }}
+                    ></input>
+                    <input
+                        ref={inputRef}
+                        className='input'
+                        placeholder="Request any song..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    // onSubmit={() => searchForSongs(searchQuery, limit)}
+                    />
+                    <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => {
+                        if (!isAndroid || (isAndroid && !androidStupid)) router.navigate("/bar");
+                    }}>
+                        <span className="text">Cancel</span>
+                    </div>
+                </form>
+                {suggestion ?
+                    <div style={{ paddingTop: padding }}>
+                        <span>
+                            Can't find your result? <span style={{ fontWeight: "bold", color: Colors.primaryRegular, cursor: 'pointer' }} onClick={() => { setSearchQuery(suggestion) }}>Try {suggestion}</span>
+                        </span>
+                    </div> : <></>
+                }
+            </div>
             <div style={{ display: 'flex', flex: 1, flexDirection: 'column', paddingRight: padding, paddingLeft: padding, width: '100%' }}>
                 <DisplayOrLoading condition={!searching} loadingScreen={
                     <div className="App-header">
@@ -198,7 +432,7 @@ export default function SongSearch() {
                         <div style={{ padding: padding }} className="App-smalltext">Loading results...</div>
                     </div>
                 }>
-                    <SongResultListMemo songs={searchResults} dims={songDims} logoutData={{ query: searchQuery }}></SongResultListMemo>
+                    <SongResultListMemo songs={searchResults} dims={songDims} logoutData={{ query: searchQuery }} />
                 </DisplayOrLoading>
             </div>
         </div>

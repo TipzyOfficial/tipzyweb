@@ -550,7 +550,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                         }
                         {/* {small ? <></> :  */}
                         <div style={{ paddingTop: 10, textAlign: 'center' }}>
-                            Don't have an account? <span style={{ color: Colors.primaryRegular }} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</span>
+                            Don't have an account? <span style={{ color: Colors.primaryRegular, cursor: "pointer" }} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</span>
                         </div>
                         {/* } */}
                         <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
