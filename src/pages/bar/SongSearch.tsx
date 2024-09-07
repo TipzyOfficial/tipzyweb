@@ -61,7 +61,8 @@ const badWords = new Set([
     "parody)",
     "(by",
     "(acoustic",
-    "(acoustic)"
+    "(acoustic)",
+    "(originally"
 ])
 
 const badArtists = new Set([
@@ -260,6 +261,7 @@ export default function SongSearch() {
     const [searchQuery, setSearchQuery] = useState(loc.state?.query ?? "");
     const [searching, setSearching] = useState(false);
     const [suggestion, setSuggestion] = useState<string | undefined>(undefined);
+    const [isAiSuggestion, setIsAiSuggestion] = useState(false);
 
     const barTopArtistSet = new Set((bar?.topArtists?.map(v => v.name) ?? [""]));
     const topArtistSet = new Set([...barTopArtistSet, ...WHITELISTED_ARTISTS])
@@ -412,7 +414,12 @@ export default function SongSearch() {
             // if (recentQuery !== searchQuery)
             setSuggestion(undefined);
             getSearchResults(searchQuery, limit);
-            getSuggestion(searchQuery);
+            if (!isAiSuggestion) {
+                getSuggestion(searchQuery);
+            } else {
+                console.log("setting to false");
+                setIsAiSuggestion(false);
+            }
         }, timeoutInterval)
 
         return () => {
@@ -438,7 +445,7 @@ export default function SongSearch() {
                         className='input'
                         placeholder="Request any song..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => { setSearchQuery(e.target.value); }}
                     // onSubmit={() => searchForSongs(searchQuery, limit)}
                     />
                     <div style={{ display: 'flex', paddingLeft: padding, alignItems: 'center', cursor: 'pointer' }} onClick={() => {
@@ -449,7 +456,8 @@ export default function SongSearch() {
                 </form>
                 {suggestion ?
                     <div style={{ paddingTop: padding }}>
-                        <div style={{ padding: padding, borderStyle: 'solid', borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, cursor: 'pointer', }} onClick={() => { setSearchQuery(suggestion) }}>
+                        <div style={{ padding: padding, borderStyle: 'solid', borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, cursor: 'pointer', }}
+                            onClick={() => { setSearchQuery(suggestion); console.log("setting to true"); setIsAiSuggestion(true) }}>
                             <span>
                                 Can't find your result? <span style={{ fontWeight: "bold", color: Colors.primaryRegular }}>Try {suggestion}</span>
                             </span>
