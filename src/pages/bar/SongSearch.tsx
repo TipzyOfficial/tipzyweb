@@ -292,7 +292,10 @@ export default function SongSearch() {
             return defaultResults();
         }
 
-        const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${query}&business_id=${bar.id}`, 'GET').then(r => r.json());
+        const b64query = btoa(query);
+        console.log("query", b64query)
+
+        const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${b64query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
         // console.log(json);
 
@@ -373,7 +376,8 @@ export default function SongSearch() {
 
     async function getSuggestion(query: string) {
         if (query.length === 0) { setSuggestion(undefined); return; }
-        const json = await fetchNoToken(`search/autocomplete/?string=${query}`).then(r => r.json()).catch((e) => { throw new Error(e) });
+        const b64query = btoa(query);
+        const json = await fetchNoToken(`search/autocomplete/?string=${b64query}`).then(r => r.json()).catch((e) => { throw new Error(e) });
         console.log("suggestion json", suggestion)
         if (json.status === 200)
             setSuggestion(json.data);
