@@ -318,7 +318,7 @@ export default function SongSearch() {
                 explicit: item.explicit
             };
 
-            const songShortened = JSON.stringify({ title: item.name.trim() ?? "Default", artists: item.artist ?? ["Default"] });
+            const songShortened = JSON.stringify({ title: song.title, artists: song.artists, explicit: song.explicit });
 
             const originalIndex = originals.get(songShortened);
 
