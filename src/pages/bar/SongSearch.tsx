@@ -71,7 +71,7 @@ const badArtists = new Set([
     "kids bop",
     "mini pop kids",
     "rockabye baby!",
-    "lofi fruits music"
+    "lofi fruits music",
 ])
 
 const compareWords = (a: string, b: string) => {
@@ -459,7 +459,7 @@ export default function SongSearch() {
                         <div style={{ padding: padding, borderStyle: 'solid', borderRadius: radius, borderWidth: 1, borderColor: Colors.primaryRegular, cursor: 'pointer', }}
                             onClick={() => { setSearchQuery(suggestion); console.log("setting to true"); setIsAiSuggestion(true) }}>
                             <span>
-                                Can't find your result? <span style={{ fontWeight: "bold", color: Colors.primaryRegular }}>Try {suggestion}</span>
+                                Can't find your result? Try <span style={{ fontWeight: "bold", color: Colors.primaryRegular }}>{suggestion}</span>
                             </span>
                         </div>
                     </div> : <></>
