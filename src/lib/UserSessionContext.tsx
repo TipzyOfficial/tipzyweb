@@ -83,7 +83,7 @@ export const getPending = async (usc: UserSessionContextType, ignoreReqs?: boole
             reqs.forEach((e: any) => {
                 const sj = e.song_json;
                 const bi = e.business_info;
-                const s: SongType = { id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: false };
+                const s: SongType = { id: sj.id, title: sj.name, artists: [sj.artist], albumart: sj.image_url, explicit: sj.explicit, duration: sj.duration_ms };
                 const b: BarType = { id: bi.id, name: bi.business_name, type: bi.business_type, image_url: bi.image_url, description: bi.description, active: bi.active, allowingRequests: bi.allowing_requests }
                 ptc += e.token_count ?? 0;
                 p.push({ id: e.id, song: s, status: e.status, bar: b, date: new Date(e.request_time) })

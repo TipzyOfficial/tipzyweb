@@ -19,7 +19,7 @@ export type SongType = {
     artists: string[], //song's artist
     albumart: string, //image url of the song's album art. small
     albumartbig?: string, //image url of the song's album art. large
-    duration?: number; //duration of song in ms. ignore
+    duration: number; //duration of song in ms. ignore
     explicit: boolean; //if the song is marked as explicit
     manuallyQueued?: boolean; //if the song was manually queued (only for Queue)
 }

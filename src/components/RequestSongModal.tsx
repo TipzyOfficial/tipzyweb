@@ -53,7 +53,7 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
 }
 
 export default function RequestSongModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
-    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
+    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false, duration: 0 };
     const userContext = useContext(UserSessionContext);
 
     // const [price, setPrice] = useState<number | undefined>(undefined);
@@ -82,6 +82,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             price: price,
             token_count: 0,
             explicit: song.explicit,
+            duration_ms: song.duration,
             free: free,
         })).then(response => response.json()).then(json => {
             // console.log("json: ", json)
@@ -103,7 +104,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<number>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
     const fdim = useFdim();
     const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
-    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
+    const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false, duration: 0 };
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
     const userContext = useContext(UserSessionContext);

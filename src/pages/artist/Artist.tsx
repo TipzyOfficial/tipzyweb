@@ -152,7 +152,8 @@ export default function Artist() {
                 albumartbig: e.images?.teaser ?? "",
                 id: e.id,
                 explicit: e.explicit,
-                artists: e.artists
+                artists: e.artists,
+                duration: e.duration_ms
             }
 
             // console.log(s);
@@ -440,7 +441,8 @@ export const fetchArtistInfo = async (userContext: UserSessionContextType, id: n
                         albumartbig: e.images?.teaser ?? "",
                         id: e.id,
                         explicit: e.explicit,
-                        artists: e.artists
+                        artists: e.artists,
+                        duration: e.duration_ms
                     }
 
                     const p: PlayableType = {

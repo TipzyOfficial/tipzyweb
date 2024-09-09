@@ -37,11 +37,11 @@ import { styles } from "../Login";
 const utf8Encode = new TextEncoder();
 
 function parseSongIHateMeku(s: any): SongType {
-    return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false }
+    return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false, duration: s.duration_ms }
 }
 
 function parseSong(s: any): SongType {
-    return { id: s.id, title: s.name, artists: s.artists, albumart: s.images[2].url, albumartbig: s.images[0].url, explicit: s.explicit }
+    return { id: s.id, title: s.name, artists: s.artists, albumart: s.images[2].url, albumartbig: s.images[0].url, explicit: s.explicit, duration: s.duration_ms }
 }
 
 function parseBusiness(b: any): BarType {
@@ -110,7 +110,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
 
         songData.forEach((e: any) => {
             j++;
-            const song: SongType = { title: e.name, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit, artists: e.artists }
+            const song: SongType = { title: e.name, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit, artists: e.artists, duration: e.duration_ms }
             songs.push(song);
         })
 
@@ -458,7 +458,7 @@ export default function Bar() {
                                     alignItems: 'center',
                                 }}>
                                     <div style={{ flexGrow: 1 }}>
-                                        <Song song={{ title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "" }} dims={songDims ? songDims * 0.9 : undefined}></Song>
+                                        <Song song={{ title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "", duration: 0 }} dims={songDims ? songDims * 0.9 : undefined}></Song>
                                     </div>
                                 </div>
                             </div>
@@ -573,7 +573,7 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
                 onClick={() => setV(!v)}
             >
                 <div style={{ flexGrow: 1 }}>
-                    <Song song={current ?? { title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "" }} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song>
+                    <Song song={current ?? { title: "No song playing", artists: ["No artist"], explicit: false, id: "-1", albumart: "", duration: 0 }} dims={props.songDims ? props.songDims * 0.9 : undefined}></Song>
                 </div>
                 <div style={{ width: (props.songDims ?? 40) * 0.7 }}>
                     <Lottie

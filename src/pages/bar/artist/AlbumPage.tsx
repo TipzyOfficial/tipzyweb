@@ -50,7 +50,7 @@ export default function AlbumPage() {
         console.log(album);
         const s: SongType[] = [];
         data.forEach((e: any) =>
-          s.push({ title: e.name, artists: e.artists, albumart: album.albumart, id: e.id, explicit: e.explicit })
+          s.push({ title: e.name, artists: e.artists, albumart: album.albumart, id: e.id, explicit: e.explicit, duration: e.duration_ms })
         );
         console.log(s);
         setSongs(s);

@@ -315,7 +315,8 @@ export default function SongSearch() {
                 albumart: item.images.thumbnail ?? "",
                 albumartbig: item.images.teaser,
                 id: item.id ?? -1,
-                explicit: item.explicit
+                explicit: item.explicit,
+                duration: item.duration_ms,
             };
 
             const songShortened = JSON.stringify({ title: song.title, artists: song.artists, explicit: song.explicit });
