@@ -115,7 +115,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
         }
     }, [])
 
-    const login = (at: string, rt: string, ea: number, isApple?: boolean, name?: any) => {
+    const login = (at: string, rt: string, ea: number, isApple?: boolean, name?: AppleReturnType) => {
         loginWithTipzyToken(at, rt, ea, isApple, name)
             .catch(() => {
                 setGlobalDisable(false);

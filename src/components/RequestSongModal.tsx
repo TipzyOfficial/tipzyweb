@@ -74,6 +74,29 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     const sendRequest = async (price: number, free: boolean): Promise<number> => {
         if (!userContext.barState.bar) return 0;
 
+        const totalWaitTime = await fetchWithToken(userContext, `tipper/business/queue/?business_id=${userContext.barState.bar.id}`, "GET").then((response) => {
+            if (response === null) throw new Error("null response");
+            if (!response.ok) throw new Error("Bad response:" + response.status);
+            return response.json();
+        }).then((json) => {
+            if (json.data === undefined) throw new Error("no data");
+            const npd: number = json.data.now_playing?.duration_ms ?? 0;
+            const npp: number = json.data.now_playing?.progress_ms ?? 0;
+
+            const ntotal = npd - npp;
+
+            let qtotal = 0;
+
+            if (json.data.queue) {
+                for (const e of json.data.queue) {
+                    if (json.data.manually_queued) qtotal += e.duration_ms;
+                }
+            }
+
+            console.log("time sending", qtotal, ntotal)
+            return qtotal + ntotal;
+        }).catch((e) => { console.log(e); return 600000; });
+
         return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
             track_id: song?.id ?? "",
             track_name: song?.title ?? "No title",
@@ -84,6 +107,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             explicit: song.explicit,
             duration_ms: song.duration,
             free: free,
+            wait_time_ms: totalWaitTime
         })).then(response => response.json()).then(json => {
             // console.log("json: ", json)
             if (json.status === 200) return 1;
@@ -113,6 +137,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const usc = useContext(UserSessionContext);
     const [isFreeRequest, setIsFreeRequest] = useState(false);
     const [loginScreenVisible, setLoginScreenVisible] = useState(noAccessToken(usc));
+    const [endScreenVisible, setEndScreenVisible] = useState(false);
 
     // console.log(masterPrice);
 
@@ -150,6 +175,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         // alert("Your request was sent! Thank you for using Tipzy :)");
         // useInterval(() => props.handleClose(), 500);
         setTimeout(() => props.handleClose(), 500);
+        // setEndScreenVisible(true);
     }
 
     function PaymentScreen() {
@@ -396,6 +422,21 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         )
     }
 
+    function EndScreen() {
+        return (
+            <>
+
+                <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                    <div style={{
+
+                    }}>
+                        <span className="App-title" style={{ paddingTop: padding }}>Thank you!</span>
+                    </div>
+                </Modal.Body>
+            </>
+        )
+    }
+
     const priceWords = (minPrice: number | undefined, contributed: number | undefined, price: number | undefined) => {
         if (minPrice === undefined || price === undefined || contributed === undefined) return "Something went wrong.";
         if (minPrice <= contributed) return `We reached the goal–add another $${numberToPrice(price)}!`;
@@ -449,7 +490,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setPaymentScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
-            {loginScreenVisible ? <LoginScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
+            {loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );
 }
