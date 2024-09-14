@@ -24,6 +24,7 @@ import FullLogo from '../assets/Tipzy_Full_Orange.png';
 import rave from '../assets/rave.png';
 import { isIOS } from 'react-device-detect';
 
+const t = process.env.REACT_APP_TESTING === "false";
 
 const formatBirthday = (birthday: Date) => {
     return `${birthday.getFullYear()}-${birthday.getMonth() + 1 >= 10 ? (birthday.getMonth() + 1) : "0" + (birthday.getMonth() + 1)}-${birthday.getDate() >= 10 ? birthday.getDate() : "0" + birthday.getDate()}`
@@ -526,7 +527,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                             <><img src={GoogleLogo} width={18} height={18} alt={"google logo"} /> <div style={{ paddingRight: 5 }} /></>
                         } onClick={googleLogin} backgroundColor="white" fontSize={20} color="black" title="Continue With Google" />
                         <div style={{ paddingBottom: padding }}></div>
-                        {
+                        {t ? (
                             usernameShowing ?
                                 <div style={{
                                     backgroundColor: "#8885", width: "100%",
@@ -543,16 +544,13 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                                         <input className='input' type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
                                     </div>
                                     <TZButton onClick={onLogin} title={"Sign in"} disabled={loginPressed}></TZButton>
-                                    {/* <TZButton onClick={() => setUsernameShowing(false)} title={"back"} disabled={loginPressed}></TZButton> */}
                                 </div>
                                 :
                                 <TZButton onClick={() => setUsernameShowing(true)} backgroundColor="#8885" fontSize={20} color="white" title="Sign in with Username" />
-                        }
-                        {/* {small ? <></> :  */}
-                        <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                        ) : <></>}
+                        {t ? <div style={{ paddingTop: 10, textAlign: 'center' }}>
                             Don't have an account? <span style={{ color: Colors.primaryRegular, cursor: "pointer" }} onClick={() => { if (!loginPressed) setLoginPage(false) }}>Sign Up</span>
-                        </div>
-                        {/* } */}
+                        </div> : <></>}
                         <div style={{ fontSize: 12, paddingTop: padding, textAlign: 'center', color: "#888" }}>
                             By using this service you agree to our <a style={{ textDecoration: 'underline', color: "#AAA" }} href="https://www.tipzy.app/privacy" target='_blank' rel="noreferrer">privacy policy.</a>
                             <br></br>
