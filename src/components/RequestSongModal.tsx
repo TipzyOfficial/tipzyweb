@@ -17,6 +17,10 @@ import '../App.css'
 import Login from "../pages/Login";
 import { Consumer } from "../lib/user";
 
+const pendingEstimateConstant = 0.667;
+
+type EstimateType = [number, number] | undefined
+
 export function RequestPlayableModal(props: { playable: PlayableType | undefined, show: boolean, handleClose: () => void, data?: any, refreshRequests?: () => Promise<void> }) {
     // const song: SongType = props.playable?.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false };
     const userContext = useContext(UserSessionContext);
@@ -26,10 +30,10 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
 
     const p = minPrice !== undefined && amountBid !== undefined && minPrice - amountBid > 100 ? minPrice - amountBid : 100;
 
-    const sendRequest = async (price: number, free: boolean): Promise<number> => {
-        if (!props.playable) return 0;
+    const sendRequest = async (price: number, free: boolean): Promise<[number, undefined]> => {
+        if (!props.playable) return [0, undefined];
 
-        return await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
+        const code = await fetchWithToken(userContext, `tipper/liveartist/request/?set_item_id=${props.playable.id}`, "POST", JSON.stringify({
             price: price,
             free: false,
         }), props.data).then(response => response.json()).then(json => {
@@ -47,6 +51,8 @@ export function RequestPlayableModal(props: { playable: PlayableType | undefined
             console.log("error: ", e)
             return 0;
         });
+
+        return [code, undefined];
     }
 
     return <BasicRequestModal song={props.playable?.song} show={props.show} handleClose={props.handleClose} data={{ selectedPlayable: props.playable }} price={p} sendRequest={sendRequest} refreshRequests={props.refreshRequests} playable minPrice={minPrice} contributed={props.playable?.amountBid} />
@@ -71,8 +77,10 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
     // }
 
 
-    const sendRequest = async (price: number, free: boolean): Promise<number> => {
-        if (!userContext.barState.bar) return 0;
+    const sendRequest = async (price: number, free: boolean): Promise<[number, EstimateType]> => {
+        if (!userContext.barState.bar) return [0, undefined];
+
+        let estimatedSlots: EstimateType = undefined;
 
         const totalWaitTime = await fetchWithToken(userContext, `tipper/business/queue/?business_id=${userContext.barState.bar.id}`, "GET").then((response) => {
             if (response === null) throw new Error("null response");
@@ -83,21 +91,33 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             const npd: number = json.data.now_playing?.duration_ms ?? 0;
             const npp: number = json.data.now_playing?.progress_ms ?? 0;
 
+            const pendingTime = json.data.pending?.total_duration_ms ?? 0;
+
             const ntotal = npd - npp;
 
             let qtotal = 0;
+            let qcount = 0;
 
             if (json.data.queue) {
                 for (const e of json.data.queue) {
-                    if (json.data.manually_queued) qtotal += e.duration_ms;
+                    console.log("time sen e", e)
+                    if (e.manually_queued) {
+                        qtotal += e.duration_ms;
+                        qcount += 1;
+                    }
                 }
             }
 
-            console.log("time sending", qtotal, ntotal)
-            return qtotal + ntotal;
+            estimatedSlots = [
+                qcount + 1,
+                Math.max(qcount + 1 + (json.data.pending?.pending_song_count ?? 0) * pendingEstimateConstant, qcount + 2)
+            ];
+
+            console.log("time sending", qtotal, ntotal, Math.ceil(pendingTime * pendingEstimateConstant))
+            return qtotal + ntotal + Math.ceil(pendingTime * pendingEstimateConstant);
         }).catch((e) => { console.log(e); return 600000; });
 
-        return await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
+        const code = await fetchWithToken(userContext, `tipper/request/?business_id=${userContext.barState.bar.id}`, "POST", JSON.stringify({
             track_id: song?.id ?? "",
             track_name: song?.title ?? "No title",
             artist: song ? artistsStringListToString(song.artists) : "No artist",
@@ -121,11 +141,13 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
             console.log("error: ", e);
             return 0;
         });
+
+        return [code, estimatedSlots]
     }
     return <BasicRequestModal song={song} show={props.show} handleClose={props.handleClose} data={props.data} sendRequest={sendRequest} price={undefined} refreshRequests={props.refreshRequests} />
 }
 
-function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<number>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
+function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<[number, EstimateType]>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
     const fdim = useFdim();
     const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false, duration: 0 };
@@ -138,14 +160,20 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const [isFreeRequest, setIsFreeRequest] = useState(false);
     const [loginScreenVisible, setLoginScreenVisible] = useState(noAccessToken(usc));
     const [endScreenVisible, setEndScreenVisible] = useState(false);
+    const [estimatedSlot, setEstimatedSlot] = useState<EstimateType>();
 
     // console.log(masterPrice);
 
     const data = props.playable ? props.data : { selectedSong: song, ...props.data }
 
+    console.log('estimatedslot', estimatedSlot)
+
     const sendRequestClose = async (price: number | undefined) => {
         if (price === undefined) return;
-        const r = await props.sendRequest(price, isFreeRequest);
+        const [r, estimate] = await props.sendRequest(price, isFreeRequest);
+
+        console.log("rest", [r, estimate])
+
         if (r === 1) {
             setSuccess(true);
             if (props.refreshRequests)
@@ -174,8 +202,13 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
 
         // alert("Your request was sent! Thank you for using Tipzy :)");
         // useInterval(() => props.handleClose(), 500);
-        setTimeout(() => props.handleClose(), 500);
-        // setEndScreenVisible(true);
+
+        if (props.playable || r !== 1) {
+            setTimeout(() => props.handleClose(), 500);
+        } else {
+            setEstimatedSlot(estimate);
+            setEndScreenVisible(true);
+        }
     }
 
     function PaymentScreen() {
@@ -215,15 +248,10 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     function RequestScreen() {
         const [price, setPrice] = useState(masterPrice);
 
-        // useEffect(() => {
-        //     console.log("modal rerendered. disabled: ", disabled);
-        // })
-
         const checkStripe = async (): Promise<boolean | null> => {
             return fetchWithToken(userContext, `get_saved_payment3`, 'GET', undefined, data)
                 .then(r => r.json())
                 .then(json => {
-                    // console.log("json gsp", json)
                     if (!json.has_method) throw new Error("malformed json: no has_method.")
                     return (json.has_method === "True")
                 }).catch((e: Error) => { console.log(e); return null });
@@ -425,12 +453,29 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     function EndScreen() {
         return (
             <>
-
+                <Modal.Header className="m-auto" style={{ width: "100%" }}>
+                    <Modal.Title style={{ color: 'white', width: "100%", textAlign: 'center' }} className="m-auto">Thank you!</Modal.Title>
+                </Modal.Header>
                 <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
                     <div style={{
-
+                        display: 'flex',
+                        flexDirection: 'column'
                     }}>
-                        <span className="App-title" style={{ paddingTop: padding }}>Thank you!</span>
+                        <span>Successfully processed your request for<br />
+                            <span className="App-normaltext">
+                                <b>{song.title}</b> by <b>{artistsStringListToString(song.artists)}</b>
+                            </span>
+                            <br />
+                        </span>
+                        {estimatedSlot !== undefined ?
+                            <>
+                                <span>Estimated spot in queue: {estimatedSlot[0]} to {Math.ceil(estimatedSlot[1])} songs from now</span>
+                                <br />
+                                <span className="App-smalltext">Keep in mind this is an estimate–the actual time may vary.</span>
+                            </>
+                            :
+                            <span>Unfortunately we can't give you an estimate of when your song will play at this time. Keep an ear out!</span>
+                        }
                     </div>
                 </Modal.Body>
             </>
@@ -447,8 +492,6 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     }
 
     const getPrice = async () => {
-        console.log("usc gp", usc);
-
         if (props.playable) {
             setMasterPrice(props.price);
         }
@@ -488,6 +531,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setDisabled(false);
                 getPrice();
                 setPaymentScreenVisible(false);
+                setEndScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
