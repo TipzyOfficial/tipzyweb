@@ -201,14 +201,14 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         await checkIsFree(usc);
 
         // alert("Your request was sent! Thank you for using Tipzy :)");
-        // useInterval(() => props.handleClose(), 500);
+        setTimeout(() => props.handleClose(), 500);
 
-        if (props.playable || r !== 1) {
-            setTimeout(() => props.handleClose(), 500);
-        } else {
-            setEstimatedSlot(estimate);
-            setEndScreenVisible(true);
-        }
+        // if (props.playable || r !== 1) {
+        //     setTimeout(() => props.handleClose(), 500);
+        // } else {
+        //     setEstimatedSlot(estimate);
+        //     setEndScreenVisible(true);
+        // }
     }
 
     function PaymentScreen() {
