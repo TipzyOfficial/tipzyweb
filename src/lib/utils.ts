@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 import { Consumer } from "./user";
 import { UserSessionContextType } from "./UserSessionContext";
+import e from "express";
+import { SongType } from "./song";
 
 function isMobile() {
     const o = typeof window.screen.orientation !== 'undefined';
@@ -98,6 +100,10 @@ export const trackUser = (usc: UserSessionContextType): string => {
     if (noAccessToken(usc)) return "[GUEST USER]"
     return `${usc.user.name}, id: ${usc.user.id}`;
 }
+
+// export function parseSong (e: any): SongType {
+//     return { title: e.name, artists: e.artists, albumart: album.albumart, id: e.id, explicit: e.explicit, duration: e.duration_ms, approved: e.approved }
+// }
 
 export function useInterval(callback: () => any, delay: number, firstDelay?: number): void {
 

@@ -63,7 +63,7 @@ export default function ArtistInfo() {
 
         const songs: SongType[] = [];
         topsongs.forEach((e: any) =>
-          songs.push({ title: e.name, artists: e.artists, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit, duration: e.duration_ms })
+          songs.push({ title: e.name, artists: e.artists, albumart: e.images?.thumbnail ?? "", albumartbig: e.images?.teaser ?? "", id: e.id, explicit: e.explicit, duration: e.duration_ms, approved: e.approved })
         );
         albumdata.forEach((e: any) => {
           const d = new Date(e.release_date);
