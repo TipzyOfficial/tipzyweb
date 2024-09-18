@@ -87,6 +87,8 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
 
     let score = r.recognizability / 20;
 
+    if (r.song.approved === false) score -= 1000;
+
     const title = r.song.title.toLowerCase();
     const titleWords = title.split(" ").filter(v => v.length > 0 || v === "-");;
 
@@ -112,14 +114,12 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
                 if (compareWords(artistWords[count], queryWords[i])) {
                     const increase = artistFactor / ((count) * 4 + 1);
                     score += increase;
-                    console.log("found", artistWords[count], increase, queryWords);
                     count++;
                 } else {
                     break;
                 }
             }
             queryWords.splice(artistPos, count);
-            console.log("qw", queryWords, count)
         }
     }
 
@@ -129,8 +129,6 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
 
     for (let i = 0; i < titleWords.length; i++) {
         //second part gives exceptions to if the bad keyword is EXPLICITLY in the string
-        console.log("badword?", titleWords[i], badWords.has(titleWords[i]));
-
         if (badWords.has(titleWords[i]) && !query.includes(titleWords[i])) return 0;
 
         if (beginningIndex === -1) {
@@ -141,8 +139,6 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
         } else {
             if (compareWords(titleWords[i - beginningIndex], queryWords[i])) {
                 score += titleFactor + (i - beginningIndex);
-
-                // console.log("word: ", titleWords[i - beginningIndex], i - beginningIndex, titleWords)
             }
         }
     }
@@ -295,8 +291,6 @@ export default function SongSearch() {
         }
 
         const b64query = btoa(query);
-        console.log("query", b64query)
-
         const json = await fetchNoToken(`tipper/business/search/?limit=${limit}&string=${b64query}&business_id=${bar.id}`, 'GET').then(r => r.json());
 
         // console.log(json);
@@ -306,9 +300,10 @@ export default function SongSearch() {
         const data: any[] = json.data//.reverse();
         const originals: Map<string, number> = new Map();
 
+        console.log(data);
 
         for (const item of data) {
-            const song =
+            const song: SongType =
             {
                 title: item.name.trim() ?? "Default",
                 artists: item.artist ?? ["Default"],
@@ -317,6 +312,7 @@ export default function SongSearch() {
                 id: item.id ?? -1,
                 explicit: item.explicit,
                 duration: item.duration_ms,
+                approved: item.approved,
             };
 
             const songShortened = JSON.stringify({ title: song.title, artists: song.artists, explicit: song.explicit });
@@ -325,7 +321,6 @@ export default function SongSearch() {
 
             if (originalIndex === undefined) {
                 originals.set(songShortened, results.length);
-                console.log(songShortened, originals);
 
                 const score = resultScore({ song: song, recognizability: item.recognizability }, query, topArtistSet)
 
@@ -431,7 +426,7 @@ export default function SongSearch() {
     return (
         <div className="App-body-top">
             {isAndroid ? (!androidStupid ? <div></div> : <div style={{ width: "100%", height: "100%", position: 'fixed', top: 0, display: "flex" }}></div>) : <></>}
-            <div style={{ padding: padding, position: 'sticky', top: 0, display: 'flex', flexDirection: 'column', width: "100%", backgroundColor: Colors.background }}>
+            <div style={{ padding: padding, position: 'sticky', top: 0, display: 'flex', flexDirection: 'column', width: "100%", backgroundColor: Colors.background, zIndex: 10 }}>
                 <form style={{ width: '100%', flexDirection: 'row', display: 'flex' }}
                     onSubmit={(e) => {
                         e.preventDefault();

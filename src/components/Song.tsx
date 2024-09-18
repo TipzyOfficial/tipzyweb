@@ -27,12 +27,13 @@ export default function Song(props: { song: SongType, dims?: number, noImage?: b
     const radius = 5;
     const bigDims = 128;
     const dims = props.dims ?? 50;
+    const disapproved = props.song.approved === false;
 
     const Img = () => props.song.albumart === "" || !props.song.albumart ? <div style={{ borderRadius: props.roundedEdges ? radius : 0, overflow: "hidden", height: dims, width: dims, backgroundColor: "#888", display: 'flex', justifyContent: 'center', alignItems: 'center' }}><FontAwesomeIcon color={"#fff8"} fontSize={dims / 3} icon={faMusic}></FontAwesomeIcon></div>
-        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims, borderRadius: props.roundedEdges ? radius : 0, overflow: "hidden", }} />
+        : <img src={props.song.albumart} alt={props.song.title} style={{ height: dims, width: dims, borderRadius: props.roundedEdges ? radius : 0, overflow: "hidden" }} />
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flex: 1, opacity: disapproved ? 0.5 : 1 }}>
             {props.number ? <span>{props.number}. </span> : <></>}
             {props.noImage ? <></> : <Img></Img>}
             <div style={{ paddingLeft: props.noImage ? 0 : dims / 10, flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -63,7 +64,7 @@ export function SongRenderItem(props: { song: SongType, dims: number, onClick?: 
             boxSizing: "border-box",
             WebkitBoxSizing: "border-box",
             MozBoxSizing: "border-box",
-            // opacity: opacity,
+            // opacity: 0.99,
             border: 'none',
             backgroundColor: '#0000'
         }}

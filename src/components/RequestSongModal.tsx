@@ -482,6 +482,26 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         )
     }
 
+    function DisapprovedScreen() {
+        return (
+            <>
+                <Modal.Header className="m-auto" style={{ width: "100%" }}>
+                    <Modal.Title style={{ color: 'white', width: "100%", textAlign: 'center' }} className="m-auto">Sorry...</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
+                        <span className="App-normaltext">
+                            {usc.barState.bar?.name} is currently only accepting songs from a pre-approved list. <br /> Unfortunately, <b>{song.title}</b> by <b>{artistsStringListToString(song.artists)}</b> is not on that list.
+                        </span>
+                    </div>
+                </Modal.Body>
+            </>
+        )
+    }
+
     const priceWords = (minPrice: number | undefined, contributed: number | undefined, price: number | undefined) => {
         if (minPrice === undefined || price === undefined || contributed === undefined) return "Something went wrong.";
         if (minPrice <= contributed) return `We reached the goal–add another $${numberToPrice(price)}!`;
@@ -524,6 +544,8 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
     }
 
+    const disapproved = song.approved === false;
+
     return (
         <Modal
             dialogClassName="App-modal"
@@ -534,7 +556,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setEndScreenVisible(false);
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
-            {loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
+            {disapproved ? <DisapprovedScreen /> : loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
         </Modal>
     );
 }
