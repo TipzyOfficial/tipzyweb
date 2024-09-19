@@ -201,14 +201,14 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         await checkIsFree(usc);
 
         // alert("Your request was sent! Thank you for using Tipzy :)");
-        setTimeout(() => props.handleClose(), 500);
+        // setTimeout(() => props.handleClose(), 500);
 
-        // if (props.playable || r !== 1) {
-        //     setTimeout(() => props.handleClose(), 500);
-        // } else {
-        //     setEstimatedSlot(estimate);
-        //     setEndScreenVisible(true);
-        // }
+        if (props.playable || r !== 1) {
+            setTimeout(() => props.handleClose(), 500);
+        } else {
+            setEstimatedSlot(estimate);
+            setEndScreenVisible(true);
+        }
     }
 
     function PaymentScreen() {
@@ -409,14 +409,16 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                                 }
                             </Modal.Body>
                             :
-                            <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
-                                <div style={{
+                            (masterPrice && !isFreeRequest ?
+                                <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                                    <div style={{
 
-                                }}>
-                                    <span style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
-
-                                </div>
-                            </Modal.Body>
+                                    }}>
+                                        <span style={{ paddingTop: padding }}>You'll only be charged for requests that are accepted.</span>
+                                    </div>
+                                </Modal.Body>
+                                : <></>
+                            )
                         }
                     </Row>
                 </Container>
@@ -469,7 +471,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                         </span>
                         {estimatedSlot !== undefined ?
                             <>
-                                <span>Estimated spot in queue: {estimatedSlot[0]} to {Math.ceil(estimatedSlot[1])} songs from now</span>
+                                <span>Estimated spot in queue (if accepted): {estimatedSlot[0]} to {Math.ceil(estimatedSlot[1])} songs from now</span>
                                 <br />
                                 <span className="App-smalltext">Keep in mind this is an estimate–the actual time may vary.</span>
                             </>
@@ -557,6 +559,7 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                 setSuccess(undefined);
             }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
             {disapproved ? <DisapprovedScreen /> : loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
+
         </Modal>
     );
 }
