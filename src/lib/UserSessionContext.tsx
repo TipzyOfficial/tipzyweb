@@ -162,6 +162,7 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
     const editBar = (bar: BarType | undefined) => {
         if (bar) cookies.set("bar_session", bar.id);
+        console.log("EDITBAR", bar)
         setBar(bar);
     }
 

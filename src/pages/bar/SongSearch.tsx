@@ -249,7 +249,7 @@ export default function SongSearch() {
     const songDims = fdim ? Math.max(Math.min(fdim / 10, 75), 50) : 50;
     const limit = 50;
     const timeoutInterval = 500;
-    const androidTimeout = 100;
+    const androidTimeout = 200;
     const [androidStupid, setAndroidStupid] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);
     const loc = useLocation();
@@ -278,7 +278,7 @@ export default function SongSearch() {
      * @param limit the max amount of results to return
      * @returns the array of songs matching the query. since it's an async function, it returns a promise.
      */
-    async function searchForSongs(query: string, limit: number, searching?: boolean): Promise<SongType[]> {
+    async function searchForSongs(query: string, limit: number): Promise<SongType[]> {
         //this function calls the backend to get the search results for a query.   
         if (!bar) return [];
 

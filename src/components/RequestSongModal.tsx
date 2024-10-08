@@ -1,4 +1,4 @@
-import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Modal, Row, Spinner } from "react-bootstrap";
 import { Colors, padding, radius, useFdim } from "../lib/Constants";
 import { PlayableType, SongType } from "../lib/song";
 import './Song.css'
@@ -16,7 +16,9 @@ import { faMusic } from "@fortawesome/free-solid-svg-icons";
 import '../App.css'
 import Login from "../pages/Login";
 import { Consumer } from "../lib/user";
+import { fetchBarInfo, getCurrentQueue } from "../pages/bar/Bar";
 
+const refreshInterval = 5000;
 const pendingEstimateConstant = 0.667;
 
 type EstimateType = [number, number] | undefined
@@ -150,6 +152,7 @@ export default function RequestSongModal(props: { song: SongType | undefined, sh
 function BasicRequestModal(props: { song: SongType | undefined, show: boolean, handleClose: () => void, data?: any, sendRequest: (price: number, free: boolean) => Promise<[number, EstimateType]>, price: number | undefined, refreshRequests?: () => Promise<void>, playable?: boolean, minPrice?: number, contributed?: number }) {
     const fdim = useFdim();
     const dims = fdim / 2; //props.playable ? fdim / 2 : fdim / 2;
+    const [ready, setReady] = useState(false);
     const song: SongType = props.song ?? { id: "-1", title: "No Title", artists: ["No artists"], albumart: "", explicit: false, duration: 0 };
     const [paymentScreenVisible, setPaymentScreenVisible] = useState(false);
     const [success, setSuccess] = useState<undefined | boolean>(undefined);
@@ -161,12 +164,13 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
     const [loginScreenVisible, setLoginScreenVisible] = useState(noAccessToken(usc));
     const [endScreenVisible, setEndScreenVisible] = useState(false);
     const [estimatedSlot, setEstimatedSlot] = useState<EstimateType>();
+    const [isPlaying, setIsPlaying] = useState(true);
 
     // console.log(masterPrice);
 
     const data = props.playable ? props.data : { selectedSong: song, ...props.data }
 
-    console.log('estimatedslot', estimatedSlot)
+    // console.log('allowingRequests?', usc.barState.bar?.allowingRequests)
 
     const sendRequestClose = async (price: number | undefined) => {
         if (price === undefined) return;
@@ -484,6 +488,26 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         )
     }
 
+    function DisableRequestsScreen() {
+        return (
+            <>
+                <Modal.Header className="m-auto" style={{ width: "100%" }}>
+                    <Modal.Title style={{ color: 'white', width: "100%", textAlign: 'center' }} className="m-auto">Sorry...</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
+                        <span className="App-normaltext">
+                            {usc.barState.bar?.name} isn't accepting songs at the moment. Come back later!
+                        </span>
+                    </div>
+                </Modal.Body>
+            </>
+        )
+    }
+
     function DisapprovedScreen() {
         return (
             <>
@@ -498,6 +522,24 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
                         <span className="App-normaltext">
                             {usc.barState.bar?.name} is currently only accepting songs from a pre-approved list. <br /> Unfortunately, <b>{song.title}</b> by <b>{artistsStringListToString(song.artists)}</b> is not on that list.
                         </span>
+                    </div>
+                </Modal.Body>
+            </>
+        )
+    }
+
+    function LoadingScreen() {
+        return (
+            <>
+                <Modal.Body style={{ textAlign: "center", paddingTop: padding, color: 'white' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: padding
+                    }}>
+                        <Spinner />
                     </div>
                 </Modal.Body>
             </>
@@ -546,19 +588,62 @@ function BasicRequestModal(props: { song: SongType | undefined, show: boolean, h
         }
     }
 
+    const fetchAll = async () => {
+        const bar = usc.barState.bar;
+        if (bar) {
+            await fetchBarInfo(usc, bar.id);
+            const cq = await getCurrentQueue(bar.id);
+            if (cq) {
+                const [c,] = cq;
+                if (!c) setIsPlaying(false);
+                else setIsPlaying(true);
+            } else {
+                setIsPlaying(false);
+            }
+        }
+    }
+
+    useInterval(() => {
+        if (props.show) {
+            console.log("refreshing interval")
+            fetchAll();
+        }
+    }, refreshInterval)
+
+    // const getAcceptingSongs = async () => {
+
+    // }
+
     const disapproved = song.approved === false;
+
+    const onShow = async () => {
+        setReady(false);
+        setDisabled(false);
+        // getAcceptingSongs();
+        getPrice();
+        setPaymentScreenVisible(false);
+        setEndScreenVisible(false);
+        setSuccess(undefined);
+
+        const bar = usc.barState.bar;
+
+        if (bar && bar.allowingRequests) {
+            setReady(true);
+        }
+
+        if (bar) {
+            fetchAll();
+        }
+        setReady(true);
+    }
 
     return (
         <Modal
             dialogClassName="App-modal"
-            show={props.show} onShow={() => {
-                setDisabled(false);
-                getPrice();
-                setPaymentScreenVisible(false);
-                setEndScreenVisible(false);
-                setSuccess(undefined);
-            }} onHide={props.handleClose} centered data-bs-theme={"dark"}>
-            {disapproved ? <DisapprovedScreen /> : loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />}
+            show={props.show} onShow={onShow} onHide={props.handleClose} centered data-bs-theme={"dark"}>
+            {ready ? (usc.barState.bar?.allowingRequests && isPlaying ? (
+                disapproved ? <DisapprovedScreen /> : loginScreenVisible ? <LoginScreen /> : endScreenVisible ? <EndScreen /> : paymentScreenVisible ? <PaymentScreen /> : <RequestScreen />
+            ) : <DisableRequestsScreen />) : <LoadingScreen />}
 
         </Modal>
     );

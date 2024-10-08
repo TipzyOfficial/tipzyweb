@@ -33,8 +33,50 @@ import defaultBackground from "../../assets/default_background.png"
 import TZButton from "../../components/TZButton";
 import TopBar from "../../components/TopBar";
 import { styles } from "../Login";
+import _ from "lodash";
 
 const utf8Encode = new TextEncoder();
+
+// export const getAllowingRequests = async (usc: UserSessionContextType) => {
+//     const bar = usc.barState.bar;
+//     if(bar){
+//         const barinfo = await fetchBarInfo(usc, bar.id);
+//         if(!barinfo) throw new Error("Error retrieving bar info.")
+//         barinfo?.allowingRequests
+//     }
+// }
+
+export const setAllowingRequests = (usc: UserSessionContextType, b: boolean) => {
+    const bar = usc.barState.bar;
+    if (!bar) return;
+    const newBar = _.cloneDeep(bar);
+    newBar.allowingRequests = b;
+    usc.barState.setBar(newBar);
+}
+
+export const getCurrentQueue = async (id: number): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
+    return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
+        if (response === null) throw new Error("null response");
+        if (!response.ok) throw new Error("Bad response:" + response.status);
+        return response.json();
+    }).then(json => {
+        console.log("queue json", json);
+
+        if (json.data === undefined) return undefined;
+        const np = json.data.now_playing;
+        const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images?.thumbnail, albumartbig: np.images?.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
+        const q: SongType[] = [];
+
+        json.data.queue.forEach((e: any) => {
+            const song: SongType = { title: e.name, artists: e.artist, albumart: e.images?.thumbnail, albumartbig: e.images?.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
+            q.push(song);
+        });
+
+        console.log("NOWPLAYING", nowplaying, "QUEUE", q)
+
+        return [nowplaying, q];
+    });
+}
 
 function parseSongIHateMeku(s: any): SongType {
     return { id: s.id, title: s.name, artists: [s.artist], albumart: s.image_url, explicit: s.explicit ?? false, duration: s.duration_ms }
@@ -202,39 +244,16 @@ export default function Bar() {
         setHeight((toggle?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
     }, [topBar, toggle])
 
-    const getCurrentQueue = async (): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
-        return fetchNoToken(`tipper/business/queue/?business_id=${id}`, "GET").then(response => {
-            if (response === null) throw new Error("null response");
-            if (!response.ok) throw new Error("Bad response:" + response.status);
-            return response.json();
-        }).then(json => {
-            console.log("queue json", json);
-
-            if (json.data === undefined) return undefined;
-            const np = json.data.now_playing;
-            const nowplaying = np ? { title: np.track_name, artists: np.artists, albumart: np.images?.thumbnail, albumartbig: np.images?.teaser, id: np.track_id, duration: np.duration_ms, explicit: np.explicit } : undefined;
-            const q: SongType[] = [];
-
-            json.data.queue.forEach((e: any) => {
-                const song: SongType = { title: e.name, artists: e.artist, albumart: e.images?.thumbnail, albumartbig: e.images?.teaser, id: e.id, duration: e.duration_ms, explicit: e.explicit, manuallyQueued: e.manually_queued };
-                q.push(song);
-            });
-
-            console.log("NOWPLAYING", nowplaying, "QUEUE", q)
-
-            return [nowplaying, q];
-        });
-    }
-
     const refreshCurrent = () => {
-        getCurrentQueue().then((r) => {
+        getCurrentQueue(id).then((r) => {
             if (!r) return;
             const [c, q] = r;
             if (!c) {
-                setDisableEverything(true);
-            } else {
-                if (setDisableEverything) setDisableEverything(false)
+                setAllowingRequests(usc, false);
             }
+            // else {
+            //     if (bar?.allowingRequests === false) setAllowingRequests(usc, true)
+            // }
             setCurrent(c);
             setQueue(
                 /** REVERT FOR SOUNDTRACK */
@@ -246,8 +265,7 @@ export default function Bar() {
     }
 
     const refreshAllReqs = async (indicator: boolean) => {
-
-        console.log("refrehing all")
+        console.log("refreshing all", usc.barState.bar)
         if (usc.user.access_token === "") return;
         if (indicator) setCload(true);
 
@@ -309,7 +327,7 @@ export default function Bar() {
     const allRefresh = (indicator: boolean) => {
         // console.log("refreshing data...")
         refreshCurrent();
-        refreshAllReqs(indicator);
+        refreshAllReqs(indicator)//.then(() => console.log("..."));
     }
 
     // useEffect(() => console.log("rerendered everything"), [])
@@ -354,8 +372,10 @@ export default function Bar() {
 
     return (
         <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
-            <div className="App-body-top" style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}>
-                <DisableRequests show={!bar.allowingRequests || disableEverything} bar={bar} />
+            <div className="App-body-top"
+            // style={bar.allowingRequests ? undefined : { overflow: 'hidden', height: "100%", position: 'fixed' }}
+            >
+                {/* <DisableRequests show={!bar.allowingRequests || disableEverything} bar={bar} /> */}
                 <div ref={topBarRef}
                     style={{
                         flex: 1, alignSelf: "stretch", display: "flex", alignItems: 'center', backgroundColor: topBarColor, position: 'fixed', top: 0, zIndex: 20, width: "100%",
