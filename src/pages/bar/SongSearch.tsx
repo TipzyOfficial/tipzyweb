@@ -101,8 +101,10 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
         if (badArtists.has(artist)) return 0;
         if (topArtists.has(artist)) score += topArtistFactor;
         const artistWords = artist.trim().split(" ").filter(v =>
-            v.length > 0
+            v.length > 0 && v !== "the"
         );
+
+        // console.log(artistWords);
         // console.log(artistWords);
 
         if (!artistWords[0]) break; //no artist (for some reason?)
@@ -110,6 +112,7 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
         const artistPos = queryWords.indexOf(artistWords[0]); //search query string for that specific artist
         if (artistPos !== -1) {
             let count = 0;
+            console.log("artist found!", artist, artistWords, artistPos)
             for (let i = artistPos; i < queryWords.length; i++) { //traverse string to find rest of artist name 
                 if (compareWords(artistWords[count], queryWords[i])) {
                     const increase = artistFactor / ((count) * 4 + 1);
@@ -123,7 +126,7 @@ const resultScore = (r: QueryResultType, q: string, topArtists: Set<string>) => 
         }
     }
 
-    console.log(queryWords);
+    // console.log(queryWords);
 
     let beginningIndex = -1;
 
@@ -326,12 +329,14 @@ export default function SongSearch() {
 
                 // const song2 =
                 // {
-                //     title: `${item.name} ${score}` ?? "Default",
+                //     title: `${item.name} ${score} ${item.recognizability}` ?? "Default",
                 //     artists: item.artist ?? ["Default"],
                 //     albumart: item.images.thumbnail ?? "",
                 //     albumartbig: item.images.teaser,
                 //     id: item.id ?? -1,
-                //     explicit: item.explicit
+                //     explicit: item.explicit,
+                //     duration: item.duration_ms,
+                //     approved: item.approved,
                 // };
 
                 results.push({ song: song, recognizability: item.recognizability, score: score })
