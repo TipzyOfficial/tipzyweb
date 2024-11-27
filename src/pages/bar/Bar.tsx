@@ -344,6 +344,7 @@ export default function Bar() {
     }
 
     useEffect(() => {
+        // alert(bar?.id);
         getCookies().remove("artist_session");
         if (!id) {
             router.navigate("/code");
