@@ -9,7 +9,7 @@ import TZButton from "../../components/TZButton";
 import { UserSessionContext, UserSessionContextType } from "../../lib/UserSessionContext";
 import { fetchWithToken } from "../..";
 import { DisplayOrLoading } from "../../components/DisplayOrLoading";
-import { Spinner } from "react-bootstrap";
+import { Col, Spinner } from "react-bootstrap";
 
 // 607 227 7092    520 esty st. $243
 // $550
@@ -61,11 +61,11 @@ export default function Refer() {
                 <BackButton></BackButton>
             } />
             <div style={styles}>
-                <span style={{ paddingBottom: padding }} className="App-normaltext">Referring a friend grants you both a FREE request!</span>
+                <span className="App-tertiarytitle" style={{ paddingBottom: padding }}>Referring a friend grants you both a <span style={{ color: Colors.primaryRegular }}>FREE</span> request!</span>
                 <span style={{ paddingBottom: padding }} className="App-normaltext">Just scan the following QR code and create an account:</span>
                 <QR url={url} />
                 <br></br>
-                <span style={{ paddingBottom: padding }} className="App-normaltext">Or copy the link below to text it to someone:</span>
+                <span style={{ paddingBottom: padding }} className="App-normaltext">Or copy the link below and text it to someone:</span>
                 {url ?
                     <div
                         onClick={() => {
@@ -73,12 +73,20 @@ export default function Refer() {
                             setCopied(true);
                         }}
                         style={{
-                            padding: padding, backgroundColor: copied ? Colors.darkerGreen : undefined, borderRadius: radius, borderWidth: 1, borderColor: 'white', borderStyle: 'solid',
-                            boxShadow: '0px 0px 10px #fff5',
+                            padding: padding, borderRadius: radius, borderWidth: 1, borderColor: copied ? Colors.green : 'white', borderStyle: 'solid',
+                            boxShadow: `0px 0px 10px ${copied ? Colors.green : "#fff3"}`,
                         }}>
-                        <span>{url}</span>
+                        <span className="App-normaltext">{url}</span>
                     </div> : <></>}
-                {copied ? <span className="App-tertiarytitle" style={{ paddingTop: padding, color: Colors.green }}>Copied link!</span> : <></>}
+                <div style={{ paddingTop: padding }} />
+
+                {copied ?
+                    <div style={{ backgroundColor: Colors.darkerGreen, padding: padding, borderRadius: radius }}>
+                        <span className="App-tertiarytitle" style={{}}>Copied link!</span>
+                    </div>
+                    : <></>}
+
+                <span className="App-normaltext">Each referral code is unique. If you want to refer another friend, please reload the page first.</span>
             </div>
         </div>
     )

@@ -158,7 +158,7 @@ export default function Account() {
 
                         {/* <span className="App-tertiarytitle">Your Information</span> */}
                     </div>
-                    <TZProfileComponent text="Refer a Friend" onClick={handleReferClick} />
+                    <TZProfileComponent borderColor={Colors.primaryRegular} text="Refer a Friend" onClick={handleReferClick} />
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
