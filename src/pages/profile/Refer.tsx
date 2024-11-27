@@ -81,12 +81,15 @@ export default function Refer() {
                 <div style={{ paddingTop: padding }} />
 
                 {copied ?
-                    <div style={{ backgroundColor: Colors.darkerGreen, padding: padding, borderRadius: radius }}>
-                        <span className="App-tertiarytitle" style={{}}>Copied link!</span>
-                    </div>
+                    <>
+                        <div style={{ backgroundColor: Colors.darkerGreen, padding: padding / 2, borderRadius: radius }}>
+                            <span className="App-tertiarytitle" style={{}}>Copied link!</span>
+                        </div>
+                        <div style={{ paddingTop: padding / 2 }} />
+                    </>
                     : <></>}
 
-                <span className="App-normaltext">Each referral code is unique. If you want to refer another friend, please reload the page first.</span>
+                <span className="App-normaltext">This codes expires once used. If you want to refer another friend, please reload the page first.</span>
             </div>
         </div>
     )
