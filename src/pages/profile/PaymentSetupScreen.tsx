@@ -9,7 +9,7 @@ export default function PaymentSetupScreen() {
     return (
         <div className="App-body-top">
             <TZHeader title={"Card details"}
-                leftComponent={<BackButton onClick={() => router.navigate(-1)} />}
+                leftComponent={<BackButton />}
                 rightComponent={<HelpButton text="If you've already set up your card details with us, you don't have fill anything out here unless you'd like to update your information."></HelpButton>}
             />
             <PaymentSetup update handleSubmit={() => {

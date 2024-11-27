@@ -20,6 +20,11 @@ export const ServerInfo = {
 //     return (`${ServerInfo.baseurl}/${ServerInfo[s]}/`)
 // }
 
+const debuglog = (...s: any[]) => {
+    // alert(s.toString());
+    console.log(s);
+}
+
 export type TokenReturnType = {
     access_token: string;
     refresh_token: string;
@@ -90,22 +95,21 @@ export async function fetchNoToken(urlEnding: string, fetchMethod?: string, body
  * @returns returns whatever the response is.
  */
 export async function fetchWithToken(accessToken: string, urlEnding: string, expiresAt: number, getRefreshToken: (() => string | null), logout: (() => void), resetTokenValues: ((tokens: TokenReturnType) => Promise<void>), fetchMethod?: string, body?: string, signal?: AbortSignal): Promise<Response | null> {
-    // const c = getCookies();
 
-    // console.log("fwt at url:", urlEnding, "at and ea", accessToken, expiresAt)
-
-    let myAccessToken = accessToken;//c.get("access_token");
+    let myAccessToken = accessToken;
 
     const newTokens = async () => {
-        const refreshToken = await getRefreshToken();
-        if (refreshToken === null) { console.log("no refresh token stored!"); return 0; }
+        const refreshToken = getRefreshToken();
+        if (refreshToken === null) { debuglog("no refresh token stored!"); return 0; }
         const tokens: TokenReturnType | null = await getAccessToken(refreshToken)
-            .catch((e) => { console.log("error access: ", e.message); return null });
+            .catch((e) => { debuglog("error access: ", e.message); return null });
         if (tokens === null) {
-            // console.log("problem getting access tokens!");
+            // debuglog("problem getting access tokens!");
             return 0;
         }
+        debuglog(`RESETING TOKEN VALUES at ${tokens.access_token} ea ${tokens.expires_at} rt ${tokens.refresh_token}`);
         resetTokenValues(tokens);
+        window.location.reload();
         myAccessToken = tokens.access_token;
         return 1;
     }
@@ -113,7 +117,7 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     if (isNaN(expiresAt) || expiresAt <= Date.now()) {
         const res = await newTokens();
         if (res === 0) {
-            console.log("tokens expired. logging out. " + urlEnding)
+            debuglog("tokens expired. logging out. " + urlEnding)
             logout();
             return null;
         }
@@ -144,51 +148,32 @@ export async function fetchWithToken(accessToken: string, urlEnding: string, exp
     const response = await theFetch();
 
     if (response.status === 401) {
-        console.log("401 error. Trying again.");
+        const text = await response.text();
+        debuglog(urlEnding + "401 error. Trying again." + text);
         const newt = await newTokens().catch(() => {
             //throw new Error("problem with your refresh token.");
-            console.log("problem with your refresh token.");
             logout();
             return;
         });
 
         if (newt === 0) {
-            console.log("problem with your refresh token.");
             logout();
             return null;
         }
 
         //throw new Error("problem with your refresh token.");
-        // console.log("trying again with new tokens now!")
+        // debuglog("trying again with new tokens now!")
         const response2 = await theFetch();
 
         if (response.status === 401) {
-            console.log("for some reason, your access token failed again. signing out.")
+            debuglog("for some reason, your access token failed again. signing out.")
             logout();
             return null;
         }
 
         return response2;
-
-
-
-        // .then((res) => {
-
-        // }).catch((e: Error) => {
-        //     console.log("couldn't refresh tokens.");
-        //     // logout();
-        //     return null;
-        // });
     }
     return response;
-
-
-
-
-    // return theFetch().then(response => 
-    //     {
-    //     }
-    // );
 }
 
 /**

@@ -67,20 +67,12 @@ export default function AlbumPage() {
     return <NotFoundPage body="We can't seem to find that album." backPath={"/bar"} />
   }
 
-
-  function handleBackClick() {
-    if (loc.state.fromLogin) {
-      router.navigate("/bar");
-    }
-    else router.navigate(-1);
-  }
-
   return (
     <DisplayOrLoading condition={ready} loadingScreen={<LoadingScreen />}>
       <div className={"App-body-top"}>
         <TZHeader title={album.title}
           leftComponent={
-            <BackButton onClick={handleBackClick}></BackButton>
+            <BackButton></BackButton>
           }
         />
         <div style={{ width: '100%', paddingBottom: padding * 2 }}>

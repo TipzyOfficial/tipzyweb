@@ -141,7 +141,7 @@ export default function Invoices() {
                 }}
             >
                 <TZHeader title={"Invoices"}
-                    leftComponent={<BackButton onClick={() => router.navigate(-1)} />}
+                    leftComponent={<BackButton />}
                     rightComponent={<HelpButton
                         text="Once your requested song gets accepted, you won't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here, as well as their processing date."></HelpButton>}
                 />

@@ -97,7 +97,7 @@ export default function ArtistInfo() {
         <div className={"App-body-top"}>
           <TZHeader title={artistName ?? "No artist"}
             leftComponent={
-              <BackButton onClick={handleBackClick}></BackButton>
+              <BackButton></BackButton>
             }
           />
           <div style={{ width: '100%', paddingBottom: padding * 2 }}>

@@ -37,10 +37,6 @@ export default function Albums() {
     return <NotFoundPage body="It appears we lost track of the bar you're in. Sorry!" backPath={"/code"} />
   }
 
-  function handleBackClick() {
-    router.navigate(-1);
-  }
-
   const maxSupport = Math.floor((wdim.width) / (albumDims + padding));
 
   console.log(maxSupport);
@@ -49,7 +45,7 @@ export default function Albums() {
     <div className={"App-body-top"}>
       <TZHeader title={"Albums"}
         leftComponent={
-          <BackButton onClick={handleBackClick}></BackButton>
+          <BackButton></BackButton>
         }
       />
       <div style={{ width: '100%', justifyContent: 'center', display: 'flex' }}>

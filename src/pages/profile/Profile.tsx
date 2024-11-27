@@ -105,14 +105,10 @@ export default function Profile() {
 
     // const loc = useLocation();
 
-    const handleBackClick = () => {
-        router.navigate(`/bar`);
-    };
-
     return (
         <div className={"App-body-top"}>
             <TZHeader title="Your Profile" leftComponent={
-                <BackButton onClick={handleBackClick}></BackButton>
+                <BackButton></BackButton>
             } />
 
             <div style={styles}>

@@ -25,6 +25,7 @@ import Invoices from './pages/profile/Invoices';
 import { getCookies, getStored } from './lib/utils';
 import Artist from './pages/artist/Artist';
 import { Analytics } from "@vercel/analytics/react"
+import Refer from './pages/profile/Refer';
 
 export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY ?? "");
 
@@ -84,6 +85,10 @@ export const router = createBrowserRouter([{
     {
       path: "/invoices",
       Component: Invoices
+    },
+    {
+      path: "/refer",
+      Component: Refer
     },
     {
       path: "/search/artist",

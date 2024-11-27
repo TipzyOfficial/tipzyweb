@@ -4,7 +4,7 @@ import BigLogo from '../components/BigLogo';
 import TZButton from '../components/TZButton';
 import { CredentialResponse, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import GoogleButton from 'react-google-button';
-import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword } from '../lib/serverinfo';
+import { ServerInfo, expiresInToAt, loginWithGoogleAccessToken, loginWithAppleAccessToken, loginWithUsernamePassword, registerUsernamePassword, fetchNoToken } from '../lib/serverinfo';
 import { Consumer } from '../lib/user';
 import { checkIfAccountExists, consumerFromJSON, fetchWithToken, storeAll } from '../index';
 import { ReturnLinkType, router } from '../App';
@@ -14,7 +14,7 @@ import { Colors, padding, radius } from '../lib/Constants';
 import { Spinner } from 'react-bootstrap';
 import { getCookies } from '../lib/utils';
 import AppleLogin from 'react-apple-login'
-import { useLocation, useNavigation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigation, useParams, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAppleAlt, faArrowLeft, faXmark as faCancel, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faApple } from '@fortawesome/free-brands-svg-icons';
@@ -43,24 +43,53 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
     const [loginPressed, setLoginPressed] = useState(false);
     const [loginPrompt, setLoginPrompt] = useState(false);
     const usc = useContext(UserSessionContext);
+    const [searchParams] = useSearchParams();
+    const referral = searchParams.get("referral");
+    const [referrer, setReferrer] = useState<string | null | undefined>(undefined)
 
     const cookies = getCookies();
     const barID = cookies.get("bar_session");
     const [usernameShowing, setUsernameShowing] = useState(false);
     const small = props.small;
 
-    const nextPage = (u?: Consumer) => {
-        if (props.nextPage && u) {
+    const redeemReferral = async (u: Consumer) => {
+        const json = await fetchWithToken({ ...usc, user: u }, `tipper/referral/redeem/?code=${referral}`, 'POST')
+            .then((r) => r.json())
+        if (json.status !== 200) {
+            throw new Error(`Bad response: ${json.status}`);
+        }
+    }
+
+    const nextPage = async (u?: Consumer) => {
+        if (props.nextPage) {
             props.nextPage(u ?? usc.user);
         } else {
             const ret = localStorage.getItem("ret");
 
+            if (referral && u) {
+                if (referrer) {
+                    await redeemReferral(u).catch((e) => {
+                        console.log(e)
+                        alert("Problem redeeming referral. Have you already redeemed a code on this account?");
+                        return;
+                    });
+                } else {
+                    alert("There is a problem with your referral. Logging in without referral.");
+                    return;
+                }
+            }
+
             if (ret) {
                 const retDecoded: ReturnLinkType = JSON.parse(atob(ret));
-                router.navigate(retDecoded.url, { state: { fromLogin: true, ...retDecoded.data } })
+                // console.log("going ret", retDecoded);
+
+                let url = retDecoded.url;
+                if (url === "/login") url = "/code";
+                router.navigate(url, { state: { fromLogin: true, ...retDecoded.data } });
             } else {
-                console.log("going barid")
-                router.navigate(barID ? `/bar?id=${barID}` : '/code');
+                console.log("going barid");
+
+                router.navigate(barID ? `/bar?id=${barID}` : '/code', { state: { fromLogin: true } });
             }
         }
     }
@@ -102,9 +131,41 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
         console.log("apple failure...", event)
     }
 
+    const getReferrer = async () => {
+        if (!referral) {
+            return;
+        }
+
+        console.log("getReferrer");
+        try {
+            const json = await fetchNoToken(`tipper/referral/?code=${referral}`, 'GET').then((r) => r.json())
+            console.log(json);
+
+            if (json.status === 200) {
+                if (json.expired) {
+                    setReferrer(null);
+                    alert("Your referral code has expired. Ask your referrer to generate a new code.");
+                } else {
+                    const ti = json.data.referred_by.tipper_info;
+                    setReferrer(`${ti.first_name} ${ti.last_name}`);
+                }
+            }
+            else {
+                throw new Error("bad response");
+            }
+        }
+        catch {
+            setReferrer(null);
+            alert("Problem getting your referral. Ask your referrer to generate a new code.")
+        }
+
+    }
+
     useEffect(() => {
         if (localStorage.getItem("ret")) setLoginPrompt(true);
-    })
+        console.log("hi")
+        getReferrer();
+    }, [])
 
     useLayoutEffect(() => {
         window.document.addEventListener('AppleIDSignInOnSuccess', (event) => handleAppleLoginSuccess(event));
@@ -116,12 +177,20 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
         }
     }, [])
 
-    const login = (at: string, rt: string, ea: number, isApple?: boolean, name?: AppleReturnType) => {
-        loginWithTipzyToken(at, rt, ea, isApple, name)
-            .catch(() => {
-                setGlobalDisable(false);
-                setLoginPressed(false);
-            })
+    const login = async (at: string, rt: string, ea: number, isApple?: boolean, name?: AppleReturnType) => {
+        if (referrer === null) {
+            alert("Your referral code is invalid. Please ask your referrer to generate a new code.");
+            setGlobalDisable(false);
+            setLoginPressed(false);
+        }
+        else {
+            await loginWithTipzyToken(at, rt, ea, isApple, name)
+                .catch(() => {
+                    setGlobalDisable(false);
+                    setLoginPressed(false);
+                });
+        }
+
     }
 
     function loginWithGoogleToken(token: string | null) {
@@ -236,17 +305,18 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
         })
 
         if (result.result && result.data) {
-            storeAll({
+            const user = await storeAll({
                 user: result.data,
                 setUser: usc.setUser,
                 barState: usc.barState,
                 artistState: usc.artistState
-            }, refreshToken).then((user) => {
-                // console.log("resulting user", user);
-                usc.setUser(user);
-                if (props.back) router.navigate(-1);
-                else nextPage(user);
-            });
+            }, refreshToken)
+
+            console.log("resulting user", user);
+            usc.setUser(user);
+            if (props.back) router.navigate(-1);
+            else nextPage(user);
+
         } else {
             await createAccount(user, isApple, customName).catch(e => console.log(e));
             const newUser = await checkIfAccountExists({
@@ -264,7 +334,7 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
             }
             usc.setUser(newUser);
             // console.log(newUser);
-            storeAll({
+            await storeAll({
                 user: newUser,
                 setUser: usc.setUser,
                 barState: usc.barState,
@@ -445,25 +515,28 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                 <div style={{
                     display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', flex: 1, width: "100%"
                 }}>
-                    {loginPrompt ? <div style={{ flex: 0, zIndex: 2, position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883', justifyContent: 'space-between', flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
-                        <div style={{
-                            flex: 1, height: 50
-                        }}></div>
-                        <div style={{ padding: padding / 2, flex: 5 }}>
-                            Please sign in to continue.
-                        </div>
-                        <div style={{
-                            flex: 1,
-                            display: 'flex', alignItems: 'center',
-                            paddingRight: padding,
-                            cursor: 'pointer',
-                            opacity: 0.8,
-                            flexDirection: 'row-reverse',
-                        }} onClick={() => nextPage()}>
-                            <FontAwesomeIcon className="App-backarrow" icon={faCancel} ></FontAwesomeIcon>
-                            {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
-                        </div>
-                    </div> : <></>}
+                    {loginPrompt ?
+                        <div style={{ flex: 0, zIndex: 2, position: 'fixed', top: 0, left: 0, textAlign: 'center', width: '100%', backgroundColor: '#8883', justifyContent: 'space-between', flexDirection: 'row', display: 'flex', alignItems: 'center' }}>
+                            <div style={{
+                                flex: 1, height: 50
+                            }}></div>
+                            <div style={{ padding: padding / 2, flex: 5, height: 50, display: "flex", justifyContent: 'center', alignItems: 'center' }}>
+                                {"Please sign in to continue."}
+                            </div>
+                            {
+                                <div style={{
+                                    flex: 1,
+                                    display: 'flex', alignItems: 'center',
+                                    paddingRight: padding,
+                                    cursor: 'pointer',
+                                    opacity: 0.8,
+                                    flexDirection: 'row-reverse',
+                                }} onClick={() => nextPage()}>
+                                    <FontAwesomeIcon className="App-backarrow" icon={faCancel} ></FontAwesomeIcon>
+                                    {/* <span className="App-tertiarytitle" style={{paddingLeft: 5}}>Exit</span> */}
+                                </div>
+                            }
+                        </div> : <></>}
                     <div style={{
                         zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: "100%",
                         maxWidth: 500,
@@ -501,6 +574,10 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
                         maxWidth: 500,
                         padding: padding, borderTopLeftRadius: radius, borderTopRightRadius: radius, backgroundColor: Colors.background
                     }}>
+                        {referrer !== undefined ?
+                            <div className='App-normaltext' style={{ paddingBottom: padding, fontWeight: 'bold' }}>
+                                {referrer === null ? "INVALID REFERRAL CODE" : `Referral from ${referrer}`}
+                            </div> : <></>}
                         <AppleLogin
                             clientId="app.tipzy.TipzyAppleSignIn"
                             redirectURI="https://app.tipzy.app/"

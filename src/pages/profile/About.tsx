@@ -8,14 +8,10 @@ import BackButton from "../../components/BackButton";
 export default function About() {
     // const loc = useLocation();
 
-    const handleBackClick = () => {
-        router.navigate(-1);
-    };
-
     return (
         <div className={"App-body-top"}>
             <TZHeader title="Contact Us" leftComponent={
-                <BackButton onClick={handleBackClick}></BackButton>
+                <BackButton></BackButton>
             } />
             <div style={styles}>
                 <span className="App-normaltext">Thanks for reaching out–we'd love to talk!</span>

@@ -129,10 +129,6 @@ export default function Account() {
         }
     }
 
-    const handleBackClick = () => {
-        router.navigate(-1);
-    };
-
     const handlePaymentDetails = () => {
         router.navigate("/payments");
     };
@@ -145,11 +141,15 @@ export default function Account() {
         router.navigate("/contact-us");
     };
 
+    const handleReferClick = () => {
+        router.navigate("/refer");
+    };
+
 
     return (
         <div className={"App-body-top"}>
             <TZHeader title="" leftComponent={
-                <BackButton onClick={handleBackClick}></BackButton>
+                <BackButton></BackButton>
             } />
             <div style={styles}>
                 <div>
@@ -158,18 +158,19 @@ export default function Account() {
 
                         {/* <span className="App-tertiarytitle">Your Information</span> */}
                     </div>
+                    <TZProfileComponent text="Refer a Friend" onClick={handleReferClick} />
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span className="App-tertiarytitle">Payments</span>
                     </div>
                     <CardDetails />
-                    <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails}></TZProfileComponent>
-                    <TZProfileComponent text="View Your Invoices" onClick={handleInvoices}></TZProfileComponent>
+                    <TZProfileComponent text="Update Card Details" onClick={handlePaymentDetails} />
+                    <TZProfileComponent text="View Your Invoices" onClick={handleInvoices} />
                     <div style={{ paddingBottom: padding / 2 }}>
                         <span className="App-tertiarytitle">About</span>
                     </div>
-                    <TZProfileComponent text="Contact Us" onClick={handleAboutClick}></TZProfileComponent>
+                    <TZProfileComponent text="Contact Us" onClick={handleAboutClick} />
                     <TZProfileComponent text="Privacy Policy" onClick={() => window.open("https://www.tipzy.app/privacy", "_blank")}></TZProfileComponent>
-                    <div style={{ padding: padding * 4 }} />
+                    <div style={{ padding: padding * 2 }} />
                     <TZProfileComponent text="Log out"
                         selectedBackgroundColor={Colors.secondaryRegular}
                         borderColor={Colors.secondaryRegular + "88"}

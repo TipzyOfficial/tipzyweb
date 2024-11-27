@@ -11,8 +11,8 @@ import { fetchBarInfo } from '../pages/bar/Bar';
 import { fetchArtistInfo } from '../pages/artist/Artist';
 
 export const defaultConsumer: () => Consumer = () => {
-    const cookies = getCookies();
-    return new Consumer(getStored("access_token") ?? "", parseInt(getStored("expires_at") ?? "0") ?? 0, "", -1)
+    const expiresat = parseInt(getStored("expires_at") ?? "0");
+    return new Consumer(getStored("access_token") ?? "", expiresat ?? 0, "", -1)
 }
 
 export type ArtistStateType = {
@@ -218,40 +218,33 @@ export function UserSessionContextProvider(props: { children: JSX.Element }) {
 
         if (!getStored("refresh_token") || !getStored("access_token")) {
             if (usc.user.access_token) {
-                checkIfAccountExists(usc).then((r) => {
-                    console.log("rdata", r.data)
-                    refreshUserData(r.data)
-                    setReady(true);
-                })
-                    .catch((e) => {
-                        console.log("no session detected." + e)
-                        setReady(true)
-                    });
+                const r = await checkIfAccountExists(usc).catch((e: Error) => { throw new Error(`USC: no session detected. ${e.message}`) })
+                console.log("rdata", r.data)
+                refreshUserData(r.data)
+                setReady(true);
             } else {
                 setReady(true)
             }
         } else {
             refreshUserData(user);
-            checkIfAccountExists(usc).then((r) => {
-                if (!r.result) {
-                    console.log("account doesn't exist, logging out.")
-                    Logout(usc);
-                    setReady(true);
-                    return;
-                }
-                refreshUserData(r.data)
+            const r = await checkIfAccountExists(usc).catch((e: Error) => { throw new Error(`USC: problem init user. ${e.message}`) });
+            if (!r.result) {
+                console.log("account doesn't exist, logging out.")
+                Logout(usc);
                 setReady(true);
-            })
-                .catch((e) => {
-                    console.log("problem init user." + e)
-                    setReady(true)
-                });
+                return;
+            }
+            refreshUserData(r.data)
+            setReady(true);
         }
 
     }
 
     useEffect(() => {
-        setup();
+        setup().catch((e) => {
+            console.log(e);
+            setReady(true)
+        });
         // if(location.pathname === "/login" || location.pathname === "/register") return;
     }, []);
 
