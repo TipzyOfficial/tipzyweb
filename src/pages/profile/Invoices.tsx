@@ -105,7 +105,7 @@ export default function Invoices() {
         const item = props.item;
 
         if (!item) return (
-            <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No pending invoice. Go request something!</div>
+            <div style={{ height: 50, justifyContent: 'center', alignItems: 'center', display: 'flex', color: '#888' }}>No invoice pending. Go request something!</div>
         )
 
         return (
@@ -143,7 +143,7 @@ export default function Invoices() {
                 <TZHeader title={"Invoices"}
                     leftComponent={<BackButton />}
                     rightComponent={<HelpButton
-                        text="Once your requested song gets accepted, you won't get charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here, as well as their processing date."></HelpButton>}
+                        text="Once a song you request gets accepted, you won't be charged immediately. Instead, we batch all payments you've made recently into a single invoice that gets charged to you every week. You can view your pending and past invoices here, and see when you'll be charged."></HelpButton>}
                 />
             </div>
             <div
