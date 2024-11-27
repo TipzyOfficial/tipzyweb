@@ -1,5 +1,5 @@
 import { useContext, useState, memo, useEffect } from "react";
-import { padding, radius } from "../../lib/Constants";
+import { Colors, padding, radius } from "../../lib/Constants";
 import { router } from "../../App";
 import TZHeader from "../../components/TZHeader";
 import "../../App.css"
@@ -27,7 +27,9 @@ function QR(props: { url: string | undefined }) {
 
     return (
         <DisplayOrLoading loadingScreen={<div style={{ width: "100%", padding: padding }}><Spinner /></div>} condition={props.url !== undefined}>
-            <div style={{ background: 'white', padding: padding, maxWidth: "50%", borderRadius: radius }}>
+            <div style={{
+                background: 'white', padding: padding, maxWidth: "50%", borderRadius: radius, boxShadow: '0px 0px 10px #fff5',
+            }}>
                 <QRCode
                     style={{ height: "auto", width: "100%" }}
                     value={url ?? ""} />
@@ -40,6 +42,7 @@ export default function Refer() {
     // const loc = useLocation();
 
     const [url, setUrl] = useState<string | undefined>(undefined);
+    const [copied, setCopied] = useState(false);
     const origin = "https://app.tipzy.app";//window.location.origin
     const usc = useContext(UserSessionContext);
 
@@ -58,9 +61,24 @@ export default function Refer() {
                 <BackButton></BackButton>
             } />
             <div style={styles}>
-                <span style={{ paddingBottom: padding }} className="App-normaltext">Referring a friend grants you both a free request!</span>
+                <span style={{ paddingBottom: padding }} className="App-normaltext">Referring a friend grants you both a FREE request!</span>
                 <span style={{ paddingBottom: padding }} className="App-normaltext">Just scan the following QR code and create an account:</span>
                 <QR url={url} />
+                <br></br>
+                <span style={{ paddingBottom: padding }} className="App-normaltext">Or copy the link below to text it to someone:</span>
+                {url ?
+                    <div
+                        onClick={() => {
+                            navigator.clipboard.writeText(url);
+                            setCopied(true);
+                        }}
+                        style={{
+                            padding: padding, backgroundColor: copied ? Colors.darkerGreen : undefined, borderRadius: radius, borderWidth: 1, borderColor: 'white', borderStyle: 'solid',
+                            boxShadow: '0px 0px 10px #fff5',
+                        }}>
+                        <span>{url}</span>
+                    </div> : <></>}
+                {copied ? <span className="App-tertiarytitle" style={{ paddingTop: padding, color: Colors.green }}>Copied link!</span> : <></>}
             </div>
         </div>
     )
