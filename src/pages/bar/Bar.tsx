@@ -46,12 +46,14 @@ const utf8Encode = new TextEncoder();
 //     }
 // }
 
-export const setAllowingRequests = (usc: UserSessionContextType, b: boolean) => {
-    const bar = usc.barState.bar;
+export const setAllowingRequests = (usc: React.MutableRefObject<UserSessionContextType>
+    , b: boolean) => {
+    console.log("set allowing requests");
+    const bar = usc.current.barState.bar;
     if (!bar) return;
     const newBar = _.cloneDeep(bar);
     newBar.allowingRequests = b;
-    usc.barState.setBar(newBar);
+    usc.current.barState.setBar(newBar);
 }
 
 export const getCurrentQueue = async (id: number): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
@@ -128,6 +130,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
         })
 
     if (!bar) {
+        console.log("undefined bar");
         userContext.barState.setBar(bar)
         return undefined;
     }
@@ -162,24 +165,30 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
     }).catch(e => console.log("cant get top artists", e));
 
     if (!noSetBar) {
-        if (!userContext.barState.bar || JSON.stringify(userContext.barState.bar) !== JSON.stringify(bar))
+        if (!userContext.barState.bar || JSON.stringify(userContext.barState.bar) !== JSON.stringify(bar)) {
+            console.log("fetchBarInfo");
             userContext.barState.setBar(bar)
+        }
     }
     return bar;
 }
 
 export default function Bar() {
     const [searchParams] = useSearchParams();
-    const usc = useContext(UserSessionContext);
+
+
+    const context = useContext(UserSessionContext);
+    const usc = useRef(context);
+
     const [ready, setReadyUn] = useState(false);
     const [view, setViewInner] = useState(0);
     // const [requestNoti, setRequestNoti] = useState(false)
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
-    const bar = usc.barState.bar;
+    const bar = context.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    const id = searchParams.get("id") ?? (usc.barState.bar ? usc.barState.bar.id : cookies.get("bar_session"));
+    const id = searchParams.get("id") ?? (usc.current.barState.bar ? usc.current.barState.bar.id : cookies.get("bar_session"));
     const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = basePadding;//fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
@@ -249,7 +258,14 @@ export default function Bar() {
             if (!r) return;
             const [c, q] = r;
             if (!c) {
-                setAllowingRequests(usc, false);
+                //setAllowingRequests(usc, false);
+                console.log("set allowing requests");
+                // const bar = usc.current.barState.bar;
+                // if (!bar) return;
+                // const newBar = _.cloneDeep(bar);
+                // newBar.allowingRequests = false;
+                if (usc.current.barState.bar)
+                    usc.current.barState.setBar({ ...usc.current.barState.bar, allowingRequests: false });
             }
             // else {
             //     if (bar?.allowingRequests === false) setAllowingRequests(usc, true)
@@ -265,13 +281,13 @@ export default function Bar() {
     }
 
     const refreshAllReqs = async (indicator: boolean) => {
-        console.log("refreshing all", usc.barState.bar)
-        if (usc.user.access_token === "") return;
+        console.log("refreshing all", usc.current.barState.bar)
+        if (usc.current.user.access_token === "") return;
         if (indicator) setCload(true);
 
         if (topRequest) {
             console.log("toppy time!!")
-            const firstJson = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${1}&offset=${0}`, 'GET').then(r => r.json())
+            const firstJson = await fetchWithToken(usc.current, `tipper/requests/business?business_id=${id}&limit=${1}&offset=${0}`, 'GET').then(r => r.json())
             const req = parseRequest(firstJson.data[0]);
             if (req.id === topRequest.id && req.status === topRequest.status) {
                 return;
@@ -279,7 +295,7 @@ export default function Bar() {
             // setTopRequest(req);
         }
 
-        const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
+        const allr = await fetchWithToken(usc.current, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
             setTopRequest(parseRequest(json.data[0]));
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
@@ -316,18 +332,24 @@ export default function Bar() {
         setCload(false);
 
         //refresh free reqs
-        const tipper = await getTipper(usc, cookies);
+        const tipper = await getTipper(usc.current, cookies);
         const data = tipper.data;
-        if (data.free_request_allowance !== usc.user.freeRequests) {
-            const consumer = consumerFromJSON(usc.user, data);
-            usc.setUser(consumer);
+        if (data.free_request_allowance !== usc.current.user.freeRequests) {
+            const consumer = consumerFromJSON(usc.current.user, data);
+            usc.current.setUser(consumer);
         }
     }
 
     const allRefresh = (indicator: boolean) => {
-        // console.log("refreshing data...")
-        refreshCurrent();
-        refreshAllReqs(indicator)//.then(() => console.log("..."));
+        if (ready) {
+            console.log("ready")
+            refreshCurrent();
+            refreshAllReqs(indicator)//.then(() => console.log("..."));    
+            // console.log("refreshing data...")} 
+        }
+        else {
+            console.log("not ready")
+        }
     }
 
     // useEffect(() => console.log("rerendered everything"), [])
@@ -353,18 +375,21 @@ export default function Bar() {
 
         checkIfFree();
 
-        if (usc.barState.bar && id === usc.barState.bar.id.toString() && usc.barState.bar.allowingRequests) {
+        if (usc.current.barState.bar && id === usc.current.barState.bar.id.toString() && usc.current.barState.bar.allowingRequests) {
             setReady(true);
-            fetchBarInfo(usc, id);
+            fetchBarInfo(usc.current, id);
             return;
         }
-        fetchBarInfo(usc, id).then(() => setReady(true))
+        fetchBarInfo(usc.current, id).then(() => setReady(true))
             .catch(e => {
-                usc.barState.setBar(undefined);
+                console.log("fetchBarInfoError - set undefined");
+                usc.current.barState.setBar(undefined);
                 setReady(true);
             });
         allRefresh(true);
     }, [])
+
+    console.log(bar);
 
     if (ready === false)
         return <LoadingScreen />
@@ -434,10 +459,10 @@ export default function Bar() {
                             </div>
                         </div>
                         {
-                            usc.user.freeRequests > 0 && !hideFreeReqs ?
+                            usc.current.user.freeRequests > 0 && !hideFreeReqs ?
                                 <div style={{ padding: 5, width: "100%", display: 'flex' }}>
                                     <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: "center", }}>
-                                        Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.user.freeRequests} free request{usc.user.freeRequests === 1 ? "" : "s"}!</span></span>
+                                        Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.current.user.freeRequests} free request{usc.current.user.freeRequests === 1 ? "" : "s"}!</span></span>
                                 </div> : <></>
                         }
                     </div>

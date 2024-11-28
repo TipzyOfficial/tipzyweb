@@ -98,7 +98,7 @@ function EnterCode() {
         const c = getCookies();
         c.remove("bar_session");
         c.remove("artist_session");
-        userContext.barState.setBar(undefined);
+        // userContext.barState.setBar(undefined);
         getBars();
     }, [])
 
