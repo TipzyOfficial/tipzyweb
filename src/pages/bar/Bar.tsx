@@ -34,6 +34,15 @@ import TZButton from "../../components/TZButton";
 import TopBar from "../../components/TopBar";
 import { styles } from "../Login";
 import _ from "lodash";
+import LeaderboardButton from "../../components/LeaderboardButton";
+import HelpButton from "../../components/HelpButton";
+
+type LeaderboardUserType = {
+    firstName: string,
+    lastName: string,
+    id: number,
+    requestCount: number,
+}
 
 const utf8Encode = new TextEncoder();
 
@@ -111,6 +120,16 @@ let currentPCache: SongType | undefined = undefined;
 let pendingReqsCache: SongRequestType[] = [];
 let allReqsCache: SongRequestType[] = [];
 
+const checkIfFree = async (id: number, setHideFreeReqs: (b: boolean) => any) => {
+    const pr = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
+        business_id: id
+    })).catch(e => { throw e });
+
+    const json = await pr.json();
+
+    setHideFreeReqs(json.Dynamic_price === 0);
+}
+
 export const fetchBarInfo = async (userContext: UserSessionContextType, id: number, noSetBar?: boolean) => {
     const bar: BarType | undefined = await fetchNoToken(`tipper/business/${id}`, 'GET').then(r => r.json())
         .then(json => {
@@ -164,7 +183,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
         bar.topSongs = top.concat(songs);
     }).catch(e => console.log("cant get top artists", e));
 
-    if (!noSetBar) {
+    if (noSetBar === undefined || !noSetBar) {
         if (!userContext.barState.bar || JSON.stringify(userContext.barState.bar) !== JSON.stringify(bar)) {
             console.log("fetchBarInfo");
             userContext.barState.setBar(bar)
@@ -175,6 +194,7 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
 
 export default function Bar() {
     const [searchParams] = useSearchParams();
+
 
 
     const context = useContext(UserSessionContext);
@@ -188,7 +208,9 @@ export default function Bar() {
     const bar = context.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    const id = searchParams.get("id") ?? (usc.current.barState.bar ? usc.current.barState.bar.id : cookies.get("bar_session"));
+    const id = parseInt(searchParams.get("id") ?? "-1") ?? (usc.current.barState.bar ? usc.current.barState.bar.id : cookies.get("bar_session"));
+
+    console.log("searchparams", searchParams.get("origin"))
     const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = basePadding;//fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
@@ -215,6 +237,7 @@ export default function Bar() {
     const [hideFreeReqs, setHideFreeReqs] = useState(true);
     const topBarColor = Colors.background + "bc";
 
+    const [leaderboard, setLeaderboard] = useState<LeaderboardUserType[] | null>([]);
 
     const notisCookie = cookies.get("notis")
 
@@ -253,9 +276,25 @@ export default function Bar() {
         setHeight((toggle?.offsetHeight ?? 0) + (topBar?.offsetHeight ?? 0));
     }, [topBar, toggle])
 
-    const refreshCurrent = () => {
-        getCurrentQueue(id).then((r) => {
-            if (!r) return;
+    const refreshLeaderboard = async () => {
+        if (usc.current.user.access_token) {
+            console.log("refreshing leaderboard");
+
+            const json = await fetchWithToken(usc.current, `tipper/business/leaderboard/?business_id=${id}`, 'GET').then(r => r.json())
+            if (!json.data) throw new Error(`Bad response from leaderboard. json: ${json}`)
+
+            const data = json.data;
+
+            console.log("leaderboarddata", data);
+        } else {
+            console.log("Can't display leaderboard unless you're logged in");
+            setLeaderboard(null);
+        }
+    }
+
+    const refreshCurrent = async (id: number) => {
+        const r = await getCurrentQueue(id)
+        if (r) {
             const [c, q] = r;
             if (!c) {
                 //setAllowingRequests(usc, false);
@@ -277,11 +316,11 @@ export default function Bar() {
                 q.splice(0, 4))
                 ;
             currentPCache = c;
-        })
+        }
+
     }
 
-    const refreshAllReqs = async (indicator: boolean) => {
-        console.log("refreshing all", usc.current.barState.bar)
+    const refreshAllReqs = async (indicator: boolean, id: number) => {
         if (usc.current.user.access_token === "") return;
         if (indicator) setCload(true);
 
@@ -301,7 +340,7 @@ export default function Bar() {
             const preqs = new Array<SongRequestType>();
             json.data.forEach((r: any) => {
                 const req = parseRequest(r);
-                if (req.bar.id === parseInt(id)) {
+                if (req.bar.id === id) {
                     if (req.status === "PENDING") preqs.push(req);
                     else reqs.push(req);
                 }
@@ -340,11 +379,15 @@ export default function Bar() {
         }
     }
 
-    const allRefresh = (indicator: boolean) => {
-        if (ready) {
+    const allRefresh = async (indicator: boolean, id: number, override?: boolean) => {
+        console.log("refresh current", usc.current.barState.bar, context.barState.bar)
+
+        if (indicator || ready) {
             console.log("ready")
-            refreshCurrent();
-            refreshAllReqs(indicator)//.then(() => console.log("..."));    
+            await refreshCurrent(id).catch((e) => console.error(e));
+            await checkIfFree(id, setHideFreeReqs).catch((e) => console.error(e));
+            await refreshLeaderboard().catch((e) => console.error(e));;
+            await refreshAllReqs(indicator, id).catch((e) => console.error(e));//.then(() => console.log("..."));    
             // console.log("refreshing data...")} 
         }
         else {
@@ -352,18 +395,18 @@ export default function Bar() {
         }
     }
 
+    const allRefreshCallback = useCallback((b: boolean) => {
+        // console.log("refresh fbi id", id);
+        allRefresh(b, id);
+    }, [id, usc, ready])
+
     // useEffect(() => console.log("rerendered everything"), [])
-    useInterval(() => allRefresh(false), timeout, 500);
+    useInterval(() => {
+        console.log("refresh in interval");
+        allRefreshCallback(false)
+    }, timeout, 500);
 
-    const checkIfFree = async () => {
-        const pr = await fetchNoToken(`calc_dynamic_price/`, 'POST', JSON.stringify({
-            business_id: id
-        })).catch(e => { throw e });
 
-        const json = await pr.json();
-
-        setHideFreeReqs(json.Dynamic_price === 0);
-    }
 
     useEffect(() => {
         // alert(bar?.id);
@@ -373,20 +416,21 @@ export default function Bar() {
             return;
         }
 
-        checkIfFree();
-
-        if (usc.current.barState.bar && id === usc.current.barState.bar.id.toString() && usc.current.barState.bar.allowingRequests) {
+        // if (usc.current.barState.bar && id === usc.current.barState.bar.id.toString() && usc.current.barState.bar.allowingRequests) {
+        //     console.log("ready true")
+        //     setReady(true);
+        //     fetchBarInfo(usc.current, id);
+        //     return;
+        // }
+        fetchBarInfo(usc.current, id).then(async () => {
+            console.log("refresh in init");
+            await allRefreshCallback(true);
             setReady(true);
-            fetchBarInfo(usc.current, id);
-            return;
-        }
-        fetchBarInfo(usc.current, id).then(() => setReady(true))
+        })
             .catch(e => {
                 console.log("fetchBarInfoError - set undefined");
                 usc.current.barState.setBar(undefined);
-                setReady(true);
             });
-        allRefresh(true);
     }, [])
 
     console.log(bar);
@@ -419,22 +463,38 @@ export default function Bar() {
                         display: "flex",
                         flexDirection: 'column',
                         alignItems: 'flex-start',
-                        justifyContent: 'flex-end',
+                        justifyContent: 'space-between',
                         backgroundColor: "#000",
                         boxShadow: 'inset 0px -30vh 30vh rgba(23, 23, 30, 0.7)',
                     }}
                     >
-                        <div style={{ height: topBar?.clientHeight ? topBar.clientHeight : 0 }}></div>
-                        <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
-                            <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{bar.name}</span>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            width: "100%"
+                        }}>
+                            <div style={{ height: topBar?.clientHeight ?? 0 }} />
+                            {/* Fit any leaderboard content up top here */}
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', flexDirection: 'row-reverse' }}>
-                            <span className='App-typetitle' style={{
-                                flex: 1,
-                                color: Colors.tertiaryLight,
-                                paddingRight: padding,
-                                textAlign: 'right',
-                            }}>{bar.type ?? "Bar"}</span>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-end',
+                            width: "100%"
+                        }}>
+                            <div style={{ paddingBottom: padding / 2, paddingTop: padding * 2, width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+                                <span className='App-title' style={{ flex: 7, width: '100%', textAlign: 'center' }}>{bar.name}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', flexDirection: 'row-reverse' }}>
+                                <span className='App-typetitle' style={{
+                                    flex: 1,
+                                    color: Colors.tertiaryLight,
+                                    paddingRight: padding,
+                                    textAlign: 'right',
+                                }}>{bar.type ?? "Bar"}</span>
+                            </div>
                         </div>
                     </div>
                     <div style={{ paddingBottom: padding / 2 }}></div>
@@ -471,9 +531,12 @@ export default function Bar() {
                     <>
                         {
                             view === 0 ?
-                                <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} refreshRequests={() => refreshAllReqs(false)} />
+                                <>
+                                    <LeaderboardContent leaderboard={leaderboard} />
+                                    <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} refreshRequests={() => refreshAllReqs(false, id)} />
+                                </>
                                 :
-                                <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload} refresh={() => refreshAllReqs(false)} />
+                                <RequestsContentMemo height={height} padding={padding} pr={pendingReqs} cr={allReqs} cload={cload} refresh={() => refreshAllReqs(false, id)} />
                         }
                         <div style={{
                             position: "fixed",
@@ -646,6 +709,44 @@ function CurrentlyPlaying(props: { current?: SongType, queue: SongType[], songDi
 const RequestsContentMemo = memo(RequestsContent);
 
 const SongListMemo = memo(SongList, () => true);
+
+
+
+const LeaderboardContent = React.memo((props: { leaderboard: LeaderboardUserType[] | null }) => {
+    const leaderboard = props.leaderboard;
+
+    const leaderboardMap = leaderboard ? leaderboard.map((v) => {
+        return (
+            <span></span>
+        )
+    }) :
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
+            <span style={{ textAlign: 'center' }}>Can't display leaderboard. Are you logged in?</span>
+        </div>
+
+
+    return (
+        <div style={{ justifyContent: 'flex-start', alignItems: 'flex-start', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ paddingTop: padding, width: "100%", }}>
+                <div style={{ paddingLeft: padding, paddingBottom: padding, display: 'flex', }}>
+                    <span style={{ paddingRight: padding }} className='App-subtitle'>🏆 Leaderboard</span>
+                    <HelpButton text="Leaderboard shows the top requesters of the night. Request more songs to get to the top!" />
+                </div>
+                <div style={{ padding: padding, width: "100%", }}>
+                    <div className="App-animated-gradient" style={{ padding: 2, borderRadius: radius, width: "100%", }}>
+                        <div style={{ padding: padding - 2, backgroundColor: Colors.background, borderRadius: radius - 2, width: "100%" }}>
+                            {leaderboard && leaderboard.length === 0 ?
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
+                                    <span style={{ textAlign: 'center' }}>No one's requested any songs yet today. Request a song to show up at the top!</span>
+                                </div>
+                                : leaderboardMap}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+})
 
 const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number, refreshRequests: () => Promise<void> }) => {
 

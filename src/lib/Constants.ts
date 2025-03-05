@@ -15,6 +15,7 @@ export const Colors = {
     green: "#50D66D",
     darkerGreen: "#20a85a",
     red: "#e64640",
+    gold: "#efbf04"
 }
 
 export const radius = 10;

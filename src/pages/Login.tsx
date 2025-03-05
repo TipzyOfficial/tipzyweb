@@ -163,7 +163,6 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
 
     useEffect(() => {
         if (localStorage.getItem("ret")) setLoginPrompt(true);
-        console.log("hi")
         getReferrer();
     }, [])
 

@@ -2,8 +2,10 @@ import { useEffect, useMemo } from "react";
 import { consumerFromJSON } from "..";
 import { Consumer } from "./user";
 
+const test = false;
+
 export const ServerInfo = {
-    baseurl: "https://www.tipzyapi.com/",
+    baseurl: test ? "https://test.tipzyapi.com/" : "https://www.tipzyapi.com/",
     login: "login",
     importPlaylists: "import_playlists",
     selectPlaylist: "select_playlist_by_id",
