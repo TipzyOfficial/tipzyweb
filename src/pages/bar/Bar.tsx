@@ -773,7 +773,7 @@ const LeaderboardCard = (props: { user: LeaderboardUserType | "next" | undefined
                     )
                 )
                 :
-                <div style={{ height: dim, padding: padding, borderRadius: radius * 2, backgroundColor: "#8881", display: "flex", justifyContent: 'space-between' }}>
+                <div style={{ height: dim, padding: padding, borderRadius: radius * 2, backgroundColor: "#8881", display: "flex", justifyContent: 'space-between', alignItems: 'center' }}>
                     {props.user === "next" ?
                         <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: 'center' }}>Request a song to show up here!</span>
                         : <></>}
