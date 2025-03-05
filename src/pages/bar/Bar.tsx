@@ -19,7 +19,7 @@ import ProfileButton from "../../components/ProfileButton";
 import ToggleTab from "../../components/ToggleTab";
 import RequestsContent from "./Requests";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRotateRight, faCrown } from "@fortawesome/free-solid-svg-icons";
 import { NotFoundPage } from "./NotFoundPage";
 import Lottie from 'react-lottie';
 import speakerAnimation from '../../assets/Speakers.json';
@@ -247,6 +247,7 @@ export default function Bar() {
     const topBarColor = Colors.background + "bc";
 
     const [leaderboard, setLeaderboard] = useState<LeaderboardUserType[] | null>([]);
+    const [userRequestCount, setUserRequestCount] = useState(0);
 
     const notisCookie = cookies.get("notis")
 
@@ -294,7 +295,21 @@ export default function Bar() {
 
             const data = json.data;
 
+            const out: LeaderboardUserType[] = [];
+            const leaderboarddata = data.leaderboard;
+
+            for (const e of leaderboarddata) {
+                out.push({
+                    firstName: e.tipper__user__first_name,
+                    lastName: e.tipper__user__last_name,
+                    id: e.tipper__id,
+                    requestCount: e.request_count,
+                })
+            }
+
             console.log("leaderboarddata", data);
+            setLeaderboard(out);
+            setUserRequestCount(data.user_request_count);
         } else {
             console.log("Can't display leaderboard unless you're logged in");
             setLeaderboard(null);
@@ -542,7 +557,7 @@ export default function Bar() {
                         {
                             view === 0 ?
                                 <>
-                                    <LeaderboardContent leaderboard={leaderboard} />
+                                    <LeaderboardContent leaderboard={leaderboard} yourCount={userRequestCount} />
                                     <SongContent topArtists={topArtists} topSongs={topSongs} songDims={songDims} artistDims={artistDims} refreshRequests={() => refreshAllReqs(false, id)} />
                                 </>
                                 :
@@ -720,43 +735,114 @@ const RequestsContentMemo = memo(RequestsContent);
 
 const SongListMemo = memo(SongList, () => true);
 
+const LeaderboardCard = (props: { user: LeaderboardUserType | "next" | undefined, userID: number, index: number }) => {
+    const fdim = useFdim();
+    const user = props.user && props.user !== "next" ? props.user : undefined
 
+    const isYou = user ? user.id === props.userID : false;
+    const dim = fdim / 8;
+    const index = props.index === -1 ? "" : `${props.index + 1}:`;
 
-const LeaderboardContent = React.memo((props: { leaderboard: LeaderboardUserType[] | null }) => {
-    const leaderboard = props.leaderboard;
+    return (
+        <>
+            {user ?
+                (props.index === 0 ?
+                    <div style={{ width: "100%", position: 'relative' }}>
+                        <div style={{ position: "absolute", top: -padding / 2, left: -padding / 2, transform: "rotate(-45deg)" }}><FontAwesomeIcon icon={faCrown} /></div>
+                        <div className={"App-animated-gradient"} style={{
+                            height: dim, padding: padding, borderRadius: radius * 2, backgroundColor: "#fff3", display: "flex", justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', boxShadow: (isYou ? '0px 0px 5px rgba(255, 255, 255, 0.5)' : '0px 5px 5px rgba(0, 0, 0, 0.5)'),
+                        }}>
+                            <span className="App-montserrat-normaltext">{index} {isYou ? "YOU" : `${user.firstName} ${user.lastName}`}</span>
+                            <span className="App-montserrat-normaltext">{user.requestCount}</span>
+                        </div>
+                    </div>
+                    :
+                    (
+                        isYou ?
+                            <div style={{ padding: padding, borderRadius: radius * 2, backgroundColor: "white", color: "black", display: "flex", justifyContent: 'space-between', height: "100%", fontWeight: 'bold', boxShadow: '0px 0px 5px rgba(255, 255, 255, 0.5)' }}>
+                                <span className="App-montserrat-normaltext">{index} YOU</span>
+                                <span className="App-montserrat-normaltext">{user.requestCount}</span>
+                            </div>
+                            :
+                            <div className="App-animated-gradient" style={{ height: dim, padding: 2, borderRadius: radius * 2, width: "100%", }}>
+                                <div style={{ padding: padding, borderRadius: radius * 2 - 2, backgroundColor: Colors.background, display: "flex", justifyContent: 'space-between', height: "100%" }}>
+                                    <span className="App-montserrat-normaltext">{index} {user?.firstName ?? "Anonymous"} {user.lastName ?? "User"}</span>
+                                    <span className="App-montserrat-normaltext">{user.requestCount}</span>
+                                </div>
+                            </div>
+                    )
+                )
+                :
+                <div style={{ height: dim, padding: padding, borderRadius: radius * 2, backgroundColor: "#8881", display: "flex", justifyContent: 'space-between' }}>
+                    {props.user === "next" ?
+                        <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: 'center' }}>Request a song to show up here!</span>
+                        : <></>}
+                </div>
+            }
+            <div style={{ height: padding }}></div>
+        </>
+    )
+}
 
-    const leaderboardMap = leaderboard ? leaderboard.map((v) => {
-        return (
-            <span></span>
-        )
-    }) :
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
-            <span style={{ textAlign: 'center' }}>Can't display leaderboard. Are you logged in?</span>
+const LeaderboardContent = (props: { leaderboard: (LeaderboardUserType)[] | null, yourCount: number }) => {
+    const usc = useContext(UserSessionContext);
+
+    let hasUser = false;
+
+    if (props.leaderboard) {
+        for (let i = 0; i < Math.min(props.leaderboard.length, 5); i++) {
+            const u = props.leaderboard[i];
+            if (u.id === usc.user.id) {
+                hasUser = true;
+                break;
+            }
+        }
+    }
+
+    const next: LeaderboardUserType | "next" | undefined = hasUser ? undefined : "next"
+
+    const leaderboard = props.leaderboard ? [...props.leaderboard, next, ...(new Array<LeaderboardUserType>(4))].slice(0, 5) : null
+
+    const leaderboardMap = leaderboard ? leaderboard.map((v, index) => <LeaderboardCard user={v} userID={usc.user.id} index={index} key={v && v !== "next" ? v.id : index} />) :
+        <div className="App-animated-gradient" style={{ padding: 2, borderRadius: radius, width: "100%", }}>
+            <div style={{ padding: padding - 2, backgroundColor: Colors.background, borderRadius: radius - 2, width: "100%" }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
+                    <span style={{ textAlign: 'center' }}>Can't display leaderboard. Are you logged in?</span>
+                </div>
+            </div>
         </div>
+
+
 
 
     return (
         <div style={{ justifyContent: 'flex-start', alignItems: 'flex-start', display: 'flex', flexDirection: 'column' }}>
             <div style={{ paddingTop: padding, width: "100%", }}>
-                <div style={{ paddingLeft: padding, paddingBottom: padding, display: 'flex', }}>
-                    <span style={{ paddingRight: padding }} className='App-subtitle'>🏆 Leaderboard</span>
-                    <HelpButton text="Leaderboard shows the top requesters of the night. Request more songs to get to the top!" />
+                <div style={{ paddingLeft: padding, display: 'flex', }}>
+                    <span style={{ paddingRight: padding }} className='App-subtitle'>🏆 Today's Leaderboard</span>
+                    <HelpButton text="Leaderboard shows the top requesters of the night. The more songs you request that get accepted, the higher up you'll be!" />
                 </div>
-                <div style={{ padding: padding, width: "100%", }}>
-                    <div className="App-animated-gradient" style={{ padding: 2, borderRadius: radius, width: "100%", }}>
-                        <div style={{ padding: padding - 2, backgroundColor: Colors.background, borderRadius: radius - 2, width: "100%" }}>
-                            {leaderboard && leaderboard.length === 0 ?
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
-                                    <span style={{ textAlign: 'center' }}>No one's requested any songs yet today. Request a song to show up at the top!</span>
-                                </div>
-                                : leaderboardMap}
+                <div style={{ paddingLeft: padding, paddingTop: padding, paddingRight: padding, width: "100%", }}>
+                    {leaderboardMap}
+                    {/* {props.leaderboard && props.leaderboard.length === 0 ?
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: "100%", }}>
+                            <span style={{ textAlign: 'center' }}>No one's requested any songs yet today. Request a song to show up at the top!</span>
                         </div>
-                    </div>
+                        : leaderboardMap} */}
                 </div>
+                {hasUser ? <></> :
+                    <div style={{ paddingLeft: padding, paddingBottom: padding, paddingRight: padding }}>
+                        <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%", }}>
+                            <div style={{ width: "100%", backgroundColor: "#fff5", height: 2 }} />
+                        </div>
+                        <div style={{ height: padding }} />
+                        <LeaderboardCard user={{ firstName: "YOU", lastName: "", id: -1, requestCount: props.yourCount }} userID={-1} index={-1} />
+                    </div>
+                }
             </div>
         </div>
     );
-})
+}
 
 const SongContent = React.memo((props: { topArtists: ArtistType[], topSongs: SongType[], songDims: number, artistDims: number, refreshRequests: () => Promise<void> }) => {
 
