@@ -287,33 +287,33 @@ export default function Bar() {
     }, [topBar, toggle])
 
     const refreshLeaderboard = async () => {
-        if (usc.user.access_token) {
-            console.log("refreshing leaderboard");
+        // if (usc.user.access_token) {
+        console.log("refreshing leaderboard");
 
-            const json = await fetchWithToken(usc, `tipper/business/leaderboard/?business_id=${id}`, 'GET').then(r => r.json())
-            if (!json.data) throw new Error(`Bad response from leaderboard. json: ${json}`)
+        const json = await fetchNoToken(`tipper/business/leaderboard/?business_id=${id}`, 'GET').then(r => r.json())
+        if (!json.data) throw new Error(`Bad response from leaderboard. json: ${json}`)
 
-            const data = json.data;
+        const data = json.data;
 
-            const out: LeaderboardUserType[] = [];
-            const leaderboarddata = data.leaderboard;
+        const out: LeaderboardUserType[] = [];
+        const leaderboarddata = data.leaderboard;
 
-            for (const e of leaderboarddata) {
-                out.push({
-                    firstName: e.tipper__user__first_name,
-                    lastName: e.tipper__user__last_name,
-                    id: e.tipper__id,
-                    requestCount: e.request_count,
-                })
-            }
-
-            console.log("leaderboarddata", data);
-            setLeaderboard(out);
-            setUserRequestCount(data.user_request_count);
-        } else {
-            console.log("Can't display leaderboard unless you're logged in");
-            setLeaderboard(null);
+        for (const e of leaderboarddata) {
+            out.push({
+                firstName: e.tipper__user__first_name,
+                lastName: e.tipper__user__last_name,
+                id: e.tipper__id,
+                requestCount: e.request_count,
+            })
         }
+
+        console.log("leaderboarddata", data);
+        setLeaderboard(out);
+        setUserRequestCount(data.user_request_count);
+        // } else {
+        //     console.log("Can't display leaderboard unless you're logged in");
+        //     setLeaderboard(null);
+        // }
     }
 
     const refreshCurrent = async (id: number) => {
