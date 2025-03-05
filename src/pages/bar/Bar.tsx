@@ -55,14 +55,14 @@ const utf8Encode = new TextEncoder();
 //     }
 // }
 
-export const setAllowingRequests = (usc: React.MutableRefObject<UserSessionContextType>
+export const setAllowingRequests = (usc: UserSessionContextType
     , b: boolean) => {
     console.log("set allowing requests");
-    const bar = usc.current.barState.bar;
+    const bar = usc.barState.bar;
     if (!bar) return;
     const newBar = _.cloneDeep(bar);
     newBar.allowingRequests = b;
-    usc.current.barState.setBar(newBar);
+    usc.barState.setBar(newBar);
 }
 
 export const getCurrentQueue = async (id: number): Promise<[SongType | undefined, SongType[]] | undefined | null> => {
@@ -192,23 +192,32 @@ export const fetchBarInfo = async (userContext: UserSessionContextType, id: numb
     return bar;
 }
 
+function clearBarCache() {
+    pendingReqsCache = [];
+    allReqsCache = [];
+    currentPCache = undefined;
+}
+
 export default function Bar() {
     const [searchParams] = useSearchParams();
 
+    const usc = useContext(UserSessionContext);
+    // const usc = useRef(context);
 
-
-    const context = useContext(UserSessionContext);
-    const usc = useRef(context);
+    if (!usc.barState.bar) clearBarCache();
 
     const [ready, setReadyUn] = useState(false);
     const [view, setViewInner] = useState(0);
     // const [requestNoti, setRequestNoti] = useState(false)
     // const [requests, setRequests] = useState<SongRequestType[]>([]);
     const cookies = getCookies();
-    const bar = context.barState.bar;
+    const bar = usc.barState.bar;
     const topSongs = bar?.topSongs ?? [];
     const topArtists = bar?.topArtists ?? [];
-    const id = parseInt(searchParams.get("id") ?? "-1") ?? (usc.current.barState.bar ? usc.current.barState.bar.id : cookies.get("bar_session"));
+
+    const idstring = searchParams.get("id")
+
+    const id = idstring ? parseInt(idstring) : (usc.barState.bar ? usc.barState.bar.id : cookies.get("bar_session"));
 
     console.log("searchparams", searchParams.get("origin"))
     const wdim = useWindowDimensions();
@@ -277,10 +286,10 @@ export default function Bar() {
     }, [topBar, toggle])
 
     const refreshLeaderboard = async () => {
-        if (usc.current.user.access_token) {
+        if (usc.user.access_token) {
             console.log("refreshing leaderboard");
 
-            const json = await fetchWithToken(usc.current, `tipper/business/leaderboard/?business_id=${id}`, 'GET').then(r => r.json())
+            const json = await fetchWithToken(usc, `tipper/business/leaderboard/?business_id=${id}`, 'GET').then(r => r.json())
             if (!json.data) throw new Error(`Bad response from leaderboard. json: ${json}`)
 
             const data = json.data;
@@ -299,12 +308,12 @@ export default function Bar() {
             if (!c) {
                 //setAllowingRequests(usc, false);
                 console.log("set allowing requests");
-                // const bar = usc.current.barState.bar;
+                // const bar = context.barState.bar;
                 // if (!bar) return;
                 // const newBar = _.cloneDeep(bar);
                 // newBar.allowingRequests = false;
-                if (usc.current.barState.bar)
-                    usc.current.barState.setBar({ ...usc.current.barState.bar, allowingRequests: false });
+                if (usc.barState.bar)
+                    usc.barState.setBar({ ...usc.barState.bar, allowingRequests: false });
             }
             // else {
             //     if (bar?.allowingRequests === false) setAllowingRequests(usc, true)
@@ -321,12 +330,12 @@ export default function Bar() {
     }
 
     const refreshAllReqs = async (indicator: boolean, id: number) => {
-        if (usc.current.user.access_token === "") return;
+        if (usc.user.access_token === "") return;
         if (indicator) setCload(true);
 
         if (topRequest) {
             console.log("toppy time!!")
-            const firstJson = await fetchWithToken(usc.current, `tipper/requests/business?business_id=${id}&limit=${1}&offset=${0}`, 'GET').then(r => r.json())
+            const firstJson = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${1}&offset=${0}`, 'GET').then(r => r.json())
             const req = parseRequest(firstJson.data[0]);
             if (req.id === topRequest.id && req.status === topRequest.status) {
                 return;
@@ -334,7 +343,7 @@ export default function Bar() {
             // setTopRequest(req);
         }
 
-        const allr = await fetchWithToken(usc.current, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
+        const allr = await fetchWithToken(usc, `tipper/requests/business?business_id=${id}&limit=${15}&offset=${0}`, 'GET').then(r => r.json()).then(json => {
             setTopRequest(parseRequest(json.data[0]));
             const reqs = new Array<SongRequestType>();
             const preqs = new Array<SongRequestType>();
@@ -371,16 +380,16 @@ export default function Bar() {
         setCload(false);
 
         //refresh free reqs
-        const tipper = await getTipper(usc.current, cookies);
+        const tipper = await getTipper(usc, cookies);
         const data = tipper.data;
-        if (data.free_request_allowance !== usc.current.user.freeRequests) {
-            const consumer = consumerFromJSON(usc.current.user, data);
-            usc.current.setUser(consumer);
+        if (data.free_request_allowance !== usc.user.freeRequests) {
+            const consumer = consumerFromJSON(usc.user, data);
+            usc.setUser(consumer);
         }
     }
 
     const allRefresh = async (indicator: boolean, id: number, override?: boolean) => {
-        console.log("refresh current", usc.current.barState.bar, context.barState.bar)
+        console.log("refresh current", usc.barState.bar, usc.barState.bar)
 
         if (indicator || ready) {
             console.log("ready")
@@ -395,9 +404,9 @@ export default function Bar() {
         }
     }
 
-    const allRefreshCallback = useCallback((b: boolean) => {
+    const allRefreshCallback = useCallback(async (b: boolean) => {
         // console.log("refresh fbi id", id);
-        allRefresh(b, id);
+        await allRefresh(b, id);
     }, [id, usc, ready])
 
     // useEffect(() => console.log("rerendered everything"), [])
@@ -416,22 +425,23 @@ export default function Bar() {
             return;
         }
 
-        // if (usc.current.barState.bar && id === usc.current.barState.bar.id.toString() && usc.current.barState.bar.allowingRequests) {
+        // if (context.barState.bar && id === context.barState.bar.id.toString() && context.barState.bar.allowingRequests) {
         //     console.log("ready true")
         //     setReady(true);
-        //     fetchBarInfo(usc.current, id);
+        //     fetchBarInfo(context, id);
         //     return;
         // }
-        fetchBarInfo(usc.current, id).then(async () => {
+
+        fetchBarInfo(usc, id).then(async () => {
             console.log("refresh in init");
             await allRefreshCallback(true);
             setReady(true);
         })
             .catch(e => {
                 console.log("fetchBarInfoError - set undefined");
-                usc.current.barState.setBar(undefined);
+                usc.barState.setBar(undefined);
             });
-    }, [])
+    }, [id])
 
     console.log(bar);
 
@@ -519,10 +529,10 @@ export default function Bar() {
                             </div>
                         </div>
                         {
-                            usc.current.user.freeRequests > 0 && !hideFreeReqs ?
+                            usc.user.freeRequests > 0 && !hideFreeReqs ?
                                 <div style={{ padding: 5, width: "100%", display: 'flex' }}>
                                     <span className="App-montserrat-normaltext" style={{ width: "100%", textAlign: "center", }}>
-                                        Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.current.user.freeRequests} free request{usc.current.user.freeRequests === 1 ? "" : "s"}!</span></span>
+                                        Great news! You have <span style={{ fontWeight: 'bold', color: Colors.primaryRegular }}>{usc.user.freeRequests} free request{usc.user.freeRequests === 1 ? "" : "s"}!</span></span>
                                 </div> : <></>
                         }
                     </div>
