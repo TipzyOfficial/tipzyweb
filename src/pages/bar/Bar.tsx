@@ -830,7 +830,7 @@ const LeaderboardContent = (props: { leaderboard: (LeaderboardUserType)[] | null
                         </div>
                         : leaderboardMap} */}
                 </div>
-                {hasUser ? <></> :
+                {hasUser || props.yourCount === 0 ? <></> :
                     <div style={{ paddingLeft: padding, paddingBottom: padding, paddingRight: padding }}>
                         <div style={{ paddingLeft: padding, paddingRight: padding, width: "100%", }}>
                             <div style={{ width: "100%", backgroundColor: "#fff5", height: 2 }} />
