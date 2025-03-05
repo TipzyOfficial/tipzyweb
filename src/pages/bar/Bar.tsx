@@ -740,7 +740,7 @@ const LeaderboardCard = (props: { user: LeaderboardUserType | "next" | undefined
     const user = props.user && props.user !== "next" ? props.user : undefined
 
     const isYou = user ? user.id === props.userID : false;
-    const dim = fdim / 8;
+    const dim = Math.min(fdim / 8, 70);
     const index = props.index === -1 ? "" : `${props.index + 1}:`;
 
     return (
@@ -759,13 +759,13 @@ const LeaderboardCard = (props: { user: LeaderboardUserType | "next" | undefined
                     :
                     (
                         isYou ?
-                            <div style={{ padding: padding, borderRadius: radius * 2, backgroundColor: "white", color: "black", display: "flex", justifyContent: 'space-between', height: "100%", fontWeight: 'bold', boxShadow: '0px 0px 5px rgba(255, 255, 255, 0.5)' }}>
+                            <div style={{ padding: padding, borderRadius: radius * 2, backgroundColor: "white", color: "black", display: "flex", justifyContent: 'space-between', alignItems: 'center', height: dim, fontWeight: 'bold', boxShadow: '0px 0px 5px rgba(255, 255, 255, 0.5)' }}>
                                 <span className="App-montserrat-normaltext">{index} YOU</span>
                                 <span className="App-montserrat-normaltext">{user.requestCount}</span>
                             </div>
                             :
                             <div className="App-animated-gradient" style={{ height: dim, padding: 2, borderRadius: radius * 2, width: "100%", }}>
-                                <div style={{ padding: padding, borderRadius: radius * 2 - 2, backgroundColor: Colors.background, display: "flex", justifyContent: 'space-between', height: "100%" }}>
+                                <div style={{ padding: padding, borderRadius: radius * 2 - 2, backgroundColor: Colors.background, display: "flex", justifyContent: 'space-between', alignItems: 'center', height: "100%" }}>
                                     <span className="App-montserrat-normaltext">{index} {user?.firstName ?? "Anonymous"} {user.lastName ?? "User"}</span>
                                     <span className="App-montserrat-normaltext">{user.requestCount}</span>
                                 </div>
