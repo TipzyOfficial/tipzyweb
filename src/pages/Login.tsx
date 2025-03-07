@@ -23,6 +23,8 @@ import GoogleLogo from '../assets/google_logo_clear.svg';
 import FullLogo from '../assets/Tipzy_Full_Orange.png';
 import rave from '../assets/rave.png';
 import { isIOS } from 'react-device-detect';
+import { track } from '@vercel/analytics';
+
 
 const t = process.env.REACT_APP_TESTING === "false";
 
@@ -183,6 +185,11 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
             setLoginPressed(false);
         }
         else {
+            const origin = cookies.get("origin");
+            if (origin) {
+                track("NEW LOGIN", { origin: origin ?? "No origin", apple_email: name?.email ?? "GUEST", time: Date.now() })
+            }
+
             await loginWithTipzyToken(at, rt, ea, isApple, name)
                 .catch(() => {
                     setGlobalDisable(false);

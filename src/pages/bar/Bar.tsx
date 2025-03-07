@@ -218,8 +218,17 @@ export default function Bar() {
     const idstring = searchParams.get("id")
 
     const id = idstring ? parseInt(idstring) : (usc.barState.bar ? usc.barState.bar.id : cookies.get("bar_session"));
+    const origin = searchParams.get("origin");
+    if (origin) {
+        try {
+            cookies.set("origin", origin)
+        } catch {
+            console.error("Can't add origin to cookies. Check datatype.");
+        }
+    } else {
+        cookies.remove("origin");
+    }
 
-    console.log("searchparams", searchParams.get("origin"))
     const wdim = useWindowDimensions();
     const fdim = useFdim();
     const padding = basePadding;//fdim ? Math.max(Math.min(fdim / 50, 30), basePadding) : basePadding;
