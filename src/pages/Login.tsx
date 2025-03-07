@@ -186,8 +186,16 @@ function Login(props: { back?: boolean, small?: boolean, nextPage?: (u: Consumer
         }
         else {
             const origin = cookies.get("origin");
+            const bar = usc.barState.bar?.name ?? (cookies.get("bar_session") ?? "UNKNOWN BAR");
+            const time = new Date(Date.now());
+
             if (origin) {
-                track("NEW LOGIN", { origin: origin ?? "No origin", apple_email: name?.email ?? "GUEST", time: Date.now() })
+                try {
+                    track(`${bar}: NEW LOGIN`, { origin: origin ?? "No origin", apple_email: name?.email ?? "GUEST", time: time.toLocaleTimeString() })
+                }
+                catch {
+                    console.error("Can't track origin thru login.")
+                }
             }
 
             await loginWithTipzyToken(at, rt, ea, isApple, name)
